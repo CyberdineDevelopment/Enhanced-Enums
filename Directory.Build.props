@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <!-- Language version and framework settings -->
-    <LangVersion>preview</LangVersion>
+    <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <!-- Build configuration settings -->
@@ -19,7 +19,7 @@
     <Copyright>Copyright © $(Company) $([System.DateTime]::Now.Year)</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/CyberdineDevelopment/smart-generators</RepositoryUrl>
+    <RepositoryUrl>https://github.com/CyberdineDevelopment/Enhanced-Enums</RepositoryUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -122,7 +122,7 @@
   </PropertyGroup>
 
   <!-- Source Generator Projects -->
-  <PropertyGroup Condition="$(MSBuildProjectName.Contains('SmartGenerators')) And !$(MSBuildProjectName.Contains('Tests'))">
+  <PropertyGroup Condition="$(MSBuildProjectName.Contains('EnhancedEnums')) And !$(MSBuildProjectName.Contains('Tests'))">
     <TargetFramework>netstandard2.0</TargetFramework>
     <IsPackable>true</IsPackable>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
@@ -130,11 +130,6 @@
     <DevelopmentDependency>true</DevelopmentDependency>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <!-- Enable cross-assembly discovery for SmartGenerators -->
-    <EnableCrossAssemblyDiscovery>true</EnableCrossAssemblyDiscovery>
-    <!-- Include build output for runtime components -->
-    <IncludeBuildOutput>true</IncludeBuildOutput>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <!-- Test projects -->

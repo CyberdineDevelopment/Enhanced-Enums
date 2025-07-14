@@ -1,0 +1,20 @@
+using System;
+
+namespace FractalDataWorks.EnhancedEnums.Attributes;
+
+/// <summary>
+/// Marks a property for which to generate lookup methods.
+/// </summary>
+[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+public sealed class EnumLookupAttribute : Attribute
+{
+    /// <summary>
+    /// Gets or sets custom method name for the lookup (e.g. ByName).
+    /// </summary>
+    public string MethodName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether allow multiple results per lookup key.
+    /// </summary>
+    public bool AllowMultiple { get; set; }
+}

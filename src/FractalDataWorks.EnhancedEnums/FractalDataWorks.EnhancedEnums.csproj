@@ -1,0 +1,105 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- Target Framework -->
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Configurations>Debug;Release;Experimental;Alpha;Beta;Preview</Configurations>
+    
+    <!-- Language and Compiler Settings -->
+    <LangVersion>preview</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);SA1202;SA1201;SA1208;MA0048;MA0016;MA0051;</NoWarn>
+    
+    <!-- Code Analysis -->
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    
+    <!-- Source Generator Specific -->
+    <IsPackable>true</IsPackable>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    
+    <!-- Special for EnhancedEnums - includes runtime components -->
+    <IncludeBuildOutput>true</IncludeBuildOutput>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <EmbedAllSources>true</EmbedAllSources>
+    
+    <!-- Build Settings -->
+    <Deterministic>true</Deterministic>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    
+    <!-- Package Management -->
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <EnablePackageValidation>false</EnablePackageValidation>
+    <EnableCrossAssemblyDiscovery>true</EnableCrossAssemblyDiscovery>
+    
+    <!-- NuGet Package Properties -->
+    <Authors>FractalDataWorks Development Team</Authors>
+    <Company>FractalDataWorks</Company>
+    <Copyright>Copyright © FractalDataWorks $([System.DateTime]::Now.Year)</Copyright>
+    <PackageProjectUrl>https://github.com/FractalDataWorks/FractalDataWorks</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/FractalDataWorks/FractalDataWorks.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>enhanced-enums;enumeration;source-generator;roslyn</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageDescription>Enhanced enum functionality with source generation for FractalDataWorks</PackageDescription>
+    
+    <!-- Strong Naming -->
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile Condition="Exists('$(MSBuildThisFileDirectory)..\..\FractalDataWorks.snk')">$(MSBuildThisFileDirectory)..\..\FractalDataWorks.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  
+  <!-- Configuration Specific Settings -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <RunAnalyzers>false</RunAnalyzers>
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DefineConstants>TRACE;RELEASE</DefineConstants>
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>true</Optimize>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RunAnalyzers>true</RunAnalyzers>
+  </PropertyGroup>
+  
+		<ItemGroup>
+			<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+			<!-- Only pack specific dependencies that exist -->
+			<None Include="$(OutputPath)\FractalDataWorks.SmartGenerators.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" Condition="Exists('$(OutputPath)\FractalDataWorks.SmartGenerators.dll')" />
+			<None Include="$(OutputPath)\FractalDataWorks.SmartGenerators.CodeBuilders.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" Condition="Exists('$(OutputPath)\FractalDataWorks.SmartGenerators.CodeBuilders.dll')" />
+		</ItemGroup>
+  
+  <ItemGroup>
+    <EmbeddedResource Include="Attributes\*.cs" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Update="Microsoft.CodeAnalysis.Analyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FractalDataWorks" />
+    <PackageReference Include="FractalDataWorks.SmartGenerators" PrivateAssets="all" />
+    <PackageReference Include="FractalDataWorks.SmartGenerators.CodeBuilders" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Bcl.HashCode" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
+  </ItemGroup>
+</Project>
+

@@ -2,39 +2,32 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
-  
   <ItemGroup>
-    <!-- Roslyn and Code Analysis -->
-    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0" />
+    <!-- FractalDataWorks packages -->
+    <PackageVersion Include="FractalDataWorks" Version="0.1.7-alpha-g7f20da2bc5" />
+    <PackageVersion Include="FractalDataWorks.SmartGenerators" Version="0.1.1-alpha-gc64e6ae799" />
+    <PackageVersion Include="FractalDataWorks.SmartGenerators.CodeBuilders" Version="0.1.1-alpha-gc64e6ae799" />
+    <PackageVersion Include="FractalDataWorks.SmartGenerators.TestUtilities" Version="0.1.1-alpha-gc64e6ae799" />
+    <PackageVersion Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
+    <!-- Microsoft packages -->
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="4.12.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.12.0" />
-    
-    <!-- System Dependencies -->
-    <PackageVersion Include="System.Collections.Immutable" Version="9.0.7" />
-    <PackageVersion Include="System.Text.Json" Version="8.0.0" />
-    <PackageVersion Include="System.Text.RegularExpressions" Version="4.3.1" />
-    <PackageVersion Include="System.Runtime.Loader" Version="4.3.0" />
-    <PackageVersion Include="System.ComponentModel.Annotations" Version="5.0.0" />
-    
-    <!-- Testing -->
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.0.0-1.25277.114" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <!-- Testing packages -->
     <PackageVersion Include="xunit" Version="2.9.2" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.1" />
-    <PackageVersion Include="xunit.v3" Version="3.0.0-pre.40" />
+    <PackageVersion Include="xunit.v3" Version="3.0.0" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.2" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
+    <PackageVersion Include="FluentAssertions" Version="6.12.1" />
+    <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
-    <PackageVersion Include="FluentAssertions" Version="6.12.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.SourceGenerators.Testing.XUnit" Version="1.1.2" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing.XUnit" Version="1.1.2" />
-    
-    <!-- Build and Versioning -->
-    <PackageVersion Include="Nerdbank.GitVersioning" Version="3.7.115" />
+    <PackageVersion Include="Verify.SourceGenerators" Version="2.2.0" />
+    <PackageVersion Include="Verify.Xunit" Version="26.6.0" />
+    <!-- Build tools -->
+    <PackageVersion Include="Nerdbank.GitVersioning" Version="3.8.38-alpha" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
-    
     <!-- Analyzers -->
-    <PackageVersion Include="StyleCop.Analyzers" Version="1.1.118" />
     <PackageVersion Include="AsyncFixer" Version="1.6.0" />
     <PackageVersion Include="Meziantou.Analyzer" Version="2.0.205" />
     <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.14.15" />
