@@ -54,9 +54,9 @@ public class EnhancedEnumOptionGeneratorTests : EnhancedEnumOptionTestBase
 
         // Assert
         result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
-        result.GeneratedSources.ShouldContainKey("ColorBases.g.cs");
+        result.ContainsSource("ColorBases.g.cs").ShouldBeTrue();
 
-        var generatedCode = result.GeneratedSources["ColorBases.g.cs"];
+        var generatedCode = result["ColorBases.g.cs"];
         LogGeneratedCode("ColorBases.g.cs", generatedCode);
 
         // Validate the generated collection class
@@ -95,10 +95,10 @@ public class EnhancedEnumOptionGeneratorTests : EnhancedEnumOptionTestBase
         var result = RunGenerator([source]);
 
         // Assert
-        result.GeneratedSources.ShouldContainKey("MyColors.g.cs");
+        result.ContainsSource("MyColors.g.cs").ShouldBeTrue();
 
         CodeValidationHelper.ValidateNamespaceAndClass(
-            result.GeneratedSources["MyColors.g.cs"],
+            result["MyColors.g.cs"],
             "TestNamespace",
             "MyColors",
             classDecl =>
@@ -170,9 +170,9 @@ public class EnhancedEnumOptionGeneratorTests : EnhancedEnumOptionTestBase
 
         // Assert
         result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
-        result.GeneratedSources.ShouldContainKey("ShapeBases.g.cs");
+        result.ContainsSource("ShapeBases.g.cs").ShouldBeTrue();
 
-        var generatedCode = result.GeneratedSources["ShapeBases.g.cs"];
+        var generatedCode = result["ShapeBases.g.cs"];
 
         // Write generated code to file for debugging
         WriteGeneratedCodeToFile("GeneratorSupportsFactoryPattern_ShapeBases.g.cs", generatedCode);
@@ -228,9 +228,9 @@ public class EnhancedEnumOptionGeneratorTests : EnhancedEnumOptionTestBase
 
         // Assert
         result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
-        result.GeneratedSources.ShouldContainKey("TestShapes.g.cs");
+        result.ContainsSource("TestShapes.g.cs").ShouldBeTrue();
 
-        var generatedCode = result.GeneratedSources["TestShapes.g.cs"];
+        var generatedCode = result["TestShapes.g.cs"];
 
         // Write generated code to file for debugging
         WriteGeneratedCodeToFile("GeneratorSupportsFactoryPatternWithExplicitCollectionName_TestShapes.g.cs", generatedCode);
@@ -295,9 +295,9 @@ public class EnhancedEnumOptionGeneratorTests : EnhancedEnumOptionTestBase
 
         // Assert
         result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
-        result.GeneratedSources.ShouldContainKey("AnimalBases.g.cs");
+        result.ContainsSource("AnimalBases.g.cs").ShouldBeTrue();
 
-        var generatedCode = result.GeneratedSources["AnimalBases.g.cs"];
+        var generatedCode = result["AnimalBases.g.cs"];
 
         // Should contain both animals
         generatedCode.ShouldContain("new TestNamespace.Dog()");
@@ -327,10 +327,10 @@ public class EnhancedEnumOptionGeneratorTests : EnhancedEnumOptionTestBase
 
         // Assert
         result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
-        result.GeneratedSources.ShouldContainKey("EmptyBases.g.cs");
+        result.ContainsSource("EmptyBases.g.cs").ShouldBeTrue();
 
         CodeValidationHelper.ValidateGeneratedCollectionClass(
-            result.GeneratedSources["EmptyBases.g.cs"],
+            result["EmptyBases.g.cs"],
             "TestNamespace",
             "EmptyBases",
             "EmptyBase");
@@ -372,10 +372,10 @@ public class EnhancedEnumOptionGeneratorTests : EnhancedEnumOptionTestBase
         var result = RunGenerator([source]);
 
         // Assert
-        result.GeneratedSources.ShouldContainKey("OrderStatuses.g.cs");
+        result.ContainsSource("OrderStatuses.g.cs").ShouldBeTrue();
 
         CodeValidationHelper.ValidateNamespaceAndClass(
-            result.GeneratedSources["OrderStatuses.g.cs"],
+            result["OrderStatuses.g.cs"],
             "Company.Product.Domain.Models",
             "OrderStatuses",
             classDecl =>
@@ -422,10 +422,10 @@ public class EnhancedEnumOptionGeneratorTests : EnhancedEnumOptionTestBase
         var result = RunGenerator([source]);
 
         // Assert
-        result.GeneratedSources.ShouldContainKey("IPaymentMethods.g.cs");
+        result.ContainsSource("IPaymentMethods.g.cs").ShouldBeTrue();
 
         CodeValidationHelper.ValidateGeneratedCollectionClass(
-            result.GeneratedSources["IPaymentMethods.g.cs"],
+            result["IPaymentMethods.g.cs"],
             "TestNamespace",
             "IPaymentMethods",
             "IPaymentMethod");
@@ -471,7 +471,7 @@ public class EnhancedEnumOptionGeneratorTests : EnhancedEnumOptionTestBase
         var result = RunGenerator([source]);
 
         // Assert
-        var generatedCode = result.GeneratedSources["PriorityBases.g.cs"];
+        var generatedCode = result["PriorityBases.g.cs"];
 
         // Verify the collection was generated
         generatedCode.ShouldContain("new TestNamespace.High()");

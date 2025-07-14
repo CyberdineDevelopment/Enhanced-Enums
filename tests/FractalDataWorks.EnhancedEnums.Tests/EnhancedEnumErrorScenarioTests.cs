@@ -1,6 +1,7 @@
 using System.Linq;
 using FractalDataWorks.EnhancedEnums.Generators;
 using FractalDataWorks.EnhancedEnums.Tests.TestHelpers;
+using FractalDataWorks.SmartGenerators.TestUtilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -42,19 +43,15 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
         var result = RunGenerator([source]);
 
         // Assert - Should still generate but might have limitations
-        result.GeneratedSources.ShouldContainKey("StatusBases.g.cs");
+        result.ContainsSource("StatusBases.g.cs").ShouldBeTrue();
 
-        // The generator should work but only find options in the current compilation
-        var syntaxTree = CSharpSyntaxTree.ParseText(result.GeneratedSources["StatusBases.g.cs"], cancellationToken: TestContext.Current.CancellationToken);
-        var root = syntaxTree.GetCompilationUnitRoot(TestContext.Current.CancellationToken);
-
-        // Should find the class at the root level or in a namespace
-        var classDecl = root.DescendantNodes()
-            .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax>()
-            .FirstOrDefault(c => c.Identifier.Text == "StatusBases");
-        classDecl.ShouldNotBeNull();
-        classDecl.Modifiers.Any(m => m.Text == "public").ShouldBeTrue();
-        classDecl.Modifiers.Any(m => m.Text == "static").ShouldBeTrue();
+        // Use ExpectationsFactory to verify the generated code structure
+        ExpectationsFactory.ExpectCode(result["StatusBases.g.cs"])
+            .HasNamespace("TestNamespace", ns => ns
+                .HasClass("StatusBases", cls => cls
+                    .IsPublic()
+                    .IsStatic()))
+            .Assert();
     }
 
     [Fact]
@@ -84,7 +81,7 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
         var result = RunGenerator([source]);
 
         // Assert - Should use default collection name
-        result.GeneratedSources.ShouldContainKey("ItemBases.g.cs");
+        result.ContainsSource("ItemBases.g.cs").ShouldBeTrue();
     }
 
     [Fact]
@@ -114,7 +111,7 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
         var result = RunGenerator([source]);
 
         // Assert - Should use default collection name
-        result.GeneratedSources.ShouldContainKey("ItemBases.g.cs");
+        result.ContainsSource("ItemBases.g.cs").ShouldBeTrue();
     }
 
     [Fact]
@@ -145,9 +142,9 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
         var result = RunGenerator([source]);
 
         // Assert
-        result.GeneratedSources.ShouldContainKey("GlobalBases.g.cs");
+        result.ContainsSource("GlobalBases.g.cs").ShouldBeTrue();
 
-        var generatedCode = result.GeneratedSources["GlobalBases.g.cs"];
+        var generatedCode = result["GlobalBases.g.cs"];
         // The generator always outputs a namespace, even if empty
         // This is different from the expected behavior
         generatedCode.ShouldContain("namespace");
@@ -180,7 +177,7 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
         var result = RunGenerator([source]);
 
         // Assert - OrphanOption should not be included
-        var generatedCode = result.GeneratedSources["ValidBases.g.cs"];
+        var generatedCode = result["ValidBases.g.cs"];
         generatedCode.ShouldNotContain("OrphanOption");
     }
 
@@ -218,8 +215,8 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
         var result = RunGenerator([source]);
 
         // Should generate collections for both bases
-        result.GeneratedSources.ShouldContainKey("BaseAs.g.cs");
-        result.GeneratedSources.ShouldContainKey("BaseBs.g.cs");
+        result.ContainsSource("BaseAs.g.cs").ShouldBeTrue();
+        result.ContainsSource("BaseBs.g.cs").ShouldBeTrue();
     }
 
     [Fact]
@@ -255,7 +252,7 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
         var result = RunGenerator([source]);
 
         // Assert - Should generate but won't instantiate abstract class
-        var generatedCode = result.GeneratedSources["AnimalBases.g.cs"];
+        var generatedCode = result["AnimalBases.g.cs"];
         // The generator currently does try to instantiate abstract classes, which would fail at runtime
         // This is a known limitation
         generatedCode.ShouldContain("new TestNamespace.Dog()");
@@ -349,8 +346,8 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
         var result = RunGeneratorWithAssemblyScanning([source1, source2, source3]);
 
         // Assert
-        result.GeneratedSources.ShouldContainKey("StatusBases.g.cs");
-        var generatedCode = result.GeneratedSources["StatusBases.g.cs"];
+        result.ContainsSource("StatusBases.g.cs").ShouldBeTrue();
+        var generatedCode = result["StatusBases.g.cs"];
         generatedCode.ShouldContain("new TestNamespace.Active()");
     }
 
@@ -390,7 +387,7 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
         var result = RunGenerator([source]);
 
         // Assert
-        var generatedCode = result.GeneratedSources["StatusBases.g.cs"];
+        var generatedCode = result["StatusBases.g.cs"];
         generatedCode.ShouldContain("new TestNamespace.StatusOptions.Active()");
         generatedCode.ShouldContain("new TestNamespace.StatusOptions.Inactive()");
     }
@@ -456,6 +453,6 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
         // Assert - The compiler should prevent this due to AllowMultiple = false
         // But if it somehow compiles, the generator would use the first attribute found
         // In practice, this code won't compile, so we're just verifying the generator doesn't crash
-        result.GeneratedSources.ShouldContainKey("FirstCollection.g.cs");
+        result.ContainsSource("FirstCollection.g.cs").ShouldBeTrue();
     }
 }

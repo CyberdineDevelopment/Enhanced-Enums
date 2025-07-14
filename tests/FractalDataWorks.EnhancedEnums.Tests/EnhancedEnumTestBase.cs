@@ -76,9 +76,16 @@ public abstract class EnhancedEnumOptionTestBase : IDisposable
             out var diagnostics,
             allReferences);
 
+        // Convert Dictionary<string, string> to GeneratedSource array
+        var generatedSources = output.Select(kvp => new GeneratedSource
+        {
+            HintName = kvp.Key,
+            SourceText = kvp.Value
+        }).ToArray();
+
         return new GeneratorRunResult
         {
-            GeneratedSources = output,
+            GeneratedSources = generatedSources,
             Diagnostics = diagnostics
         };
     }
@@ -99,9 +106,16 @@ public abstract class EnhancedEnumOptionTestBase : IDisposable
             out var diagnostics,
             allReferences);
 
+        // Convert Dictionary<string, string> to GeneratedSource array
+        var generatedSources = output.Select(kvp => new GeneratedSource
+        {
+            HintName = kvp.Key,
+            SourceText = kvp.Value
+        }).ToArray();
+
         return new GeneratorRunResult
         {
-            GeneratedSources = output,
+            GeneratedSources = generatedSources,
             Diagnostics = diagnostics
         };
     }
@@ -122,9 +136,16 @@ public abstract class EnhancedEnumOptionTestBase : IDisposable
             out var diagnostics,
             allReferences);
 
+        // Convert Dictionary<string, string> to GeneratedSource array
+        var generatedSources = output.Select(kvp => new GeneratedSource
+        {
+            HintName = kvp.Key,
+            SourceText = kvp.Value
+        }).ToArray();
+
         return new GeneratorRunResult
         {
-            GeneratedSources = output,
+            GeneratedSources = generatedSources,
             Diagnostics = diagnostics
         };
     }

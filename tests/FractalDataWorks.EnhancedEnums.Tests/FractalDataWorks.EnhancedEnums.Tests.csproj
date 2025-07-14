@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <!-- Target Framework -->
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     
     <!-- Test Project Settings -->
     <IsTestProject>true</IsTestProject>
@@ -71,8 +71,8 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="xunit.v3" />
-    <PackageReference Include="FractalDataWorks.SmartGenerators.TestUtilities">
-    </PackageReference>
+    <!-- Use project reference for latest version -->
+    <ProjectReference Include="/mnt/c/development/fractaldataworks/smart-generators/src/FractalDataWorks.SmartGenerators.TestUtilities/FractalDataWorks.SmartGenerators.TestUtilities.csproj" />
   </ItemGroup>
 
   <ItemGroup>

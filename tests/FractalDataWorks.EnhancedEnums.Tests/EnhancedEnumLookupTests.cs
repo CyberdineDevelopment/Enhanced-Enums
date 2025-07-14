@@ -1,6 +1,7 @@
 using System.Linq;
 using FractalDataWorks.EnhancedEnums.Generators;
 using FractalDataWorks.EnhancedEnums.Tests.TestHelpers;
+using FractalDataWorks.SmartGenerators.TestUtilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -55,14 +56,23 @@ public class EnhancedEnumOptionLookupTests : EnhancedEnumOptionTestBase
         // Assert
         result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
 
-        var generatedCode = result.GeneratedSources["CountryBases.g.cs"];
+        var generatedCode = result["CountryBases.g.cs"];
 
         // Debug: Write generated code to help diagnose issues
         WriteGeneratedCodeToFile("GeneratorCreatesLookupMethodForMarkedProperty_CountryBases.g.cs", generatedCode);
 
-        // Should contain GetByIsoCode method
-        generatedCode.ShouldContain("GetByIsoCode");
-        generatedCode.ShouldContain("public static CountryBase? GetByIsoCode(string isoCode)");
+        // Use ExpectationsFactory to verify the generated code structure
+        ExpectationsFactory.ExpectCode(generatedCode)
+            .HasNamespace("TestNamespace", ns => ns
+                .HasClass("CountryBases", cls => cls
+                    .IsPublic()
+                    .IsStatic()
+                    .HasMethod("GetByIsoCode", method => method
+                        .IsPublic()
+                        .IsStatic()
+                        .HasReturnType("TestNamespace.CountryBase?")
+                        .HasParameter("isoCode", param => param.HasType("string")))))
+            .Assert();
     }
 
     [Fact]
@@ -105,14 +115,20 @@ public class EnhancedEnumOptionLookupTests : EnhancedEnumOptionTestBase
         var result = RunGenerator([source]);
 
         // Assert
-        var generatedCode = result.GeneratedSources["ProductBases.g.cs"];
+        var generatedCode = result["ProductBases.g.cs"];
 
-        // Debug: Write generated code to help diagnose issues
-        WriteGeneratedCodeToFile("GeneratorCreatesMultiValueLookupMethod_ProductBases.g.cs", generatedCode);
-
-        // Should contain GetByCategories method that returns multiple items
-        generatedCode.ShouldContain("GetByCategories");
-        generatedCode.ShouldContain("IEnumerable<ProductBase>");
+        // Use ExpectationsFactory to verify the generated code structure
+        ExpectationsFactory.ExpectCode(generatedCode)
+            .HasNamespace("TestNamespace", ns => ns
+                .HasClass("ProductBases", cls => cls
+                    .IsPublic()
+                    .IsStatic()
+                    .HasMethod("GetByCategories", method => method
+                        .IsPublic()
+                        .IsStatic()
+                        .HasReturnType("IEnumerable<TestNamespace.ProductBase>")
+                        .HasParameter("categories", param => param.HasType("string[]")))))
+            .Assert();
     }
 
     [Fact]
@@ -154,10 +170,20 @@ public class EnhancedEnumOptionLookupTests : EnhancedEnumOptionTestBase
         var result = RunGenerator([source]);
 
         // Assert
-        var generatedCode = result.GeneratedSources["UserRoleBases.g.cs"];
+        var generatedCode = result["UserRoleBases.g.cs"];
 
-        // Should use custom method name
-        generatedCode.ShouldContain("FindByPermissionLevel");
+        // Use ExpectationsFactory to verify the generated code structure
+        ExpectationsFactory.ExpectCode(generatedCode)
+            .HasNamespace("TestNamespace", ns => ns
+                .HasClass("UserRoleBases", cls => cls
+                    .IsPublic()
+                    .IsStatic()
+                    .HasMethod("FindByPermissionLevel", method => method
+                        .IsPublic()
+                        .IsStatic())))
+            .Assert();
+        
+        // Verify that the default method name is not used
         generatedCode.ShouldNotContain("GetByPermissionLevel");
     }
 
@@ -210,12 +236,24 @@ public class EnhancedEnumOptionLookupTests : EnhancedEnumOptionTestBase
         var result = RunGenerator([source]);
 
         // Assert
-        var generatedCode = result.GeneratedSources["CurrencyBases.g.cs"];
+        var generatedCode = result["CurrencyBases.g.cs"];
 
-        // Should generate lookup methods for all marked properties
-        generatedCode.ShouldContain("GetByCode");
-        generatedCode.ShouldContain("GetBySymbol");
-        generatedCode.ShouldContain("GetByNumericCode");
+        // Use ExpectationsFactory to verify the generated code structure
+        ExpectationsFactory.ExpectCode(generatedCode)
+            .HasNamespace("TestNamespace", ns => ns
+                .HasClass("CurrencyBases", cls => cls
+                    .IsPublic()
+                    .IsStatic()
+                    .HasMethod("GetByCode", method => method
+                        .IsPublic()
+                        .IsStatic())
+                    .HasMethod("GetBySymbol", method => method
+                        .IsPublic()
+                        .IsStatic())
+                    .HasMethod("GetByNumericCode", method => method
+                        .IsPublic()
+                        .IsStatic())))
+            .Assert();
     }
 
     [Fact]
@@ -257,11 +295,19 @@ public class EnhancedEnumOptionLookupTests : EnhancedEnumOptionTestBase
         var result = RunGenerator([source]);
 
         // Assert
-        var generatedCode = result.GeneratedSources["ConfigBases.g.cs"];
+        var generatedCode = result["ConfigBases.g.cs"];
 
-        // Should handle nullable parameter
-        generatedCode.ShouldContain("GetByOptionalKey");
-        generatedCode.ShouldContain("string? optionalKey");
+        // Use ExpectationsFactory to verify the generated code structure
+        ExpectationsFactory.ExpectCode(generatedCode)
+            .HasNamespace("TestNamespace", ns => ns
+                .HasClass("ConfigBases", cls => cls
+                    .IsPublic()
+                    .IsStatic()
+                    .HasMethod("GetByOptionalKey", method => method
+                        .IsPublic()
+                        .IsStatic()
+                        .HasParameter("optionalKey", param => param.HasType("string?")))))
+            .Assert();
     }
 
     [Fact]
@@ -301,11 +347,23 @@ public class EnhancedEnumOptionLookupTests : EnhancedEnumOptionTestBase
         var result = RunGenerator([source]);
 
         // Assert
-        var generatedCode = result.GeneratedSources["DateRangeBases.g.cs"];
+        var generatedCode = result["DateRangeBases.g.cs"];
 
-        // Should generate methods with proper parameter types
-        generatedCode.ShouldContain("DateTime startDate");
-        generatedCode.ShouldContain("Guid id");
+        // Use ExpectationsFactory to verify the generated code structure
+        ExpectationsFactory.ExpectCode(generatedCode)
+            .HasNamespace("TestNamespace", ns => ns
+                .HasClass("DateRangeBases", cls => cls
+                    .IsPublic()
+                    .IsStatic()
+                    .HasMethod("GetByStartDate", method => method
+                        .IsPublic()
+                        .IsStatic()
+                        .HasParameter("startDate", param => param.HasType("DateTime")))
+                    .HasMethod("GetById", method => method
+                        .IsPublic()
+                        .IsStatic()
+                        .HasParameter("id", param => param.HasType("Guid")))))
+            .Assert();
     }
 
     [Fact]
@@ -343,9 +401,21 @@ public class EnhancedEnumOptionLookupTests : EnhancedEnumOptionTestBase
         // Assert
         result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
 
-        var generatedCode = result.GeneratedSources["LookupOnlyBases.g.cs"];
-        generatedCode.ShouldContain("GetById");
-        generatedCode.ShouldContain("GetByCode");
+        var generatedCode = result["LookupOnlyBases.g.cs"];
+        
+        // Use ExpectationsFactory to verify the generated code structure
+        ExpectationsFactory.ExpectCode(generatedCode)
+            .HasNamespace("TestNamespace", ns => ns
+                .HasClass("LookupOnlyBases", cls => cls
+                    .IsPublic()
+                    .IsStatic()
+                    .HasMethod("GetById", method => method
+                        .IsPublic()
+                        .IsStatic())
+                    .HasMethod("GetByCode", method => method
+                        .IsPublic()
+                        .IsStatic())))
+            .Assert();
     }
 
     [Fact]
@@ -383,8 +453,19 @@ public class EnhancedEnumOptionLookupTests : EnhancedEnumOptionTestBase
         var result = RunGenerator([source]);
 
         // Assert
-        var generatedCode = result.GeneratedSources["CaseSensitiveBases.g.cs"];
+        var generatedCode = result["CaseSensitiveBases.g.cs"];
 
+        // Use ExpectationsFactory to verify the generated code structure
+        ExpectationsFactory.ExpectCode(generatedCode)
+            .HasNamespace("TestNamespace", ns => ns
+                .HasClass("CaseSensitiveBases", cls => cls
+                    .IsPublic()
+                    .IsStatic()
+                    .HasMethod("GetByName", method => method
+                        .IsPublic()
+                        .IsStatic())))
+            .Assert();
+        
         // GetByName should use specified comparison
         generatedCode.ShouldContain("StringComparison.Ordinal");
     }

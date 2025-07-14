@@ -63,10 +63,17 @@ public class EnhancedEnumOptionIncrementalTests : EnhancedEnumOptionTestBase
 
         // Assert - Should use cached output
         var runResult = driver.GetRunResult();
+        
+        // Check that the generator recognized the unrelated change and cached the enum generation
+        runResult.Results.Length.ShouldBe(1);
+        
+        // Verify the generated output is still present
+        var generatedTrees = runResult.GeneratedTrees;
+        generatedTrees.ShouldContain(t => t.FilePath.EndsWith("StatusBases.g.cs"));
+        
+        // The incremental generator should have cached results for unchanged enum sources
         var trackedSteps = runResult.Results[0].TrackedSteps;
-
-        // Should have tracked steps (caching behavior may vary)
-        trackedSteps.ShouldNotBeEmpty();
+        trackedSteps.SelectMany(s => s.Value).Any(step => step.Outputs.Length > 0).ShouldBeTrue();
     }
 
     [Fact]

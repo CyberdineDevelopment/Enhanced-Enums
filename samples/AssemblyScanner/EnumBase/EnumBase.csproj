@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <!-- Package settings for NuGet meta-package -->
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <!-- Don’t include project’s (empty) build output assembly -->
+    <IncludeBuildOutput>true</IncludeBuildOutput>
+    <PackageOutputPath>..\nuget</PackageOutputPath>
+    <PackageId>AssemblyScannerSample.EnumBase</PackageId>
+    <Description>EnumBase meta-package: runtime API and source-generator analyzer</Description>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <NoWarn>$(NoWarn);NU5104;NU5128</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Compile-time reference to EnhancedEnums -->
+    <PackageReference Include="FractalDataWorks.EnhancedEnums" Pack="true" ReferenceOutputAssembly="true" />
+    <!-- Embed EnhancedEnums analyzer and ensure it's passed transitively -->
+    <PackageReference Include="FractalDataWorks.EnhancedEnums" Pack="true" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <!-- Include dependencies for the analyzer -->
+		<!--
+		<ProjectReference Include="..\..\..\src\FractalDataWorks.SmartGenerators\FractalDataWorks.SmartGenerators.csproj" Pack="true" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\..\src\FractalDataWorks.SmartGenerators.CodeBuilders\FractalDataWorks.SmartGenerators.CodeBuilders.csproj" Pack="true" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+		-->
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FractalDataWorks.SmartGenerators" Pack="true" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <PackageReference Include="FractalDataWorks.SmartGenerators.CodeBuilders" Pack="true" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+</Project>
+

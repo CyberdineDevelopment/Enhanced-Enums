@@ -89,9 +89,9 @@ public class EnhancedEnumOptionCrossAssemblyTests : EnhancedEnumOptionTestBase
         var result = RunGenerator([assemblyASource], assemblyB.ToMetadataReference());
 
         // Assert
-        result.GeneratedSources.ShouldContainKey("PluginBases.g.cs");
+        result.ContainsSource("PluginBases.g.cs").ShouldBeTrue();
 
-        var generatedCode = result.GeneratedSources["PluginBases.g.cs"];
+        var generatedCode = result["PluginBases.g.cs"];
         generatedCode.ShouldContain("new PluginLibrary.SecurityPlugin()");
         generatedCode.ShouldContain("new PluginLibrary.LoggingPlugin()");
     }
@@ -196,9 +196,9 @@ public class EnhancedEnumOptionCrossAssemblyTests : EnhancedEnumOptionTestBase
             ext2Assembly.ToMetadataReference());
 
         // Assert
-        result.GeneratedSources.ShouldContainKey("Handlers.g.cs");
+        result.ContainsSource("Handlers.g.cs").ShouldBeTrue();
 
-        var generatedCode = result.GeneratedSources["Handlers.g.cs"];
+        var generatedCode = result["Handlers.g.cs"];
         // Should include all handlers from both extension assemblies
         generatedCode.ShouldContain("HttpHandler");
         generatedCode.ShouldContain("TcpHandler");
@@ -271,9 +271,9 @@ public class EnhancedEnumOptionCrossAssemblyTests : EnhancedEnumOptionTestBase
             extAssembly.ToMetadataReference());
 
         // Assert
-        result.GeneratedSources.ShouldContainKey("FeatureBases.g.cs");
+        result.ContainsSource("FeatureBases.g.cs").ShouldBeTrue();
 
-        var generatedCode = result.GeneratedSources["FeatureBases.g.cs"];
+        var generatedCode = result["FeatureBases.g.cs"];
         // Should NOT include external features when flag is false
         generatedCode.ShouldNotContain("ExternalFeature");
     }
@@ -313,7 +313,7 @@ public class EnhancedEnumOptionCrossAssemblyTests : EnhancedEnumOptionTestBase
 
         // Assert
         result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
-        result.GeneratedSources.ShouldContainKey("Bases.g.cs");
+        result.ContainsSource("Bases.g.cs").ShouldBeTrue();
     }
 
     [Fact(Skip = "Cross-assembly scanning requires running generator in base assembly")]
@@ -390,9 +390,9 @@ public class EnhancedEnumOptionCrossAssemblyTests : EnhancedEnumOptionTestBase
             extAssembly.ToMetadataReference());
 
         // Assert
-        result.GeneratedSources.ShouldContainKey("ServiceBases.g.cs");
+        result.ContainsSource("ServiceBases.g.cs").ShouldBeTrue();
 
-        var generatedCode = result.GeneratedSources["ServiceBases.g.cs"];
+        var generatedCode = result["ServiceBases.g.cs"];
         // Should include both local and external options
         generatedCode.ShouldContain("CoreService");
         generatedCode.ShouldContain("CustomService");

@@ -52,11 +52,11 @@ public class EnhancedEnumOptionMultipleCollectionsTests : EnhancedEnumOptionTest
         result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
 
         // Should generate separate collection files
-        result.GeneratedSources.ShouldContainKey("PositionPlayers.g.cs");
-        result.GeneratedSources.ShouldContainKey("Pitchers.g.cs");
+        result.ContainsSource("PositionPlayers.g.cs").ShouldBeTrue();
+        result.ContainsSource("Pitchers.g.cs").ShouldBeTrue();
 
-        var positionPlayersCode = result.GeneratedSources["PositionPlayers.g.cs"];
-        var pitchersCode = result.GeneratedSources["Pitchers.g.cs"];
+        var positionPlayersCode = result["PositionPlayers.g.cs"];
+        var pitchersCode = result["Pitchers.g.cs"];
 
         // Write generated code to files for debugging
         WriteGeneratedCodeToFile("MultipleCollections_PositionPlayers.g.cs", positionPlayersCode);
@@ -115,11 +115,11 @@ public class EnhancedEnumOptionMultipleCollectionsTests : EnhancedEnumOptionTest
         // Assert
         result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
 
-        result.GeneratedSources.ShouldContainKey("PositionPlayers.g.cs");
-        result.GeneratedSources.ShouldContainKey("Pitchers.g.cs");
+        result.ContainsSource("PositionPlayers.g.cs").ShouldBeTrue();
+        result.ContainsSource("Pitchers.g.cs").ShouldBeTrue();
 
-        var positionPlayersCode = result.GeneratedSources["PositionPlayers.g.cs"];
-        var pitchersCode = result.GeneratedSources["Pitchers.g.cs"];
+        var positionPlayersCode = result["PositionPlayers.g.cs"];
+        var pitchersCode = result["Pitchers.g.cs"];
 
         // PositionPlayers should contain FirstBaseman and TwoWayPlayer
         positionPlayersCode.ShouldContain("FirstBaseman");
@@ -172,8 +172,8 @@ public class EnhancedEnumOptionMultipleCollectionsTests : EnhancedEnumOptionTest
         // Assert
         result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
 
-        var activeUsersCode = result.GeneratedSources["ActiveUsers.g.cs"];
-        var adminUsersCode = result.GeneratedSources["AdminUsers.g.cs"];
+        var activeUsersCode = result["ActiveUsers.g.cs"];
+        var adminUsersCode = result["AdminUsers.g.cs"];
 
         // Both collections should have their own lookup methods
         activeUsersCode.ShouldContain("GetByDepartment");
@@ -231,8 +231,8 @@ public class EnhancedEnumOptionMultipleCollectionsTests : EnhancedEnumOptionTest
         // Assert
         result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
 
-        var circlesCode = result.GeneratedSources["Circles.g.cs"];
-        var squaresCode = result.GeneratedSources["Squares.g.cs"];
+        var circlesCode = result["Circles.g.cs"];
+        var squaresCode = result["Squares.g.cs"];
 
         WriteGeneratedCodeToFile("MultipleCollectionsFactory_Circles.g.cs", circlesCode);
         WriteGeneratedCodeToFile("MultipleCollectionsFactory_Squares.g.cs", squaresCode);
@@ -292,13 +292,13 @@ public class EnhancedEnumOptionMultipleCollectionsTests : EnhancedEnumOptionTest
         result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
 
         // Should generate three separate collections
-        result.GeneratedSources.ShouldContainKey("Small.g.cs");
-        result.GeneratedSources.ShouldContainKey("Medium.g.cs");
-        result.GeneratedSources.ShouldContainKey("Large.g.cs");
+        result.ContainsSource("Small.g.cs").ShouldBeTrue();
+        result.ContainsSource("Medium.g.cs").ShouldBeTrue();
+        result.ContainsSource("Large.g.cs").ShouldBeTrue();
 
-        var smallCode = result.GeneratedSources["Small.g.cs"];
-        var mediumCode = result.GeneratedSources["Medium.g.cs"];
-        var largeCode = result.GeneratedSources["Large.g.cs"];
+        var smallCode = result["Small.g.cs"];
+        var mediumCode = result["Medium.g.cs"];
+        var largeCode = result["Large.g.cs"];
 
         // Each collection should contain only its own options
         smallCode.ShouldContain("TinySize");

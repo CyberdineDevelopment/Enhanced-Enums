@@ -4,10 +4,10 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- FractalDataWorks packages -->
-    <PackageVersion Include="FractalDataWorks" Version="0.1.7-alpha-g7f20da2bc5" />
-    <PackageVersion Include="FractalDataWorks.SmartGenerators" Version="0.1.1-alpha-gc64e6ae799" />
-    <PackageVersion Include="FractalDataWorks.SmartGenerators.CodeBuilders" Version="0.1.1-alpha-gc64e6ae799" />
-    <PackageVersion Include="FractalDataWorks.SmartGenerators.TestUtilities" Version="0.1.1-alpha-gc64e6ae799" />
+    <PackageVersion Include="FractalDataWorks" Version="0.1.2-alpha-gca1c536bfd" />
+    <PackageVersion Include="FractalDataWorks.SmartGenerators" Version="0.1.2-alpha-gf6ea635473" />
+    <PackageVersion Include="FractalDataWorks.SmartGenerators.CodeBuilders" Version="0.1.2-alpha-gf6ea635473" />
+    <PackageVersion Include="FractalDataWorks.SmartGenerators.TestUtilities" Version="0.1.2-alpha-gf6ea635473" />
     <PackageVersion Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
     <!-- Microsoft packages -->
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
