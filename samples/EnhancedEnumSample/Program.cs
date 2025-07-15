@@ -1,67 +1,67 @@
-using FractalDataWorks.EnhancedEnums;
 using FractalDataWorks.EnhancedEnums.Attributes;
 using System;
 
 namespace EnhancedEnumSample;
 
- [EnhancedEnum("Colors", NameComparison = StringComparison.InvariantCultureIgnoreCase)]
-    public abstract class ColorEnum : IEnhancedEnum
+[EnhancedEnumOption(NameComparison = StringComparison.OrdinalIgnoreCase)]
+public abstract class ColorEnum
+{
+    public abstract string Name { get; }
+    public abstract string Hex { get; }
+    
+    [EnumLookup]
+    public abstract int Value { get; }
+}
+
+[EnumOption]
+public class Red : ColorEnum
+{
+    public override string Name => "Red";
+    public override string Hex => "#FF0000";
+    public override int Value => 1;
+}
+
+[EnumOption]
+public class Green : ColorEnum
+{
+    public override string Name => "Green";
+    public override string Hex => "#00FF00";
+    public override int Value => 2;
+}
+
+[EnumOption]
+public class Blue : ColorEnum
+{
+    public override string Name => "Blue";
+    public override string Hex => "#0000FF";
+    public override int Value => 3;
+}
+
+class Program
+{
+    static void Main()
     {
-        protected ColorEnum(int id, string name)
-        {
-            Id = id;
-            Name = name;
-        }
-
-        // Parameterless constructor required for generator
-        protected ColorEnum() 
-        {
-            Id = 0;
-            Name = string.Empty;
-        }
-
-        public int Id { get; }
-        public string Name { get; }
+        Console.WriteLine("Enhanced Enum Sample");
+        Console.WriteLine("===================");
         
-        public abstract string Hex { get; }
-        
-        public override string ToString() => Name;
-    }
-
-    [EnumOption(Name = "Red", Order = 1)]
-    public class RedOption : ColorEnum
-    {
-        public RedOption() : base(1, "Red") { }
-        public override string Hex => "#FF0000";
-    }
-
-    [EnumOption(Name = "Green", Order = 2)]
-    public class GreenOption : ColorEnum
-    {
-        public GreenOption() : base(2, "Green") { }
-        public override string Hex => "#00FF00";
-    }
-
-    [EnumOption(Name = "Blue", Order = 3)]
-    public class BlueOption : ColorEnum
-    {
-        public BlueOption() : base(3, "Blue") { }
-        public override string Hex => "#0000FF";
-    }
-    class Program
-    {
-        static void Main()
+        Console.WriteLine("\nAll Colors:");
+        foreach (var color in ColorEnums.All)
         {
-            Console.WriteLine("All Colors:");
-            foreach (var c in Colors.All)
-                Console.WriteLine($"{c.Value}: {c.Name} ({c.Hex})");
-
-            Console.WriteLine("Lookup by name (ignore case):");
-            Console.WriteLine(Colors.ByName("green"));
-
-            Console.WriteLine("Lookup by value:");
-            Console.WriteLine(Colors.ByValue(3));
+            Console.WriteLine($"{color.Value}: {color.Name} ({color.Hex})");
         }
+
+        Console.WriteLine("\nLookup by name (case insensitive):");
+        var green = ColorEnums.GetByName("green");
+        Console.WriteLine($"Found: {green?.Name} - {green?.Hex}");
+
+        Console.WriteLine("\nLookup by value:");
+        var blue = ColorEnums.GetByValue(3);
+        Console.WriteLine($"Found: {blue?.Name} - {blue?.Hex}");
+
+        Console.WriteLine("\nLookup not found:");
+        var purple = ColorEnums.GetByName("Purple");
+        Console.WriteLine($"Purple: {purple?.Name ?? "Not found"}");
+        
+        Console.WriteLine("\nTotal colors: " + ColorEnums.All.Length);
     }
-
-
+}

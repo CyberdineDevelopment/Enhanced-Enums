@@ -1,351 +1,379 @@
-# FractalDataWorks EnhancedEnumOption Library
+# FractalDataWorks.EnhancedEnums
 
-A lightweight, type-safe enum implementation for C# that ensures compile-time type safety, extensibility via interface-first and class-first patterns, optional factory support, and optimized runtime lookups via generated lookup collections.
+A source generator library that provides type-safe, extensible enum implementations for C#.
 
 ## Table of Contents
 
+- [Overview](#overview)
 - [Installation](#installation)
 - [Basic Usage](#basic-usage)
-- [Factory-Based Enums](#factory-based-enums)
-- [Advanced Lookup Configuration](#advanced-lookup-configuration)
-- [How It Works - Under the Hood](#how-it-works---under-the-hood)
-- [Benefits Over Traditional C# Enums](#benefits-over-traditional-csharp-enums)
+- [Advanced Features](#advanced-features)
+- [Generated Code](#generated-code)
 - [Performance Characteristics](#performance-characteristics)
 - [Best Practices](#best-practices)
-- [Customization Options](#customization-options)
-- [Migration from Traditional Enums](#migration-from-traditional-enums)
-- [Cross-Project Enum Collections](#cross-project-enum-collections)
-- [Multiple Collections](#multiple-collections)
-- [Advanced Patterns](#advanced-patterns)
-- [Testing Your Enums](#testing-your-enums)
-- [Integration with Other Libraries](#integration-with-other-libraries)
-- [Extending the Library](#extending-the-library)
 - [Attribute Reference](#attribute-reference)
-- [License](#license)
+- [How It Works](#how-it-works)
+
+## Overview
+
+FractalDataWorks.EnhancedEnums is a source generator that creates type-safe, object-oriented alternatives to traditional C# enums. It generates static collection classes with efficient lookup methods for enum-like types.
+
+### Key Benefits
+
+- **Type Safety**: Compile-time validation of enum definitions
+- **Rich Behavior**: Object-oriented enum instances with methods and properties
+- **Efficient Lookups**: Generated lookup methods for fast value retrieval
+- **Extensibility**: Easy to add new enum values without breaking existing code
+- **Source Generation**: Zero runtime overhead, everything is generated at compile time
 
 ## Installation
 
 ```bash
-dotnet add package FractalDataWorks.SmartGenerators.EnhancedEnumOptions
+dotnet add package FractalDataWorks.EnhancedEnums
 ```
 
 ## Basic Usage
 
-Support both interface-first and class-first enum definitions.
-
-### Interface-First
+### 1. Define an Enhanced Enum
 
 ```csharp
-using FractalDataWorks.EnhancedEnumOptions;
-using FractalDataWorks.EnhancedEnumOptions.Attributes;
+using FractalDataWorks.EnhancedEnums.Attributes;
 
-[EnhancedEnumOption("StatusOptions")]
-public interface IStatusOption : IEnhancedEnumOption
+[EnhancedEnumOption]
+public abstract class Priority
 {
-    bool IsGood { get; }
-    [EnumLookup] string Category { get; }
+    public abstract string Name { get; }
+    public abstract int Level { get; }
+    public abstract string Description { get; }
+}
+
+[EnumOption]
+public class High : Priority
+{
+    public override string Name => "High";
+    public override int Level => 1;
+    public override string Description => "High priority item";
+}
+
+[EnumOption]
+public class Medium : Priority
+{
+    public override string Name => "Medium";
+    public override int Level => 2;
+    public override string Description => "Medium priority item";
+}
+
+[EnumOption]
+public class Low : Priority
+{
+    public override string Name => "Low";
+    public override int Level => 3;
+    public override string Description => "Low priority item";
 }
 ```
 
-### Class-First
+### 2. Use the Generated Collection
 
 ```csharp
-using FractalDataWorks.EnhancedEnumOptions;
-using FractalDataWorks.EnhancedEnumOptions.Attributes;
-
-[EnhancedEnumOption("StatusOptions")]
-public abstract class StatusOptionBase : IEnhancedEnumOption<StatusOptionBase>
+// Access all values
+foreach (var priority in Priorities.All)
 {
-    protected StatusOptionBase(int id, string name)
-    {
-        Id = id;
-        Name = name;
-    }
+    Console.WriteLine($"{priority.Name}: {priority.Description}");
+}
 
-    protected StatusOptionBase() { } // Required for generator
+// Lookup by name
+var high = Priorities.GetByName("High");
+Console.WriteLine($"Level: {high?.Level}");
 
-    public int Id { get; }
-    public string Name { get; }
+// Check if value exists
+var unknown = Priorities.GetByName("Unknown");
+if (unknown == null)
+{
+    Console.WriteLine("Priority not found");
+}
+```
+
+## Advanced Features
+
+### Lookup Properties
+
+Mark properties with `[EnumLookup]` to generate dedicated lookup methods:
+
+```csharp
+[EnhancedEnumOption]
+public abstract class HttpStatusCode
+{
+    public abstract string Name { get; }
     
-    public abstract StatusOptionBase Empty();
-}
-
-[EnumOption(Name = "Activate")]
-public class ActivateOption : StatusOptionBase
-{
-    public ActivateOption() : base(1, "Activate") { }
+    [EnumLookup]
+    public abstract int Code { get; }
     
-    public override StatusOptionBase Empty() => new EmptyStatusOption();
+    [EnumLookup]
+    public abstract string Category { get; }
 }
+
+[EnumOption]
+public class Ok : HttpStatusCode
+{
+    public override string Name => "OK";
+    public override int Code => 200;
+    public override string Category => "Success";
+}
+
+[EnumOption]
+public class NotFound : HttpStatusCode
+{
+    public override string Name => "Not Found";
+    public override int Code => 404;
+    public override string Category => "Client Error";
+}
+
+// Usage:
+var ok = HttpStatusCodes.GetByCode(200);
+var clientErrors = HttpStatusCodes.GetByCategory("Client Error");
 ```
 
-## Factory-Based Enums
-
-Enable dynamic instance creation with `UseFactory = true`.
-
-### Interface-First Factory
+### Custom Collection Names
 
 ```csharp
-[EnhancedEnumOption(CollectionName = "PaymentOptions", UseFactory = true)]
-public interface IPaymentOption : IEnhancedEnumOption
+[EnhancedEnumOption("MyCustomStatuses")]
+public abstract class Status
 {
-    [EnumLookup] string Gateway { get; }
-    [EnumLookup] string CountryCode { get; }
+    public abstract string Name { get; }
 }
+
+// Generates: MyCustomStatuses.All, MyCustomStatuses.GetByName()
 ```
 
-### Class-First Factory
-
-```csharp
-[EnhancedEnumOption(CollectionName = "PaymentOptions", UseFactory = true)]
-public abstract class PaymentOptionBase : IEnhancedEnumOption<PaymentOptionBase>
-{
-    protected PaymentOptionBase(int id, string name)
-    {
-        Id = id;
-        Name = name;
-    }
-
-    public int Id { get; init; }
-    public string Name { get; init; }
-    [EnumLookup] public abstract string Gateway { get; }
-    [EnumLookup] public abstract string CountryCode { get; }
-}
-
-[EnumOption(Name = "CreditCard")]
-public class CreditCardOption : PaymentOptionBase
-{
-    public CreditCardOption() : base(1, "Credit Card") { }
-}
-```
-
-## Advanced Lookup Configuration
-
-Customize lookup methods on any property.
-
-### Interface-First Lookup
-
-```csharp
-[EnhancedEnumOption(NameComparison = StringComparison.InvariantCultureIgnoreCase)]
-public interface IErrorCode : IEnhancedEnumOption
-{
-    [EnumLookup(MethodName = "ForCategory")] string Category { get; }
-    [EnumLookup(AllowMultiple = true)] ErrorSeverity Severity { get; }
-}
-```
-
-### Class-First Lookup
+### String Comparison Options
 
 ```csharp
 [EnhancedEnumOption(NameComparison = StringComparison.Ordinal)]
-public abstract class ErrorCodeBase : IEnhancedEnumOption<ErrorCodeBase>
+public abstract class CaseSensitiveEnum
 {
-    protected ErrorCodeBase(int id, string name)
-    {
-        Id = id;
-        Name = name;
-    }
-
-    public int Id { get; init; }
-    public string Name { get; init; }
-    [EnumLookup] public abstract string Category { get; }
-    [EnumLookup(AllowMultiple = true)] public abstract ErrorSeverity Severity { get; }
+    public abstract string Name { get; }
 }
 ```
 
-## How It Works - Under the Hood
-
-The source generator emits static collection classes:
+### Factory Pattern Support
 
 ```csharp
-public static class StatusOptions
+[EnhancedEnumOption(UseFactory = true)]
+public abstract class DatabaseConnection
 {
-    public static IStatusOption ByName(string name) => /* lookup */;
-    public static bool TryGetById(int id, out IStatusOption opt) => /* ... */;
-    public static IStatusOption Empty() => /* ... */;
+    public abstract string Name { get; }
+    public abstract string ConnectionString { get; }
+    
+    // Factory method must be defined in base class
+    public static DatabaseConnection Create(Type type)
+    {
+        return (DatabaseConnection)Activator.CreateInstance(type);
+    }
 }
 ```
 
-## Benefits Over Traditional C# Enums
+### Custom Lookup Method Names
 
-- Compile-time type safety
-- Rich object-oriented behaviors
-- Flexible lookup methods
-- Optional factory-driven creation
-- Cross-assembly aggregation
+```csharp
+[EnhancedEnumOption]
+public abstract class User
+{
+    public abstract string Name { get; }
+    
+    [EnumLookup(MethodName = "FindByRole")]
+    public abstract string Role { get; }
+}
+
+// Generates: FindByRole() instead of GetByRole()
+```
+
+## Generated Code
+
+The source generator creates static collection classes with the following structure:
+
+```csharp
+public static class [EnumName]s
+{
+    private static readonly List<[EnumType]> _all = new List<[EnumType]>();
+    
+    static [EnumName]s()
+    {
+        // Initialize all enum instances
+        _all.Add(new [EnumOption1]());
+        _all.Add(new [EnumOption2]());
+        // ...
+    }
+    
+    /// <summary>
+    /// Gets all available [EnumType] values.
+    /// </summary>
+    public static ImmutableArray<[EnumType]> All => _all.ToImmutableArray();
+    
+    /// <summary>
+    /// Gets the [EnumType] with the specified name.
+    /// </summary>
+    public static [EnumType]? GetByName(string name)
+    {
+        return _all.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
+    }
+    
+    // Additional lookup methods for [EnumLookup] properties
+    public static [EnumType]? GetBy[PropertyName]([PropertyType] [paramName])
+    {
+        return _all.FirstOrDefault(x => /* comparison logic */);
+    }
+}
+```
 
 ## Performance Characteristics
 
-- **.NET 9+**: `Enum.TryGetAlternateLookup` optimized
-- **< .NET 9**: Efficient dictionary fallback
+### Current Implementation
+
+- **Initialization**: O(n) - All enum instances created during static constructor
+- **All Property Access**: O(n) - Creates new `ImmutableArray` on each access
+- **Name Lookups**: O(n) - Linear search through collection using `FirstOrDefault`
+- **Property Lookups**: O(n) - Linear search through collection using `FirstOrDefault`
+- **Memory Usage**: All instances stored in memory permanently
+
+### Performance Considerations
+
+- **Small Enums (< 10 items)**: Performance is generally acceptable
+- **Large Enums (> 50 items)**: Consider the performance impact of linear searches
+- **Frequent Lookups**: Cache results if performing many repeated lookups
+- **Memory Constraints**: All enum instances remain in memory for the application lifetime
 
 ## Best Practices
 
-- **Naming**: Interfaces end with `Option`, base classes with `Base`, collections with `Options`.
-- **UseFactory**: Enable for per-call instances.
-- **XML Comments**: Document all enum types and members.
-- **Extensions**: Provide helper methods for common operations.
-
-## Customization Options
-
-| Attribute          | Property         | Default                          | Description                     |
-|--------------------|------------------|----------------------------------|---------------------------------|
-| EnhancedEnumOption       | CollectionName   | `{ClassName}s`                   | Collection class name           |
-|                    | UseFactory       | `false`                          | New instance per lookup         |
-|                    | NameComparison   | `OrdinalIgnoreCase`              | Name matching strategy          |
-| EnumLookup         | MethodName       | `By{PropertyName}`               | Lookup method name              |
-|                    | AllowMultiple    | `false`                          | Multiple values per key         |
-| EnumOption         | Name             | Class name                       | Custom display name             |
-
-## Migration from Traditional Enums
-
-### Before
+### 1. Naming Conventions
 
 ```csharp
-public enum OrderStatus { Pending = 1, Shipped = 2, Delivered = 3 }
+// Good: Descriptive base class name
+[EnhancedEnumOption]
+public abstract class OrderStatus { }
+
+// Good: Descriptive option names
+[EnumOption]
+public class AwaitingPayment : OrderStatus { }
 ```
 
-### Interface-First
+### 2. Keep Enums Focused
 
 ```csharp
-[EnhancedEnumOption(CollectionName = "OrderStatuses")]
-public interface IOrderStatus : IEnhancedEnumOption { }
-```
-
-### Class-First
-
-```csharp
-[EnhancedEnumOption(CollectionName = "OrderStatuses")]
-public abstract class OrderStatusBase : IEnhancedEnumOption<OrderStatusBase> { }
-```
-
-## Cross-Project Enum Collections
-
-Enable cross-assembly discovery:
-
-```xml
-<PropertyGroup>
-  <EnableCrossAssemblyDiscovery>true</EnableCrossAssemblyDiscovery>
-</PropertyGroup>
-```
-
-```csharp
-public interface IConnectionOption : IEnhancedEnumOption { [EnumLookup] string Category { get; } }
-public static class ConnectionOptions { /* aggregated lookups */ }
-```
-
-## Multiple Collections
-
-Create multiple collections from the same base enum type for logical categorization.
-
-### Defining Multiple Collections
-
-```csharp
-[EnhancedEnumOption("PositionPlayers")]
-[EnhancedEnumOption("Pitchers")]
-public abstract class BaseballPlayerBase
+// Good: Single responsibility
+[EnhancedEnumOption]
+public abstract class PaymentMethod
 {
     public abstract string Name { get; }
-    public abstract string Position { get; }
+    public abstract bool RequiresVerification { get; }
+}
+
+// Avoid: Too many responsibilities
+[EnhancedEnumOption]
+public abstract class EverythingEnum
+{
+    public abstract string PaymentMethod { get; }
+    public abstract string UserRole { get; }
+    public abstract string OrderStatus { get; }
 }
 ```
 
-### Assigning Options to Collections
-
-Each enum option must specify which collection(s) it belongs to:
+### 3. Use Lookup Properties Strategically
 
 ```csharp
-[EnumOption(CollectionName = "PositionPlayers")]
-public class Catcher : BaseballPlayerBase
+[EnhancedEnumOption]
+public abstract class Country
 {
-    public override string Name => "Catcher";
-    public override string Position => "C";
-}
-
-[EnumOption(CollectionName = "Pitchers")]
-public class StartingPitcher : BaseballPlayerBase
-{
-    public override string Name => "Starting Pitcher";
-    public override string Position => "SP";
-}
-
-// Options can belong to multiple collections
-[EnumOption(CollectionName = "Pitchers")]
-[EnumOption(CollectionName = "PositionPlayers")]
-public class TwoWayPlayer : BaseballPlayerBase
-{
-    public override string Name => "Two-Way Player";
-    public override string Position => "P/DH";
+    public abstract string Name { get; }
+    
+    // Good: Frequently searched properties
+    [EnumLookup]
+    public abstract string IsoCode { get; }
+    
+    // Consider: Only add lookup if needed
+    public abstract string Capital { get; }
 }
 ```
 
-### Using Multiple Collections
+### 4. Document Your Enums
 
 ```csharp
-// Access each collection independently
-foreach (var player in PositionPlayers.All)
+/// <summary>
+/// Represents the status of an order in the system.
+/// </summary>
+[EnhancedEnumOption]
+public abstract class OrderStatus
 {
-    Console.WriteLine($"Position Player: {player.Name}");
+    /// <summary>
+    /// Gets the display name of the status.
+    /// </summary>
+    public abstract string Name { get; }
+    
+    /// <summary>
+    /// Gets the internal status code.
+    /// </summary>
+    [EnumLookup]
+    public abstract string Code { get; }
 }
-
-foreach (var pitcher in Pitchers.All)
-{
-    Console.WriteLine($"Pitcher: {pitcher.Name}");
-}
-
-// Each collection has its own lookup methods
-var catcher = PositionPlayers.GetByName("Catcher");
-var starter = Pitchers.GetByName("Starting Pitcher");
 ```
-
-### Requirements for Multiple Collections
-
-- When multiple `[EnhancedEnumOption]` attributes are used, all `[EnumOption]` classes **must** specify a `CollectionName`
-- Options can belong to multiple collections using multiple `[EnumOption]` attributes
-- Collection names must match those defined in the `[EnhancedEnumOption]` attributes
-
-## Advanced Patterns
-
-Implement state machines or discriminated unions via interfaces or base classes.
-
-## Testing Your Enums
-
-*(Tests will be added soon.)*
-
-## Integration with Other Libraries
-
-Use enhanced enums as value objects in ASP.NET, EF Core, gRPC, and JSON serializers.
-
-## Extending the Library
-
-Implement `IEnhancedEnumOptionStrategy` to add custom generation patterns.
 
 ## Attribute Reference
 
 ### EnhancedEnumOptionAttribute
+
+Marks a class or interface for enhanced enum generation.
+
 ```csharp
-[EnhancedEnumOption("MyOptions", UseFactory = true, NameComparison = StringComparison.Ordinal)]
+[EnhancedEnumOption(
+    CollectionName = "MyCollection",      // Optional: Custom collection name
+    UseFactory = true,                    // Optional: Use factory pattern
+    NameComparison = StringComparison.Ordinal,  // Optional: String comparison method
+    IncludeReferencedAssemblies = true    // Optional: Scan referenced assemblies
+)]
 ```
-- `CollectionName` (string, required): Name of the generated collection class
-- `UseFactory` (bool, default: false): Use factory pattern for instance creation
-- `NameComparison` (StringComparison, default: OrdinalIgnoreCase): String comparison for lookups
-- `IncludeReferencedAssemblies` (bool, default: false): Scan referenced assemblies for options
+
+**Properties:**
+- `CollectionName` (string): Name of the generated collection class. Default: `{ClassName}s`
+- `UseFactory` (bool): Whether to use factory pattern for instance creation. Default: `false`
+- `NameComparison` (StringComparison): String comparison method for name lookups. Default: `OrdinalIgnoreCase`
+- `IncludeReferencedAssemblies` (bool): Whether to scan referenced assemblies. Default: `false`
 
 ### EnumOptionAttribute
+
+Marks a class as an option for an enhanced enum.
+
 ```csharp
-[EnumOption(Name = "Display Name", Order = 1, CollectionName = "MyCollection")]
+[EnumOption]
+public class MyOption : MyEnumBase { }
 ```
-- `Name` (string, default: class name): Display name of the option
-- `Order` (int, default: 0): Sort order in the collection
-- `CollectionName` (string, default: null): Which collection this option belongs to (required for multiple collections)
 
 ### EnumLookupAttribute
+
+Marks a property to generate a lookup method.
+
 ```csharp
-[EnumLookup(MethodName = "FindByCode", AllowMultiple = true)]
+[EnumLookup(
+    MethodName = "FindByCode",    // Optional: Custom method name
+    AllowMultiple = true          // Optional: Return multiple results
+)]
+public abstract string Code { get; }
 ```
-- `MethodName` (string, default: "GetBy{PropertyName}"): Custom lookup method name
-- `AllowMultiple` (bool, default: false): Return collection instead of single instance
+
+**Properties:**
+- `MethodName` (string): Name of the generated lookup method. Default: `GetBy{PropertyName}`
+- `AllowMultiple` (bool): Whether to return multiple results. Default: `false`
+
+## How It Works
+
+The FractalDataWorks.EnhancedEnums source generator:
+
+1. **Scans** your code for classes marked with `[EnhancedEnumOption]`
+2. **Finds** all classes marked with `[EnumOption]` that inherit from the base class
+3. **Analyzes** properties marked with `[EnumLookup]` to generate lookup methods
+4. **Generates** static collection classes with optimized lookup methods
+5. **Compiles** the generated code as part of your build process
+
+The generated code is included in your assembly and provides compile-time safety with runtime efficiency.
 
 ## License
 
-MIT License.
+This library is part of the FractalDataWorks toolkit and is licensed under the Apache License 2.0.
