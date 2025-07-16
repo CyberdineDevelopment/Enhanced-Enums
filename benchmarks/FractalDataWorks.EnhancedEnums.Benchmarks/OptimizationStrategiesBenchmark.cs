@@ -8,18 +8,19 @@ using System.Linq;
 
 namespace FractalDataWorks.EnhancedEnums.Benchmarks;
 
-[SimpleJob(RuntimeMoniker.Net80)]
+[SimpleJob]
 [MemoryDiagnoser]
+[MarkdownExporter]
 public class OptimizationStrategiesBenchmark
 {
     // Test data
-    private readonly List<TestEnum> _list;
-    private readonly Dictionary<string, TestEnum> _dictionary;
-    private readonly Dictionary<int, TestEnum> _intDictionary;
-    private readonly FrozenDictionary<string, TestEnum> _frozenDictionary;
-    private readonly FrozenDictionary<int, TestEnum> _frozenIntDictionary;
-    private readonly ImmutableArray<TestEnum> _immutableArray;
-    private readonly TestEnum[] _array;
+    private readonly List<TestItem> _list;
+    private readonly Dictionary<string, TestItem> _dictionary;
+    private readonly Dictionary<int, TestItem> _intDictionary;
+    private readonly FrozenDictionary<string, TestItem> _frozenDictionary;
+    private readonly FrozenDictionary<int, TestItem> _frozenIntDictionary;
+    private readonly ImmutableArray<TestItem> _immutableArray;
+    private readonly TestItem[] _array;
     
     // Test cases
     private readonly string[] _lookupNames;
@@ -28,10 +29,10 @@ public class OptimizationStrategiesBenchmark
     public OptimizationStrategiesBenchmark()
     {
         // Initialize test data with 50 items (medium-sized enum)
-        var items = new List<TestEnum>();
+        var items = new List<TestItem>();
         for (int i = 0; i < 50; i++)
         {
-            items.Add(new TestEnum { Id = i + 1, Name = $"Item{i + 1}", Code = $"CODE{i + 1:D3}" });
+            items.Add(new TestItem { Id = i + 1, Name = $"Item{i + 1}", Code = $"CODE{i + 1:D3}" });
         }
         
         _list = items;
@@ -39,11 +40,11 @@ public class OptimizationStrategiesBenchmark
         _immutableArray = items.ToImmutableArray();
         
         // Create dictionaries
-        _dictionary = items.ToDictionary(x => x.Name);
+        _dictionary = items.ToDictionary(x => x.Name, StringComparer.OrdinalIgnoreCase);
         _intDictionary = items.ToDictionary(x => x.Id);
         
         // Create frozen dictionaries (.NET 8+)
-        _frozenDictionary = items.ToFrozenDictionary(x => x.Name);
+        _frozenDictionary = items.ToFrozenDictionary(x => x.Name, StringComparer.OrdinalIgnoreCase);
         _frozenIntDictionary = items.ToFrozenDictionary(x => x.Id);
         
         // Prepare lookup test cases (mix of existing and non-existing)
@@ -53,9 +54,9 @@ public class OptimizationStrategiesBenchmark
     
     // Current Enhanced Enums approach - Linear search
     [Benchmark(Baseline = true)]
-    public TestEnum? LinearSearch_ByName()
+    public TestItem? LinearSearchByName()
     {
-        TestEnum? result = null;
+        TestItem? result = null;
         foreach (var name in _lookupNames)
         {
             result = _list.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
@@ -64,9 +65,9 @@ public class OptimizationStrategiesBenchmark
     }
     
     [Benchmark]
-    public TestEnum? LinearSearch_ById()
+    public TestItem? LinearSearchById()
     {
-        TestEnum? result = null;
+        TestItem? result = null;
         foreach (var id in _lookupIds)
         {
             result = _list.FirstOrDefault(x => x.Id == id);
@@ -76,9 +77,9 @@ public class OptimizationStrategiesBenchmark
     
     // Dictionary approach - O(1) lookup
     [Benchmark]
-    public TestEnum? Dictionary_ByName()
+    public TestItem? DictionaryByName()
     {
-        TestEnum? result = null;
+        TestItem? result = null;
         foreach (var name in _lookupNames)
         {
             _dictionary.TryGetValue(name, out result);
@@ -87,9 +88,9 @@ public class OptimizationStrategiesBenchmark
     }
     
     [Benchmark]
-    public TestEnum? Dictionary_ById()
+    public TestItem? DictionaryById()
     {
-        TestEnum? result = null;
+        TestItem? result = null;
         foreach (var id in _lookupIds)
         {
             _intDictionary.TryGetValue(id, out result);
@@ -99,9 +100,9 @@ public class OptimizationStrategiesBenchmark
     
     // Frozen Dictionary approach - Optimized for read-heavy scenarios
     [Benchmark]
-    public TestEnum? FrozenDictionary_ByName()
+    public TestItem? FrozenDictionaryByName()
     {
-        TestEnum? result = null;
+        TestItem? result = null;
         foreach (var name in _lookupNames)
         {
             _frozenDictionary.TryGetValue(name, out result);
@@ -110,9 +111,9 @@ public class OptimizationStrategiesBenchmark
     }
     
     [Benchmark]
-    public TestEnum? FrozenDictionary_ById()
+    public TestItem? FrozenDictionaryById()
     {
-        TestEnum? result = null;
+        TestItem? result = null;
         foreach (var id in _lookupIds)
         {
             _frozenIntDictionary.TryGetValue(id, out result);
@@ -122,9 +123,9 @@ public class OptimizationStrategiesBenchmark
     
     // Switch expression for small enums (simulated with first 10 items)
     [Benchmark]
-    public TestEnum? SwitchExpression_ByName()
+    public TestItem? SwitchExpressionByName()
     {
-        TestEnum? result = null;
+        TestItem? result = null;
         foreach (var name in _lookupNames)
         {
             result = name switch
@@ -147,28 +148,28 @@ public class OptimizationStrategiesBenchmark
     
     // All property access patterns
     [Benchmark]
-    public int All_ToImmutableArray()
+    public int AllToImmutableArray()
     {
         // Current approach - creates new array each time
         return _list.ToImmutableArray().Length;
     }
     
     [Benchmark]
-    public int All_Cached()
+    public int AllCached()
     {
         // Cached approach - no allocation
         return _immutableArray.Length;
     }
     
     [Benchmark]
-    public TestEnum All_FirstItem_ToImmutableArray()
+    public TestItem AllFirstItemToImmutableArray()
     {
         // Current approach with element access
         return _list.ToImmutableArray()[0];
     }
     
     [Benchmark]
-    public TestEnum All_FirstItem_Cached()
+    public TestItem AllFirstItemCached()
     {
         // Cached approach with element access
         return _immutableArray[0];
@@ -176,7 +177,7 @@ public class OptimizationStrategiesBenchmark
     
     // Iteration patterns
     [Benchmark]
-    public int Iterate_ToImmutableArray()
+    public int IterateToImmutableArray()
     {
         int count = 0;
         foreach (var item in _list.ToImmutableArray())
@@ -187,7 +188,7 @@ public class OptimizationStrategiesBenchmark
     }
     
     [Benchmark]
-    public int Iterate_Cached()
+    public int IterateCached()
     {
         int count = 0;
         foreach (var item in _immutableArray)
@@ -197,7 +198,7 @@ public class OptimizationStrategiesBenchmark
         return count;
     }
     
-    public class TestEnum
+    public class TestItem
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;

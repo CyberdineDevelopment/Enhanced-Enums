@@ -7,15 +7,16 @@ using System.Linq;
 
 namespace FractalDataWorks.EnhancedEnums.Benchmarks;
 
-[SimpleJob(RuntimeMoniker.Net80)]
+[SimpleJob]
 [MemoryDiagnoser]
+[MarkdownExporter]
 public class SmallEnumOptimizationBenchmark
 {
     // Small enum with only 5 items
-    private readonly List<SmallEnum> _list;
-    private readonly Dictionary<string, SmallEnum> _dictionary;
-    private readonly FrozenDictionary<string, SmallEnum> _frozenDictionary;
-    private readonly SmallEnum[] _array;
+    private readonly List<SmallItem> _list;
+    private readonly Dictionary<string, SmallItem> _dictionary;
+    private readonly FrozenDictionary<string, SmallItem> _frozenDictionary;
+    private readonly SmallItem[] _array;
     
     // Test cases
     private readonly string[] _lookupNames;
@@ -25,25 +26,25 @@ public class SmallEnumOptimizationBenchmark
         // Initialize small enum
         _array = new[]
         {
-            new SmallEnum { Id = 1, Name = "Active", Code = "ACT" },
-            new SmallEnum { Id = 2, Name = "Inactive", Code = "INA" },
-            new SmallEnum { Id = 3, Name = "Pending", Code = "PEN" },
-            new SmallEnum { Id = 4, Name = "Suspended", Code = "SUS" },
-            new SmallEnum { Id = 5, Name = "Deleted", Code = "DEL" }
+            new SmallItem { Id = 1, Name = "Active", Code = "ACT" },
+            new SmallItem { Id = 2, Name = "Inactive", Code = "INA" },
+            new SmallItem { Id = 3, Name = "Pending", Code = "PEN" },
+            new SmallItem { Id = 4, Name = "Suspended", Code = "SUS" },
+            new SmallItem { Id = 5, Name = "Deleted", Code = "DEL" }
         };
         
         _list = _array.ToList();
-        _dictionary = _array.ToDictionary(x => x.Name);
-        _frozenDictionary = _array.ToFrozenDictionary(x => x.Name);
+        _dictionary = _array.ToDictionary(x => x.Name, StringComparer.OrdinalIgnoreCase);
+        _frozenDictionary = _array.ToFrozenDictionary(x => x.Name, StringComparer.OrdinalIgnoreCase);
         
         // Test cases - mix of all values plus some non-existent
         _lookupNames = new[] { "Active", "Pending", "Deleted", "Unknown", "Inactive", "Invalid" };
     }
     
     [Benchmark(Baseline = true)]
-    public SmallEnum? LinearSearch()
+    public SmallItem? LinearSearch()
     {
-        SmallEnum? result = null;
+        SmallItem? result = null;
         foreach (var name in _lookupNames)
         {
             result = _list.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
@@ -52,9 +53,9 @@ public class SmallEnumOptimizationBenchmark
     }
     
     [Benchmark]
-    public SmallEnum? Dictionary()
+    public SmallItem? Dictionary()
     {
-        SmallEnum? result = null;
+        SmallItem? result = null;
         foreach (var name in _lookupNames)
         {
             _dictionary.TryGetValue(name, out result);
@@ -63,9 +64,9 @@ public class SmallEnumOptimizationBenchmark
     }
     
     [Benchmark]
-    public SmallEnum? FrozenDictionary()
+    public SmallItem? FrozenDictionary()
     {
-        SmallEnum? result = null;
+        SmallItem? result = null;
         foreach (var name in _lookupNames)
         {
             _frozenDictionary.TryGetValue(name, out result);
@@ -74,9 +75,9 @@ public class SmallEnumOptimizationBenchmark
     }
     
     [Benchmark]
-    public SmallEnum? SwitchExpression()
+    public SmallItem? SwitchExpression()
     {
-        SmallEnum? result = null;
+        SmallItem? result = null;
         foreach (var name in _lookupNames)
         {
             result = name switch
@@ -93,9 +94,9 @@ public class SmallEnumOptimizationBenchmark
     }
     
     [Benchmark]
-    public SmallEnum? SwitchExpression_CaseInsensitive()
+    public SmallItem? SwitchExpressionCaseInsensitive()
     {
-        SmallEnum? result = null;
+        SmallItem? result = null;
         foreach (var name in _lookupNames)
         {
             result = name?.ToUpperInvariant() switch
@@ -113,7 +114,7 @@ public class SmallEnumOptimizationBenchmark
     
     // Direct array indexing (when you know the index)
     [Benchmark]
-    public SmallEnum DirectArrayAccess()
+    public SmallItem DirectArrayAccess()
     {
         // Simulating enum value access like StatusEnum.Active
         return _array[0]; // Active
@@ -121,9 +122,9 @@ public class SmallEnumOptimizationBenchmark
     
     // Comparison with if-else chain
     [Benchmark]
-    public SmallEnum? IfElseChain()
+    public SmallItem? IfElseChain()
     {
-        SmallEnum? result = null;
+        SmallItem? result = null;
         foreach (var name in _lookupNames)
         {
             if (string.Equals(name, "Active", StringComparison.OrdinalIgnoreCase))
@@ -142,7 +143,7 @@ public class SmallEnumOptimizationBenchmark
         return result;
     }
     
-    public class SmallEnum
+    public class SmallItem
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;

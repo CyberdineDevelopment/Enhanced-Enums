@@ -43,6 +43,9 @@ public class EnhancedEnumOptionGenerator : FractalDataWorks.SmartGenerators.Incr
         codeBuilder.AppendLine("using System.Linq;");
         codeBuilder.AppendLine("using System.Collections.Generic;");
         codeBuilder.AppendLine("using System.Collections.Immutable;");
+        codeBuilder.AppendLine("#if NET8_0_OR_GREATER");
+        codeBuilder.AppendLine("using System.Collections.Frozen;");
+        codeBuilder.AppendLine("#endif");
         codeBuilder.AppendLine();
 
         // Add namespace declaration if needed
@@ -63,6 +66,34 @@ public class EnhancedEnumOptionGenerator : FractalDataWorks.SmartGenerators.Incr
 
         // Add private field for storing instances
         codeBuilder.AppendLine($"private static readonly List<{def.FullTypeName}> _all = new List<{def.FullTypeName}>();");
+        codeBuilder.AppendLine($"private static readonly ImmutableArray<{def.FullTypeName}> _cachedAll;");
+        
+        // Use FrozenDictionary on .NET 8+ for better performance
+        codeBuilder.AppendLine("#if NET8_0_OR_GREATER");
+        codeBuilder.AppendLine($"private static readonly FrozenDictionary<string, {def.FullTypeName}> _nameDict;");
+        foreach (var lookup in def.LookupProperties)
+        {
+            if (!lookup.AllowMultiple)
+            {
+                codeBuilder.AppendLine($"private static readonly FrozenDictionary<{lookup.PropertyType}, {def.FullTypeName}> _{ToCamelCase(lookup.PropertyName)}Dict;");
+            }
+        }
+        codeBuilder.AppendLine("#else");
+        codeBuilder.AppendLine($"private static readonly Dictionary<string, {def.FullTypeName}> _nameDict = new Dictionary<string, {def.FullTypeName}>(StringComparer.{def.NameComparison});");
+        
+        // Add dictionary fields for each lookup property
+        foreach (var lookup in def.LookupProperties)
+        {
+            if (!lookup.AllowMultiple)
+            {
+                var comparerStr = string.Equals(lookup.PropertyType, "string", StringComparison.Ordinal) 
+                    ? $"(StringComparer.{def.NameComparison})" 
+                    : "()";
+                codeBuilder.AppendLine($"private static readonly Dictionary<{lookup.PropertyType}, {def.FullTypeName}> _{ToCamelCase(lookup.PropertyName)}Dict = new Dictionary<{lookup.PropertyType}, {def.FullTypeName}>{comparerStr};");
+            }
+        }
+        codeBuilder.AppendLine("#endif");
+        
         codeBuilder.AppendLine();
 
         // Add static constructor to initialize instances
@@ -86,6 +117,104 @@ public class EnhancedEnumOptionGenerator : FractalDataWorks.SmartGenerators.Incr
             }
         }
 
+        // Cache the All collection to prevent allocations
+        codeBuilder.AppendLine();
+        codeBuilder.AppendLine("// Cache the immutable array to prevent repeated allocations");
+        codeBuilder.AppendLine("_cachedAll = _all.ToImmutableArray();");
+        
+        // Populate dictionaries for fast lookups
+        codeBuilder.AppendLine();
+        codeBuilder.AppendLine("// Populate dictionaries for fast lookups");
+        codeBuilder.AppendLine("#if NET8_0_OR_GREATER");
+        codeBuilder.AppendLine("// Create temp dictionaries for FrozenDictionary initialization");
+        codeBuilder.AppendLine($"var tempNameDict = new Dictionary<string, {def.FullTypeName}>(StringComparer.{def.NameComparison});");
+        
+        foreach (var lookup in def.LookupProperties)
+        {
+            if (!lookup.AllowMultiple)
+            {
+                var comparerStr = string.Equals(lookup.PropertyType, "string", StringComparison.Ordinal) 
+                    ? $"(StringComparer.{def.NameComparison})" 
+                    : "()";
+                codeBuilder.AppendLine($"var temp{lookup.PropertyName}Dict = new Dictionary<{lookup.PropertyType}, {def.FullTypeName}>{comparerStr};");
+            }
+        }
+        
+        codeBuilder.AppendLine();
+        codeBuilder.AppendLine("foreach (var item in _all)");
+        codeBuilder.AppendLine("{");
+        codeBuilder.Indent();
+        codeBuilder.AppendLine("if (!tempNameDict.ContainsKey(item.Name))");
+        codeBuilder.AppendLine("{");
+        codeBuilder.Indent();
+        codeBuilder.AppendLine("tempNameDict[item.Name] = item;");
+        codeBuilder.Outdent();
+        codeBuilder.AppendLine("}");
+        
+        foreach (var lookup in def.LookupProperties)
+        {
+            if (!lookup.AllowMultiple)
+            {
+                codeBuilder.AppendLine();
+                codeBuilder.AppendLine($"if (!temp{lookup.PropertyName}Dict.ContainsKey(item.{lookup.PropertyName}))");
+                codeBuilder.AppendLine("{");
+                codeBuilder.Indent();
+                codeBuilder.AppendLine($"temp{lookup.PropertyName}Dict[item.{lookup.PropertyName}] = item;");
+                codeBuilder.Outdent();
+                codeBuilder.AppendLine("}");
+            }
+        }
+        
+        codeBuilder.Outdent();
+        codeBuilder.AppendLine("}");
+        
+        // Convert to FrozenDictionaries
+        codeBuilder.AppendLine();
+        codeBuilder.AppendLine("// Convert to FrozenDictionaries for better performance");
+        codeBuilder.AppendLine("_nameDict = tempNameDict.ToFrozenDictionary(StringComparer." + def.NameComparison + ");");
+        
+        foreach (var lookup in def.LookupProperties)
+        {
+            if (!lookup.AllowMultiple)
+            {
+                var comparerStr = string.Equals(lookup.PropertyType, "string", StringComparison.Ordinal) 
+                    ? "(StringComparer." + def.NameComparison + ")" 
+                    : "()";
+                codeBuilder.AppendLine($"_{ToCamelCase(lookup.PropertyName)}Dict = temp{lookup.PropertyName}Dict.ToFrozenDictionary{comparerStr};");
+            }
+        }
+        
+        codeBuilder.AppendLine("#else");
+        codeBuilder.AppendLine("foreach (var item in _all)");
+        codeBuilder.AppendLine("{");
+        codeBuilder.Indent();
+        codeBuilder.AppendLine("if (!_nameDict.ContainsKey(item.Name))");
+        codeBuilder.AppendLine("{");
+        codeBuilder.Indent();
+        codeBuilder.AppendLine("_nameDict[item.Name] = item;");
+        codeBuilder.Outdent();
+        codeBuilder.AppendLine("}");
+        
+        // Populate dictionaries for lookup properties
+        foreach (var lookup in def.LookupProperties)
+        {
+            if (!lookup.AllowMultiple)
+            {
+                var dictName = $"_{ToCamelCase(lookup.PropertyName)}Dict";
+                codeBuilder.AppendLine();
+                codeBuilder.AppendLine($"if (!{dictName}.ContainsKey(item.{lookup.PropertyName}))");
+                codeBuilder.AppendLine("{");
+                codeBuilder.Indent();
+                codeBuilder.AppendLine($"{dictName}[item.{lookup.PropertyName}] = item;");
+                codeBuilder.Outdent();
+                codeBuilder.AppendLine("}");
+            }
+        }
+        
+        codeBuilder.Outdent();
+        codeBuilder.AppendLine("}");
+        codeBuilder.AppendLine("#endif");
+
         codeBuilder.Outdent();
         codeBuilder.AppendLine("}");
         codeBuilder.AppendLine();
@@ -94,7 +223,7 @@ public class EnhancedEnumOptionGenerator : FractalDataWorks.SmartGenerators.Incr
         codeBuilder.AppendLine("/// <summary>");
         codeBuilder.AppendLine($"/// Gets all available {def.ClassName} values.");
         codeBuilder.AppendLine("/// </summary>");
-        codeBuilder.AppendLine($"public static ImmutableArray<{def.FullTypeName}> All => _all.ToImmutableArray();");
+        codeBuilder.AppendLine($"public static ImmutableArray<{def.FullTypeName}> All => _cachedAll;");
 
         // Add GetByName method - always generate since Name property is required by design
         codeBuilder.AppendLine();
@@ -106,7 +235,15 @@ public class EnhancedEnumOptionGenerator : FractalDataWorks.SmartGenerators.Incr
         codeBuilder.AppendLine($"public static {def.FullTypeName}? GetByName(string name)");
         codeBuilder.AppendLine("{");
         codeBuilder.Indent();
-        codeBuilder.AppendLine($"return _all.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.{def.NameComparison}));");
+        codeBuilder.AppendLine("if (string.IsNullOrEmpty(name))");
+        codeBuilder.AppendLine("{");
+        codeBuilder.Indent();
+        codeBuilder.AppendLine("return null;");
+        codeBuilder.Outdent();
+        codeBuilder.AppendLine("}");
+        codeBuilder.AppendLine();
+        codeBuilder.AppendLine("_nameDict.TryGetValue(name, out var result);");
+        codeBuilder.AppendLine("return result;");
         codeBuilder.Outdent();
         codeBuilder.AppendLine("}");
 
@@ -117,7 +254,7 @@ public class EnhancedEnumOptionGenerator : FractalDataWorks.SmartGenerators.Incr
         }
 
         // Generate static property accessors for each enum value
-        if (values.Any())
+        if (!values.IsEmpty)
         {
             codeBuilder.AppendLine();
             codeBuilder.AppendLine("// Static property accessors");
@@ -133,6 +270,9 @@ public class EnhancedEnumOptionGenerator : FractalDataWorks.SmartGenerators.Incr
                 codeBuilder.AppendLine($"public static {def.FullTypeName} {propertyName} => _all.OfType<{value.FullTypeName}>().First();");
             }
         }
+
+        // Generate Empty value
+        GenerateEmptyValue(codeBuilder, def);
 
         // Close class
         codeBuilder.Outdent();
@@ -483,24 +623,96 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
         {
             codeBuilder.AppendLine($"/// <returns>The {def.ClassName} with the specified {lookup.PropertyName}, or null if not found.</returns>");
             var paramName = ToCamelCase(lookup.PropertyName);
+            var dictName = $"_{ToCamelCase(lookup.PropertyName)}Dict";
             // PropertyType already includes nullable annotation if needed
             codeBuilder.AppendLine($"public static {def.FullTypeName}? {lookup.LookupMethodName}({lookup.PropertyType} {paramName})");
             codeBuilder.AppendLine("{");
             codeBuilder.Indent();
 
+            // Add null check for string types
             if (string.Equals(lookup.PropertyType, "string", StringComparison.Ordinal))
             {
-                // Use the configured string comparison for string lookups
-                codeBuilder.AppendLine($"return _all.FirstOrDefault(x => string.Equals(x.{lookup.PropertyName}, {paramName}, StringComparison.{def.NameComparison}));");
+                codeBuilder.AppendLine($"if (string.IsNullOrEmpty({paramName}))");
+                codeBuilder.AppendLine("{");
+                codeBuilder.Indent();
+                codeBuilder.AppendLine("return null;");
+                codeBuilder.Outdent();
+                codeBuilder.AppendLine("}");
+                codeBuilder.AppendLine();
             }
-            else
-            {
-                codeBuilder.AppendLine($"return _all.FirstOrDefault(x => x.{lookup.PropertyName}?.Equals({paramName}) ?? false);");
-            }
+
+            // Use dictionary lookup
+            codeBuilder.AppendLine($"{dictName}.TryGetValue({paramName}, out var result);");
+            codeBuilder.AppendLine("return result;");
 
             codeBuilder.Outdent();
             codeBuilder.AppendLine("}");
         }
+    }
+
+    /// <summary>
+    /// Generates the Empty value singleton for the enum collection.
+    /// </summary>
+    private static void GenerateEmptyValue(CodeBuilder codeBuilder, EnumTypeInfo def)
+    {
+        // Add Empty property singleton field
+        codeBuilder.AppendLine();
+        codeBuilder.AppendLine($"private static readonly EmptyValue _empty = new EmptyValue();");
+        codeBuilder.AppendLine();
+        codeBuilder.AppendLine("/// <summary>");
+        codeBuilder.AppendLine("/// Gets an empty instance representing no selection.");
+        codeBuilder.AppendLine("/// </summary>");
+        codeBuilder.AppendLine($"public static {def.FullTypeName} Empty => _empty;");
+        
+        // Generate nested EmptyValue class
+        codeBuilder.AppendLine();
+        codeBuilder.AppendLine($"private sealed class EmptyValue : {def.FullTypeName}");
+        codeBuilder.AppendLine("{");
+        codeBuilder.Indent();
+        
+        // Generate common property implementations with default values
+        // Name property is almost always present in enums
+        codeBuilder.AppendLine("public override string Name => string.Empty;");
+        
+        // Generate default implementations for lookup properties
+        foreach (var lookup in def.LookupProperties)
+        {
+            var defaultValue = GetDefaultValueForType(lookup.PropertyType);
+            codeBuilder.AppendLine($"public override {lookup.PropertyType} {lookup.PropertyName} => {defaultValue};");
+        }
+        
+        // Note: We can't know all abstract properties at generation time, 
+        // so users may need to create custom empty classes for complex enums
+        
+        codeBuilder.Outdent();
+        codeBuilder.AppendLine("}");
+    }
+
+    /// <summary>
+    /// Gets the default value string for a given type.
+    /// </summary>
+    private static string GetDefaultValueForType(string typeName)
+    {
+        // Remove nullable annotations for comparison
+        var cleanType = typeName.TrimEnd('?');
+        
+        return cleanType switch
+        {
+            "string" => "string.Empty",
+            "int" => "0",
+            "long" => "0L",
+            "short" => "0",
+            "byte" => "0",
+            "double" => "0.0",
+            "float" => "0.0f",
+            "decimal" => "0m",
+            "bool" => "false",
+            "System.Guid" or "Guid" => "Guid.Empty",
+            "System.DateTime" or "DateTime" => "DateTime.MinValue",
+            "System.DateTimeOffset" or "DateTimeOffset" => "DateTimeOffset.MinValue",
+            "System.TimeSpan" or "TimeSpan" => "TimeSpan.Zero",
+            _ => typeName.EndsWith("?") ? "null" : $"default({cleanType})"
+        };
     }
 
     /// <summary>
@@ -521,17 +733,19 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
     {
         if (string.IsNullOrEmpty(name))
             return "_";
-
+        #pragma warning disable MA0009 // Ignore regex warning for this simple case
         // Replace spaces and special characters with underscores
         var result = System.Text.RegularExpressions.Regex.Replace(name, @"[^\w]", "_");
-        
+        #pragma warning restore MA0009          
         // Ensure it doesn't start with a number
         if (char.IsDigit(result[0]))
             result = "_" + result;
         
+        #pragma warning disable MA0009 // Ignore regex warning for this simple case
         // Remove consecutive underscores
         result = System.Text.RegularExpressions.Regex.Replace(result, @"_+", "_");
-        
+        result = System.Text.RegularExpressions.Regex.Replace(result, @"_", string.Empty);
+        #pragma warning restore MA0009
         // Trim underscores from ends
         result = result.Trim('_');
         

@@ -7,13 +7,15 @@ static class Program
 {
     static void Main(string[] args)
     {
+        // The project targets .NET 10, so benchmarks will run on .NET 10
+        // Memory diagnostics are enabled via [MemoryDiagnoser] attribute on each benchmark class
         var config = DefaultConfig.Instance
             .WithOptions(ConfigOptions.DisableOptimizationsValidator);
 
-        // Check if a specific benchmark is requested via command line
+        // Run specific benchmark based on command line argument
         if (args.Length > 0)
         {
-            switch (args[0].ToLower())
+            switch (args[0].ToLowerInvariant())
             {
                 case "simple":
                     BenchmarkRunner.Run<SimpleBenchmark>(config);
@@ -28,25 +30,21 @@ static class Program
                     BenchmarkRunner.Run<AllPropertyAllocationBenchmark>(config);
                     break;
                 default:
-                    RunAllBenchmarks(config);
+                    // Run all benchmarks
+                    BenchmarkRunner.Run(new[] 
+                    { 
+                        typeof(SimpleBenchmark),
+                        typeof(OptimizationStrategiesBenchmark),
+                        typeof(SmallEnumOptimizationBenchmark),
+                        typeof(AllPropertyAllocationBenchmark)
+                    }, config);
                     break;
             }
         }
         else
         {
-            // Run all benchmarks if no argument provided
-            RunAllBenchmarks(config);
+            // Default to optimization strategies benchmark to show the improvements
+            BenchmarkRunner.Run<OptimizationStrategiesBenchmark>(config);
         }
-    }
-
-    static void RunAllBenchmarks(IConfig config)
-    {
-        BenchmarkRunner.Run(new[] 
-        { 
-            typeof(SimpleBenchmark),
-            typeof(OptimizationStrategiesBenchmark),
-            typeof(SmallEnumOptimizationBenchmark),
-            typeof(AllPropertyAllocationBenchmark)
-        }, config);
     }
 }

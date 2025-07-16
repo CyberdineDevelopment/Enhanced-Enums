@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace FractalDataWorks.EnhancedEnums.Benchmarks;
 
-[SimpleJob(RuntimeMoniker.Net80)]
+[SimpleJob]
 [MemoryDiagnoser]
 [MarkdownExporter]
 public class AllPropertyAllocationBenchmark
@@ -33,21 +33,21 @@ public class AllPropertyAllocationBenchmark
     
     // Current Enhanced Enums approach - allocates on every access
     [Benchmark(Baseline = true)]
-    public ImmutableArray<SampleItem> ToImmutableArray_EveryTime()
+    public ImmutableArray<SampleItem> ToImmutableArrayEveryTime()
     {
         return _items.ToImmutableArray();
     }
     
     // Cached immutable array - no allocation
     [Benchmark]
-    public ImmutableArray<SampleItem> Cached_ImmutableArray()
+    public ImmutableArray<SampleItem> CachedImmutableArray()
     {
         return _cachedImmutableArray;
     }
     
     // Return cached regular array
     [Benchmark]
-    public SampleItem[] Cached_Array()
+    public SampleItem[] CachedArray()
     {
         return _cachedArray;
     }
@@ -61,14 +61,14 @@ public class AllPropertyAllocationBenchmark
     
     // Direct list access (not safe, but for comparison)
     [Benchmark]
-    public List<SampleItem> DirectListAccess()
+    public IReadOnlyList<SampleItem> DirectListAccess()
     {
         return _items;
     }
     
     // Accessing first item - current approach
     [Benchmark]
-    public SampleItem? FirstItem_ToImmutableArray()
+    public SampleItem? FirstItemToImmutableArray()
     {
         var all = _items.ToImmutableArray();
         return all.Length > 0 ? all[0] : null;
@@ -76,14 +76,14 @@ public class AllPropertyAllocationBenchmark
     
     // Accessing first item - cached
     [Benchmark]
-    public SampleItem? FirstItem_Cached()
+    public SampleItem? FirstItemCached()
     {
         return _cachedImmutableArray.Length > 0 ? _cachedImmutableArray[0] : null;
     }
     
     // Iterating - current approach
     [Benchmark]
-    public int Iterate_ToImmutableArray()
+    public int IterateToImmutableArray()
     {
         int sum = 0;
         foreach (var item in _items.ToImmutableArray())
@@ -95,7 +95,7 @@ public class AllPropertyAllocationBenchmark
     
     // Iterating - cached
     [Benchmark]
-    public int Iterate_Cached()
+    public int IterateCached()
     {
         int sum = 0;
         foreach (var item in _cachedImmutableArray)
@@ -107,28 +107,28 @@ public class AllPropertyAllocationBenchmark
     
     // Count property access - current
     [Benchmark]
-    public int Count_ToImmutableArray()
+    public int CountToImmutableArray()
     {
         return _items.ToImmutableArray().Length;
     }
     
     // Count property access - cached
     [Benchmark]
-    public int Count_Cached()
+    public int CountCached()
     {
         return _cachedImmutableArray.Length;
     }
     
     // LINQ operations - current
     [Benchmark]
-    public SampleItem? LinqWhere_ToImmutableArray()
+    public SampleItem? LinqWhereToImmutableArray()
     {
         return _items.ToImmutableArray().FirstOrDefault(x => x.Id == 10);
     }
     
     // LINQ operations - cached
     [Benchmark]
-    public SampleItem? LinqWhere_Cached()
+    public SampleItem? LinqWhereCached()
     {
         return _cachedImmutableArray.FirstOrDefault(x => x.Id == 10);
     }
