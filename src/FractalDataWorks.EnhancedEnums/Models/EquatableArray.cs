@@ -7,16 +7,25 @@ using System.Linq;
 namespace FractalDataWorks.EnhancedEnums.Models;
 
 /// <summary>
+/// Provides factory methods for creating EquatableArray instances.
+/// </summary>
+public static class EquatableArray
+{
+    /// <summary>
+    /// Creates an empty EquatableArray of the specified type.
+    /// </summary>
+    /// <typeparam name="T">The type of elements in the array.</typeparam>
+    /// <returns>An empty EquatableArray.</returns>
+    public static EquatableArray<T> Empty<T>() where T : IEquatable<T> => new(ImmutableArray<T>.Empty);
+}
+
+/// <summary>
 /// An immutable, equatable array wrapper that provides value-based equality for use in incremental generators.
 /// </summary>
 /// <typeparam name="T">The type of elements in the array.</typeparam>
 public readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnumerable<T>
     where T : IEquatable<T>
 {
-    /// <summary>
-    /// Gets an empty array.
-    /// </summary>
-    public static EquatableArray<T> Empty { get; } = new(ImmutableArray<T>.Empty);
 
     private readonly ImmutableArray<T> _array;
 

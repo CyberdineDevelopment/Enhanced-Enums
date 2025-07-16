@@ -4,10 +4,31 @@ This guide will help you get up and running with FractalDataWorks.EnhancedEnums 
 
 ## Installation
 
-Add the package to your project:
+### Option 1: NuGet Package (Recommended)
 
 ```bash
 dotnet add package FractalDataWorks.EnhancedEnums
+```
+
+### Option 2: Project Reference
+
+If you're referencing the source code directly (e.g., for local development):
+
+```xml
+<ItemGroup>
+  <ProjectReference Include="path\to\FractalDataWorks.EnhancedEnums.csproj" 
+                    OutputItemType="Analyzer" 
+                    ReferenceOutputAssembly="true" />
+</ItemGroup>
+```
+
+**Note:** You must also add the EnableAssemblyScanner attribute:
+
+```csharp
+// In AssemblyInfo.cs or any source file
+using FractalDataWorks.SmartGenerators;
+
+[assembly: EnableAssemblyScanner]
 ```
 
 ## Your First Enhanced Enum
@@ -104,7 +125,6 @@ The source generator automatically created a static class called `TaskStatuses` 
 
 - Learn about [lookup properties](Advanced.md#lookup-properties) for efficient searching
 - Explore [custom collection names](Advanced.md#custom-collection-names)
-- Read about [performance characteristics](Performance.md)
 - Check out [best practices](../README.md#best-practices)
 
 ## Common Patterns

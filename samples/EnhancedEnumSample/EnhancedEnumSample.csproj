@@ -8,6 +8,7 @@
 	<ItemGroup>
 		<!-- Single reference provides both runtime and analyzer -->
 		<ProjectReference Include="..\..\src\FractalDataWorks.EnhancedEnums\FractalDataWorks.EnhancedEnums.csproj" />
+		<PackageReference Include="FractalDataWorks.SmartGenerators" />
 	</ItemGroup>
 </Project>
 

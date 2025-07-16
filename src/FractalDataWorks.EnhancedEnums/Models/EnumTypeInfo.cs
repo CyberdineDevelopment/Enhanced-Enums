@@ -63,12 +63,12 @@ public sealed class EnumTypeInfo : IInputInfo, IEquatable<EnumTypeInfo>
     /// <summary>
     /// Gets the list of properties that should be used for lookup methods.
     /// </summary>
-    public EquatableArray<PropertyLookupInfo> LookupProperties { get; set; } = EquatableArray<PropertyLookupInfo>.Empty;
+    public EquatableArray<PropertyLookupInfo> LookupProperties { get; set; } = EquatableArray.Empty<PropertyLookupInfo>();
 
     /// <summary>
     /// Gets the list of concrete enum value types discovered during processing.
     /// </summary>
-    public EquatableArray<EnumValueInfo> ConcreteTypes { get; set; } = EquatableArray<EnumValueInfo>.Empty;
+    public EquatableArray<EnumValueInfo> ConcreteTypes { get; set; } = EquatableArray.Empty<EnumValueInfo>();
 
     /// <summary>
     /// Gets the ID value for a specific enum value.
@@ -158,7 +158,7 @@ public sealed class EnumTypeInfo : IInputInfo, IEquatable<EnumTypeInfo>
         }
 
         // Compare by InputHash for efficient equality
-        return InputHash == other.InputHash;
+        return string.Equals(InputHash, other.InputHash, StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -175,6 +175,6 @@ public sealed class EnumTypeInfo : IInputInfo, IEquatable<EnumTypeInfo>
     public override int GetHashCode()
     {
         // Use the InputHash for consistent hash code
-        return InputHash.GetHashCode();
+        return StringComparer.Ordinal.GetHashCode(InputHash);
     }
 }

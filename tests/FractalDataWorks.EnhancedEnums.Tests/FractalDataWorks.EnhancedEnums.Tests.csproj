@@ -71,8 +71,8 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="xunit.v3" />
-    <!-- Use project reference for latest version -->
-    <ProjectReference Include="/mnt/c/development/fractaldataworks/smart-generators/src/FractalDataWorks.SmartGenerators.TestUtilities/FractalDataWorks.SmartGenerators.TestUtilities.csproj" />
+    <!-- Use package reference for TestUtilities -->
+    <PackageReference Include="FractalDataWorks.SmartGenerators.TestUtilities" />
   </ItemGroup>
 
   <ItemGroup>

@@ -5,6 +5,7 @@
   <ItemGroup>
     <!-- FractalDataWorks packages -->
     <PackageVersion Include="FractalDataWorks" Version="0.1.2-alpha-gca1c536bfd" />
+    <PackageVersion Include="FractalDataWorks.EnhancedEnums" Version="0.1.4-alpha-g4381c8d59f" />
     <PackageVersion Include="FractalDataWorks.SmartGenerators" Version="0.1.2-alpha-gf6ea635473" />
     <PackageVersion Include="FractalDataWorks.SmartGenerators.CodeBuilders" Version="0.1.2-alpha-gf6ea635473" />
     <PackageVersion Include="FractalDataWorks.SmartGenerators.TestUtilities" Version="0.1.2-alpha-gf6ea635473" />
@@ -24,6 +25,8 @@
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="Verify.SourceGenerators" Version="2.2.0" />
     <PackageVersion Include="Verify.Xunit" Version="26.6.0" />
+    <!-- Benchmarking -->
+    <PackageVersion Include="BenchmarkDotNet" Version="0.13.12" />
     <!-- Build tools -->
     <PackageVersion Include="Nerdbank.GitVersioning" Version="3.8.38-alpha" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />

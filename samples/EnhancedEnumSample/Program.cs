@@ -3,7 +3,7 @@ using System;
 
 namespace EnhancedEnumSample;
 
-[EnhancedEnumOption(NameComparison = StringComparison.OrdinalIgnoreCase)]
+[EnhancedEnumOption("ColorEnums", NameComparison = StringComparison.OrdinalIgnoreCase)]
 public abstract class ColorEnum
 {
     public abstract string Name { get; }

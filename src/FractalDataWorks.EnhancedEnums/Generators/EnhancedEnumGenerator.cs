@@ -36,7 +36,9 @@ public class EnhancedEnumOptionGenerator : FractalDataWorks.SmartGenerators.Incr
         // Create a code builder for the source file
         var codeBuilder = new CodeBuilder();
 
-        // Add using directives
+        // Add nullable directive and using directives
+        codeBuilder.AppendLine("#nullable enable");
+        codeBuilder.AppendLine();
         codeBuilder.AppendLine("using System;");
         codeBuilder.AppendLine("using System.Linq;");
         codeBuilder.AppendLine("using System.Collections.Generic;");
@@ -94,9 +96,7 @@ public class EnhancedEnumOptionGenerator : FractalDataWorks.SmartGenerators.Incr
         codeBuilder.AppendLine("/// </summary>");
         codeBuilder.AppendLine($"public static ImmutableArray<{def.FullTypeName}> All => _all.ToImmutableArray();");
 
-        // Add GetByName method if there's a Name property in lookups or we detect it
-        // For now, always generate it since most enums have a Name property
-        // TODO: Detect this during transform phase
+        // Add GetByName method - always generate since Name property is required by design
         codeBuilder.AppendLine();
         codeBuilder.AppendLine("/// <summary>");
         codeBuilder.AppendLine($"/// Gets the {def.ClassName} with the specified name.");

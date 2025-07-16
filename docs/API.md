@@ -501,3 +501,44 @@ The source generator validates your code and produces compilation errors for:
 - **Recommended**: .NET 6.0 or higher
 - **Nullable reference types**: Supported with C# 8.0+
 - **Modern features**: FrozenDictionary requires .NET 8.0+
+
+## Source Generator Configuration
+
+### Package Reference
+
+When using the NuGet package, the source generator is automatically configured:
+
+```xml
+<PackageReference Include="FractalDataWorks.EnhancedEnums" Version="*" />
+```
+
+### Project Reference
+
+When referencing the project directly, proper configuration is required:
+
+```xml
+<ItemGroup>
+  <!-- Correct: Registers as analyzer and includes runtime components -->
+  <ProjectReference Include="path\to\FractalDataWorks.EnhancedEnums.csproj" 
+                    OutputItemType="Analyzer" 
+                    ReferenceOutputAssembly="true" />
+</ItemGroup>
+```
+
+#### Configuration Options
+
+- **OutputItemType="Analyzer"**: Required to register the project as a Roslyn analyzer/source generator
+- **ReferenceOutputAssembly="true"**: Required to access attributes at runtime
+- **ReferenceOutputAssembly="false"**: Use only if attributes are provided separately
+
+### Assembly Scanner Requirement
+
+The source generator requires the assembly scanner to be enabled:
+
+```csharp
+using FractalDataWorks.SmartGenerators;
+
+[assembly: EnableAssemblyScanner]
+```
+
+Without this attribute, the generator may not discover all enum options, especially in cross-assembly scenarios.

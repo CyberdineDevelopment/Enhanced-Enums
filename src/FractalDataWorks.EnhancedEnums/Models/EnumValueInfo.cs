@@ -169,6 +169,6 @@ string.Equals(Description, other.Description, StringComparison.Ordinal);
     public override int GetHashCode()
     {
         // Use the InputHash for consistent hash code
-        return InputHash.GetHashCode();
+        return StringComparer.Ordinal.GetHashCode(InputHash);
     }
 }

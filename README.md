@@ -35,9 +35,27 @@ FractalDataWorks Enhanced Enums provides a powerful alternative to standard C# e
 
 ## Installation
 
+### NuGet Package
 ```bash
 dotnet add package FractalDataWorks.EnhancedEnums
 ```
+
+### Project Reference
+When referencing the source generator as a project (e.g., for local development or benchmarks), you must configure it properly:
+
+```xml
+<ItemGroup>
+  <ProjectReference Include="path\to\FractalDataWorks.EnhancedEnums.csproj" 
+                    OutputItemType="Analyzer" 
+                    ReferenceOutputAssembly="true" />
+</ItemGroup>
+```
+
+**Important:** 
+- `OutputItemType="Analyzer"` - Registers the project as a Roslyn analyzer/source generator
+- `ReferenceOutputAssembly="true"` - Ensures the attributes are available at runtime
+
+Without proper configuration, the source generator won't run and the collection classes won't be generated.
 
 ## Quick Start
 
@@ -247,14 +265,6 @@ public abstract class UserRole
 // Generates: FindByLevel() instead of GetByPermissionLevel()
 ```
 
-## Performance Characteristics
-
-- **Initialization**: O(n) during static constructor
-- **All property access**: O(n) array allocation on each access
-- **Name lookups**: O(n) linear search through collection
-- **Property lookups**: O(n) linear search through collection
-- **Memory usage**: Stores all instances in memory
-
 ## Best Practices
 
 1. **Use descriptive names** for enum options and properties
@@ -340,6 +350,42 @@ public abstract class DateRange
     public abstract Guid Id { get; }
 }
 ```
+
+## Troubleshooting
+
+### Source Generator Not Running
+
+If your enhanced enum collection classes are not being generated:
+
+1. **Check Project Reference Configuration**
+   ```xml
+   <!-- Correct -->
+   <ProjectReference Include="..\..\src\FractalDataWorks.EnhancedEnums\FractalDataWorks.EnhancedEnums.csproj" 
+                     OutputItemType="Analyzer" 
+                     ReferenceOutputAssembly="true" />
+   
+   <!-- Incorrect - Generator won't run -->
+   <ProjectReference Include="..\..\src\FractalDataWorks.EnhancedEnums\FractalDataWorks.EnhancedEnums.csproj" />
+   ```
+
+2. **Enable Assembly Scanner**
+   Add to your AssemblyInfo.cs or any source file:
+   ```csharp
+   using FractalDataWorks.SmartGenerators;
+   
+   [assembly: EnableAssemblyScanner]
+   ```
+
+3. **Check Build Output**
+   Look for warnings like:
+   - `CS8032: An instance of analyzer ... cannot be created`
+   - `CS0103: The name 'YourEnums' does not exist in the current context`
+
+### Common Issues
+
+- **Missing Dependencies**: The generator requires SmartGenerators dependencies. When using PackageReference, these are included automatically. With ProjectReference, you may need to ensure dependencies are available.
+- **Case Sensitivity**: By default, name lookups are case-insensitive. Use `NameComparison` attribute property to change this.
+- **Nullable Reference Types**: Generated code may produce warnings in projects with nullable reference types enabled. This is a known issue that doesn't affect functionality.
 
 ## Contributing
 
