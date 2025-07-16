@@ -116,6 +116,24 @@ public class EnhancedEnumOptionGenerator : FractalDataWorks.SmartGenerators.Incr
             GenerateLookupMethod(codeBuilder, def, lookup);
         }
 
+        // Generate static property accessors for each enum value
+        if (values.Any())
+        {
+            codeBuilder.AppendLine();
+            codeBuilder.AppendLine("// Static property accessors");
+            foreach (var value in values)
+            {
+                // Use the Name property which comes from EnumOptionAttribute.Name or falls back to class name
+                var propertyName = MakeValidIdentifier(value.Name);
+                
+                codeBuilder.AppendLine();
+                codeBuilder.AppendLine("/// <summary>");
+                codeBuilder.AppendLine($"/// Gets the {value.Name} instance.");
+                codeBuilder.AppendLine("/// </summary>");
+                codeBuilder.AppendLine($"public static {def.FullTypeName} {propertyName} => _all.OfType<{value.FullTypeName}>().First();");
+            }
+        }
+
         // Close class
         codeBuilder.Outdent();
         codeBuilder.AppendLine("}");
@@ -494,5 +512,29 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
             return str;
 
         return char.ToLowerInvariant(str[0]) + str.Substring(1);
+    }
+
+    /// <summary>
+    /// Makes a valid C# identifier from a string.
+    /// </summary>
+    private static string MakeValidIdentifier(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+            return "_";
+
+        // Replace spaces and special characters with underscores
+        var result = System.Text.RegularExpressions.Regex.Replace(name, @"[^\w]", "_");
+        
+        // Ensure it doesn't start with a number
+        if (char.IsDigit(result[0]))
+            result = "_" + result;
+        
+        // Remove consecutive underscores
+        result = System.Text.RegularExpressions.Regex.Replace(result, @"_+", "_");
+        
+        // Trim underscores from ends
+        result = result.Trim('_');
+        
+        return string.IsNullOrEmpty(result) ? "_" : result;
     }
 }

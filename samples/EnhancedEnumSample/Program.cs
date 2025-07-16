@@ -62,6 +62,11 @@ class Program
         var purple = ColorEnums.GetByName("Purple");
         Console.WriteLine($"Purple: {purple?.Name ?? "Not found"}");
         
+        Console.WriteLine("\nStatic property accessors:");
+        Console.WriteLine($"Red: {ColorEnums.Red.Name} - {ColorEnums.Red.Hex}");
+        Console.WriteLine($"Green: {ColorEnums.Green.Name} - {ColorEnums.Green.Hex}");
+        Console.WriteLine($"Blue: {ColorEnums.Blue.Name} - {ColorEnums.Blue.Hex}");
+        
         Console.WriteLine("\nTotal colors: " + ColorEnums.All.Length);
     }
 }

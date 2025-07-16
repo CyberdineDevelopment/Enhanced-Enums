@@ -7,7 +7,9 @@
   </PropertyGroup>
 	<ItemGroup>
 		<!-- Single reference provides both runtime and analyzer -->
-		<ProjectReference Include="..\..\src\FractalDataWorks.EnhancedEnums\FractalDataWorks.EnhancedEnums.csproj" />
+		<ProjectReference Include="..\..\src\FractalDataWorks.EnhancedEnums\FractalDataWorks.EnhancedEnums.csproj" 
+						  OutputItemType="Analyzer" 
+						  ReferenceOutputAssembly="true" />
 		<PackageReference Include="FractalDataWorks.SmartGenerators" />
 	</ItemGroup>
 </Project>
