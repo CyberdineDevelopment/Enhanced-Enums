@@ -264,16 +264,32 @@ public static class {EnumName}s // or custom CollectionName
 {
     // Private backing storage
     private static readonly List<{EnumType}> _all = new List<{EnumType}>();
+    private static readonly ImmutableArray<{EnumType}> _cachedAll;
+    private static readonly Dictionary<string, {EnumType}> _nameDict;
+    private static readonly EmptyValue _empty = new EmptyValue();
+    
+    // Dictionary for each lookup property
+    private static readonly Dictionary<{PropertyType}, {EnumType}> _{propertyName}Dict;
     
     // Static constructor for initialization
-    static {EnumName}s() { /* ... */ }
+    static {EnumName}s() 
+    { 
+        // Populate _all collection
+        // Cache immutable array
+        // Build lookup dictionaries
+        // FrozenDictionary on .NET 8+
+    }
     
     // Public API
-    public static ImmutableArray<{EnumType}> All { get; }
-    public static {EnumType}? GetByName(string name) { /* ... */ }
+    public static ImmutableArray<{EnumType}> All { get; } // Zero allocations
+    public static {EnumType} Empty { get; } // Singleton empty value
+    public static {EnumType}? GetByName(string name) { /* O(1) lookup */ }
+    
+    // Static property accessors
+    public static {EnumType} {ValueName} { get; } // Direct access
     
     // Generated lookup methods
-    public static {EnumType}? GetBy{PropertyName}({PropertyType} value) { /* ... */ }
+    public static {EnumType}? GetBy{PropertyName}({PropertyType} value) { /* O(1) lookup */ }
 }
 ```
 
@@ -287,13 +303,64 @@ public static ImmutableArray<{EnumType}> All { get; }
 
 **Returns:** An `ImmutableArray<T>` containing all enum instances.
 
-**Performance:** O(n) - Creates new array on each access.
+**Performance:** O(1) - Returns cached array with zero allocations.
 
 **Example:**
 ```csharp
 foreach (var status in OrderStatuses.All)
 {
     Console.WriteLine(status.Name);
+}
+```
+
+### Empty Property
+
+Returns a singleton instance representing "no selection".
+
+```csharp
+public static {EnumType} Empty { get; }
+```
+
+**Returns:** A singleton instance with default values:
+- String properties return `string.Empty`
+- Numeric properties return `0`
+- `DateTime` returns `DateTime.MinValue`
+- `Guid` returns `Guid.Empty`
+- `bool` returns `false`
+- Nullable types return `null`
+
+**Performance:** O(1) - Returns cached singleton.
+
+**Example:**
+```csharp
+var none = OrderStatuses.Empty;
+if (currentStatus == OrderStatuses.Empty)
+{
+    Console.WriteLine("No status selected");
+}
+```
+
+### Static Property Accessors
+
+Direct access to specific enum values.
+
+```csharp
+public static {EnumType} {ValueName} { get; }
+```
+
+**Returns:** The specific enum instance.
+
+**Performance:** O(1) - Direct array index access.
+
+**Example:**
+```csharp
+var pending = OrderStatuses.Pending;
+var shipped = OrderStatuses.Shipped;
+
+// No need for string lookups!
+if (order.Status == OrderStatuses.Processing)
+{
+    // Handle processing orders
 }
 ```
 
@@ -310,7 +377,7 @@ public static {EnumType}? GetByName(string name)
 
 **Returns:** The matching enum instance, or `null` if not found.
 
-**Performance:** O(n) - Linear search through collection.
+**Performance:** O(1) - Dictionary lookup with zero allocations.
 
 **Comparison:** Uses the `NameComparison` setting from `[EnhancedEnumOption]`.
 
@@ -338,11 +405,11 @@ public static {EnumType}? GetBy{PropertyName}({PropertyType} value)
 - `{EnumType}?` when `AllowMultiple = false` (default)
 - `IEnumerable<{EnumType}>` when `AllowMultiple = true`
 
-**Performance:** O(n) - Linear search through collection.
+**Performance:** O(1) - Dictionary lookup with zero allocations.
 
 **Comparison Logic:**
-- **String properties**: Uses `StringComparison.OrdinalIgnoreCase`
-- **Value types**: Uses `Equals()` method
+- **String properties**: Uses configured `StringComparison` (default: `OrdinalIgnoreCase`)
+- **Value types**: Uses `Equals()` method for dictionary key comparison
 - **Reference types**: Uses `Equals()` method with null handling
 
 **Example:**
@@ -500,7 +567,9 @@ The source generator validates your code and produces compilation errors for:
 - **Minimum**: .NET Standard 2.0
 - **Recommended**: .NET 6.0 or higher
 - **Nullable reference types**: Supported with C# 8.0+
-- **Modern features**: FrozenDictionary requires .NET 8.0+
+- **Performance optimizations**:
+  - .NET Standard 2.0 - .NET 7: Uses `Dictionary<TKey, TValue>`
+  - .NET 8.0+: Uses `FrozenDictionary<TKey, TValue>` for additional 35% performance improvement
 
 ## Source Generator Configuration
 

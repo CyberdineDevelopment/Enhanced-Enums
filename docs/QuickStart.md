@@ -41,8 +41,14 @@ using FractalDataWorks.EnhancedEnums.Attributes;
 [EnhancedEnumOption]
 public abstract class TaskStatus
 {
-    public abstract string Name { get; }
-    public abstract bool IsCompleted { get; }
+    protected TaskStatus(string name, bool isCompleted)
+    {
+        Name = name;
+        IsCompleted = isCompleted;
+    }
+    
+    public string Name { get; }
+    public bool IsCompleted { get; }
 }
 ```
 
@@ -52,23 +58,33 @@ public abstract class TaskStatus
 [EnumOption]
 public class Todo : TaskStatus
 {
-    public override string Name => "To Do";
-    public override bool IsCompleted => false;
+    public Todo() : base("To Do", false) { }
 }
 
 [EnumOption]
 public class InProgress : TaskStatus
 {
-    public override string Name => "In Progress";
-    public override bool IsCompleted => false;
+    public InProgress() : base("In Progress", false) { }
 }
 
 [EnumOption]
 public class Done : TaskStatus
 {
-    public override string Name => "Done";
-    public override bool IsCompleted => true;
+    public Done() : base("Done", true) { }
 }
+```
+
+**With C# 12 Primary Constructors (Preferred):**
+
+```csharp
+[EnumOption]
+public class Todo() : TaskStatus("To Do", false);
+
+[EnumOption]
+public class InProgress() : TaskStatus("In Progress", false);
+
+[EnumOption]
+public class Done() : TaskStatus("Done", true);
 ```
 
 ### 3. Use Your Enhanced Enum
@@ -85,16 +101,24 @@ class Program
             Console.WriteLine($"- {status.Name} (Completed: {status.IsCompleted})");
         }
 
-        // Find a specific status
+        // Direct access via static properties
+        var todo = TaskStatuses.Todo;
+        var done = TaskStatuses.Done;
+        Console.WriteLine($"\nDirect access: {todo.Name} -> {done.Name}");
+
+        // Find a specific status by name
         var inProgress = TaskStatuses.GetByName("In Progress");
-        Console.WriteLine($"\nFound: {inProgress?.Name}");
+        Console.WriteLine($"Found: {inProgress?.Name}");
 
         // Check completion status
-        var done = TaskStatuses.GetByName("Done");
-        if (done?.IsCompleted == true)
+        if (done.IsCompleted)
         {
             Console.WriteLine("This task is complete!");
         }
+        
+        // Handle "no selection" case
+        var empty = TaskStatuses.Empty;
+        Console.WriteLine($"Empty status: '{empty.Name}' (Completed: {empty.IsCompleted})");
     }
 }
 ```
@@ -109,16 +133,20 @@ All Task Statuses:
 - In Progress (Completed: False)
 - Done (Completed: True)
 
+Direct access: To Do -> Done
 Found: In Progress
 This task is complete!
+Empty status: '' (Completed: False)
 ```
 
 ## What Just Happened?
 
 The source generator automatically created a static class called `TaskStatuses` with:
 
-- **All property**: Returns all enum instances as an `ImmutableArray`
-- **GetByName method**: Finds an enum by its name
+- **All property**: Returns all enum instances as an `ImmutableArray` (cached, zero allocations)
+- **GetByName method**: Finds an enum by its name (O(1) dictionary lookup)
+- **Static property accessors**: Direct access like `TaskStatuses.Todo`
+- **Empty property**: Singleton representing "no selection"
 - **Static initialization**: All enum instances are created once at startup
 
 ## Next Steps
@@ -135,26 +163,34 @@ The source generator automatically created a static class called `TaskStatuses` 
 [EnhancedEnumOption]
 public abstract class OrderStatus
 {
-    public abstract string Name { get; }
-    public abstract string Description { get; }
-    public abstract bool CanBeCancelled { get; }
+    protected OrderStatus(string name, string description, bool canBeCancelled)
+    {
+        Name = name;
+        Description = description;
+        CanBeCancelled = canBeCancelled;
+    }
+    
+    public string Name { get; }
+    public string Description { get; }
+    public bool CanBeCancelled { get; }
 }
 
+// Traditional constructor approach
 [EnumOption]
 public class Pending : OrderStatus
 {
-    public override string Name => "Pending";
-    public override string Description => "Order is awaiting processing";
-    public override bool CanBeCancelled => true;
+    public Pending() : base("Pending", "Order is awaiting processing", true) { }
 }
 
+// C# 12 Primary constructor (cleaner!)
 [EnumOption]
-public class Shipped : OrderStatus
-{
-    public override string Name => "Shipped";
-    public override string Description => "Order has been shipped";
-    public override bool CanBeCancelled => false;
-}
+public class Shipped() : OrderStatus("Shipped", "Order has been shipped", false);
+
+[EnumOption]
+public class Processing() : OrderStatus("Processing", "Order is being processed", false);
+
+[EnumOption]
+public class Delivered() : OrderStatus("Delivered", "Order has been delivered", false);
 ```
 
 ### Configuration Enums
@@ -163,35 +199,41 @@ public class Shipped : OrderStatus
 [EnhancedEnumOption]
 public abstract class LogLevel
 {
-    public abstract string Name { get; }
-    public abstract int Severity { get; }
-    public abstract ConsoleColor Color { get; }
+    protected LogLevel(string name, int severity, ConsoleColor color)
+    {
+        Name = name;
+        Severity = severity;
+        Color = color;
+    }
+    
+    public string Name { get; }
+    public int Severity { get; }
+    public ConsoleColor Color { get; }
 }
 
+// C# 12 Primary constructors - concise and clear!
 [EnumOption]
-public class Info : LogLevel
-{
-    public override string Name => "Info";
-    public override int Severity => 1;
-    public override ConsoleColor Color => ConsoleColor.White;
-}
+public class Debug() : LogLevel("Debug", 0, ConsoleColor.Gray);
 
 [EnumOption]
-public class Warning : LogLevel
-{
-    public override string Name => "Warning";
-    public override int Severity => 2;
-    public override ConsoleColor Color => ConsoleColor.Yellow;
-}
+public class Info() : LogLevel("Info", 1, ConsoleColor.White);
 
 [EnumOption]
-public class Error : LogLevel
-{
-    public override string Name => "Error";
-    public override int Severity => 3;
-    public override ConsoleColor Color => ConsoleColor.Red;
-}
+public class Warning() : LogLevel("Warning", 2, ConsoleColor.Yellow);
+
+[EnumOption]
+public class Error() : LogLevel("Error", 3, ConsoleColor.Red);
+
+[EnumOption]
+public class Fatal() : LogLevel("Fatal", 4, ConsoleColor.DarkRed);
 ```
+
+**Benefits of Constructor Approach:**
+- No need to override properties or add XML documentation
+- Properties are immutable by default
+- Less boilerplate code
+- Primary constructors make enum options extremely concise
+- IntelliSense shows constructor parameters clearly
 
 ## Troubleshooting
 
