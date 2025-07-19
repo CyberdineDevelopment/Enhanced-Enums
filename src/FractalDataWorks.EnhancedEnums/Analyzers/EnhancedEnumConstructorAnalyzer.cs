@@ -9,17 +9,17 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace FractalDataWorks.EnhancedEnums.Analyzers;
 
 /// <summary>
-/// Analyzer that enforces IEnhancedEnumOption implementation on enhanced enum base classes.
+/// Analyzer that enforces constructor-based patterns for enhanced enum base classes.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class EnhancedEnumBaseAnalyzer : DiagnosticAnalyzer
+public class EnhancedEnumConstructorAnalyzer : DiagnosticAnalyzer
 {
-    public const string DiagnosticId = "ENH1001";
+    public const string DiagnosticId = "ENH1002";
 
-    private static readonly LocalizableString Title = "Enhanced enum base class should implement IEnhancedEnumOption";
-    private static readonly LocalizableString MessageFormat = "Enhanced enum base class '{0}' should implement IEnhancedEnumOption for full functionality";
-    private static readonly LocalizableString Description = "Enhanced enum base classes should implement IEnhancedEnumOption to enable features like GetById generation and proper interface-based return types.";
-    private const string Category = "Usage";
+    private static readonly LocalizableString Title = "Enhanced enum base class should use constructor-based pattern";
+    private static readonly LocalizableString MessageFormat = "Enhanced enum base class '{0}' uses abstract properties instead of constructor parameters. Consider using a constructor-based pattern for better immutability and Empty value generation.";
+    private static readonly LocalizableString Description = "Enhanced enum base classes should use constructor parameters and read-only properties instead of abstract properties. This enables proper Empty value generation and follows immutability best practices.";
+    private const string Category = "Design";
 
     private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(
         DiagnosticId,
@@ -45,7 +45,7 @@ public class EnhancedEnumBaseAnalyzer : DiagnosticAnalyzer
         var semanticModel = context.SemanticModel;
         var classSymbol = semanticModel.GetDeclaredSymbol(classDeclaration);
 
-        if (classSymbol == null)
+        if (classSymbol == null || !classSymbol.IsAbstract)
             return;
 
         // Check if class has [EnhancedEnumBase] attribute
@@ -56,19 +56,19 @@ public class EnhancedEnumBaseAnalyzer : DiagnosticAnalyzer
         if (!hasEnhancedEnumBaseAttribute)
             return;
 
-        // Check if class implements IEnhancedEnumOption
-        var enhancedEnumOptionInterface = context.Compilation.GetTypeByMetadataName("FractalDataWorks.IEnhancedEnumOption");
-        if (enhancedEnumOptionInterface == null)
-        {
-            // If the interface isn't available in the compilation, we can't check
-            return;
-        }
+        // Check for abstract properties (excluding Name which is required)
+        var abstractProperties = classSymbol.GetMembers()
+            .OfType<IPropertySymbol>()
+            .Where(p => p.IsAbstract && !string.Equals(p.Name, "Name", StringComparison.Ordinal))
+            .ToList();
 
-        var implementsInterface = classSymbol.AllInterfaces.Contains(enhancedEnumOptionInterface, SymbolEqualityComparer.Default);
+        // Check if class has any constructors
+        var hasConstructor = classSymbol.Constructors
+            .Any(c => !c.IsImplicitlyDeclared && c.DeclaredAccessibility != Accessibility.Private);
 
-        if (!implementsInterface)
+        // If it has abstract properties but no constructor, report diagnostic
+        if (abstractProperties.Count > 0 && !hasConstructor)
         {
-            // Report diagnostic
             var diagnostic = Diagnostic.Create(
                 Rule,
                 classDeclaration.Identifier.GetLocation(),

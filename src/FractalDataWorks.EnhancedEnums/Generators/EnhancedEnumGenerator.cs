@@ -71,7 +71,7 @@ public class EnhancedEnumOptionGenerator : IncrementalGeneratorBase<EnumTypeInfo
 
         // Check if base type implements IEnhancedEnumOption
         var implementsEnhancedOption = baseTypeSymbol?.AllInterfaces.Any(i => 
-            i.ToDisplayString() == "FractalDataWorks.IEnhancedEnumOption") ?? false;
+            string.Equals(i.ToDisplayString(), "FractalDataWorks.IEnhancedEnumOption", StringComparison.Ordinal)) ?? false;
             
         // Add conditional compilation fields for dictionaries
         classBuilder.AddCodeBlock($@"#if NET8_0_OR_GREATER
@@ -269,7 +269,7 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
             .WithXmlDocSummary($"Gets all available {def.ClassName} values."));
 
         // Add GetByName method - always generate since Name property is required by design
-        var getByNameReturnType = effectiveReturnType?.EndsWith("?") == true ? effectiveReturnType : $"{effectiveReturnType}?";
+        var getByNameReturnType = effectiveReturnType?.EndsWith("?", StringComparison.Ordinal) == true ? effectiveReturnType : $"{effectiveReturnType}?";
         classBuilder.AddMethod("GetByName", getByNameReturnType!, method => method
             .MakePublic()
             .MakeStatic()
@@ -290,7 +290,7 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
         // Generate GetById method if implementing IEnhancedEnumOption
         if (implementsEnhancedOption)
         {
-            var getByIdReturnType = effectiveReturnType?.EndsWith("?") == true ? effectiveReturnType : $"{effectiveReturnType}?";
+            var getByIdReturnType = effectiveReturnType?.EndsWith("?", StringComparison.Ordinal) == true ? effectiveReturnType : $"{effectiveReturnType}?";
             classBuilder.AddMethod("GetById", getByIdReturnType!, method => method
                 .MakePublic()
                 .MakeStatic()
@@ -328,7 +328,7 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
         }
 
         // Generate Empty value
-        GenerateEmptyValue(classBuilder, def, effectiveReturnType);
+        GenerateEmptyValue(classBuilder, def, effectiveReturnType, baseTypeSymbol);
 
         // Build the complete source code with headers
         var sourceCode = new StringBuilder();
@@ -727,7 +727,7 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
     /// <summary>
     /// Generates the Empty value singleton for the enum collection.
     /// </summary>
-    private static void GenerateEmptyValue(ClassBuilder classBuilder, EnumTypeInfo def, string? effectiveReturnType)
+    private static void GenerateEmptyValue(ClassBuilder classBuilder, EnumTypeInfo def, string? effectiveReturnType, INamedTypeSymbol? baseTypeSymbol)
     {
         // Add Empty property singleton field
         classBuilder.AddField("EmptyValue", "_empty", field => field
@@ -744,19 +744,36 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
             .WithXmlDocSummary("Gets an empty instance representing no selection."));
         
         // Generate nested EmptyValue class
-        classBuilder.AddNestedClass(nestedClass => nestedClass
-            .WithName("EmptyValue")
-            .MakePrivate()
-            .MakeSealed()
-            .WithBaseType(def.FullTypeName)
-            .AddProperty("Name", "string", prop => prop
-                .MakePublic()
-                .MakeOverride()
-                .WithExpressionBody("string.Empty"))
-            .AddCodeBlock(BuildLookupPropertiesForEmpty(def)));
-        
-        // Note: We can't know all abstract properties at generation time, 
-        // so users may need to create custom empty classes for complex enums
+        classBuilder.AddNestedClass(builder => 
+        {
+            builder.WithName("EmptyValue")
+                .MakePrivate()
+                .MakeSealed()
+                .WithBaseType(def.FullTypeName);
+
+            // Find the most accessible constructor and generate appropriate call
+            if (baseTypeSymbol != null)
+            {
+                var constructors = baseTypeSymbol.Constructors
+                    .Where(c => !c.IsStatic && c.DeclaredAccessibility != Accessibility.Private)
+                    .OrderBy(c => c.Parameters.Length)
+                    .ThenBy(c => c.DeclaredAccessibility == Accessibility.Protected ? 0 : 1)
+                    .ToList();
+
+                if (constructors.Count > 0)
+                {
+                    var ctor = constructors.First();
+                    var args = string.Join(", ", ctor.Parameters.Select(p => GetDefaultValueForType(p.Type.ToDisplayString())));
+                    
+                    builder.AddConstructor(ctorBuilder => ctorBuilder
+                        .MakePublic()
+                        .WithBaseCall(args));
+                }
+            }
+
+            // Add lookup property overrides
+            builder.AddCodeBlock(BuildLookupPropertiesForEmpty(def));
+        });
     }
     
     /// <summary>
@@ -799,7 +816,7 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
             "System.DateTime" or "DateTime" => "DateTime.MinValue",
             "System.DateTimeOffset" or "DateTimeOffset" => "DateTimeOffset.MinValue",
             "System.TimeSpan" or "TimeSpan" => "TimeSpan.Zero",
-            _ => typeName.EndsWith("?") ? "null" : $"default({cleanType})"
+            _ => typeName.EndsWith("?", StringComparison.Ordinal) ? "null" : $"default({cleanType})"
         };
     }
 

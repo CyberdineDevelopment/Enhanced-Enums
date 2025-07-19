@@ -10,8 +10,9 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Formatting;
+using FractalDataWorks.EnhancedEnums.Analyzers;
 
-namespace FractalDataWorks.EnhancedEnums.Analyzers;
+namespace FractalDataWorks.EnhancedEnums.CodeFixes;
 
 /// <summary>
 /// Code fix provider that implements IEnhancedEnumOption on enhanced enum base classes.
@@ -43,12 +44,12 @@ public class EnhancedEnumBaseCodeFixProvider : CodeFixProvider
             diagnostic);
     }
 
-    private async Task<Document> ImplementIEnhancedEnumOptionAsync(Document document, ClassDeclarationSyntax classDeclaration, CancellationToken cancellationToken)
+    private static async Task<Document> ImplementIEnhancedEnumOptionAsync(Document document, ClassDeclarationSyntax classDeclaration, CancellationToken cancellationToken)
     {
         var editor = await DocumentEditor.CreateAsync(document, cancellationToken).ConfigureAwait(false);
         var generator = editor.Generator;
         var semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
-        var classSymbol = semanticModel.GetDeclaredSymbol(classDeclaration);
+        var classSymbol = semanticModel?.GetDeclaredSymbol(classDeclaration, cancellationToken);
 
         if (classSymbol == null)
             return document;
@@ -171,7 +172,7 @@ public class EnhancedEnumBaseCodeFixProvider : CodeFixProvider
         var compilationUnit = root as CompilationUnitSyntax;
         if (compilationUnit != null)
         {
-            var hasUsing = compilationUnit.Usings.Any(u => u.Name?.ToString() == "FractalDataWorks");
+            var hasUsing = compilationUnit.Usings.Any(u => string.Equals(u.Name?.ToString(), "FractalDataWorks", System.StringComparison.Ordinal));
             if (!hasUsing)
             {
                 var newUsing = SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName("FractalDataWorks"))
