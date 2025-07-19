@@ -21,7 +21,7 @@ public class SmokeTests
 
         // Assert
         generator.ShouldNotBeNull();
-        generator.ShouldBeAssignableTo<Microsoft.CodeAnalysis.IIncrementalGenerator>();
+        generator.ShouldBeAssignableTo<IIncrementalGenerator>();
     }
 
     [Fact]
@@ -72,7 +72,7 @@ public class SmokeTests
     public void ShouldHaveRequiredReferences()
     {
         // Verify we can access all required types at runtime
-        System.Type.GetType("FractalDataWorks.EnhancedEnums.Attributes.EnhancedEnumOptionAttribute, FractalDataWorks.EnhancedEnums")
+        Type.GetType("FractalDataWorks.EnhancedEnums.Attributes.EnhancedEnumBaseAttribute, FractalDataWorks.EnhancedEnums")
             .ShouldNotBeNull();
 
         // Note: EnableAssemblyScannerAttribute is a compile-time only attribute used by source generators

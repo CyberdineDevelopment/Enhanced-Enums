@@ -19,7 +19,7 @@ This guide covers advanced features and patterns for FractalDataWorks.EnhancedEn
 Use `[EnumLookup]` to generate efficient lookup methods for any property:
 
 ```csharp
-[EnhancedEnumOption]
+[EnhancedEnumBase]
 public abstract class Country
 {
     public abstract string Name { get; }
@@ -78,7 +78,7 @@ var populous = Countries.GetByPopulation(331_000_000);
 Override the default collection name:
 
 ```csharp
-[EnhancedEnumOption("ApplicationStates")]
+[EnhancedEnumBase("ApplicationStates")]
 public abstract class AppState
 {
     public abstract string Name { get; }
@@ -107,13 +107,13 @@ public class Running : AppState
 Control how string comparisons are performed:
 
 ```csharp
-[EnhancedEnumOption(NameComparison = StringComparison.Ordinal)]
+[EnhancedEnumBase(NameComparison = StringComparison.Ordinal)]
 public abstract class CaseSensitive
 {
     public abstract string Name { get; }
 }
 
-[EnhancedEnumOption(NameComparison = StringComparison.OrdinalIgnoreCase)] // Default
+[EnhancedEnumBase(NameComparison = StringComparison.OrdinalIgnoreCase)] // Default
 public abstract class CaseInsensitive
 {
     public abstract string Name { get; }
@@ -131,7 +131,7 @@ Available options:
 Use the factory pattern for fresh instances on each lookup:
 
 ```csharp
-[EnhancedEnumOption(UseFactory = true)]
+[EnhancedEnumBase(UseFactory = true)]
 public abstract class DatabaseConnection
 {
     public abstract string Name { get; }
@@ -172,7 +172,7 @@ With factory pattern:
 Customize the generated lookup method names:
 
 ```csharp
-[EnhancedEnumOption]
+[EnhancedEnumBase]
 public abstract class User
 {
     public abstract string Name { get; }
@@ -194,7 +194,7 @@ public abstract class User
 Lookup properties can be any type:
 
 ```csharp
-[EnhancedEnumOption]
+[EnhancedEnumBase]
 public abstract class Holiday
 {
     public abstract string Name { get; }
@@ -233,7 +233,7 @@ var mondayHoliday = Holidays.GetByDayOfWeek(DayOfWeek.Monday);
 Generate multiple lookup methods for different search patterns:
 
 ```csharp
-[EnhancedEnumOption]
+[EnhancedEnumBase]
 public abstract class Product
 {
     public abstract string Name { get; }
@@ -275,7 +275,7 @@ Enhanced enums can be used across assembly boundaries:
 ### Assembly A (Shared Library)
 
 ```csharp
-[EnhancedEnumOption]
+[EnhancedEnumBase]
 public abstract class ApiEndpoint
 {
     public abstract string Name { get; }
@@ -317,7 +317,7 @@ class Program
 ### ASP.NET Core Integration
 
 ```csharp
-[EnhancedEnumOption]
+[EnhancedEnumBase]
 public abstract class ResponseStatus
 {
     public abstract string Name { get; }
@@ -366,7 +366,7 @@ public class UsersController : ControllerBase
 ### Entity Framework Integration
 
 ```csharp
-[EnhancedEnumOption]
+[EnhancedEnumBase]
 public abstract class OrderStatus
 {
     public abstract string Name { get; }
@@ -399,7 +399,7 @@ public class Order
 ### JSON Serialization
 
 ```csharp
-[EnhancedEnumOption]
+[EnhancedEnumBase]
 public abstract class Priority
 {
     public abstract string Name { get; }

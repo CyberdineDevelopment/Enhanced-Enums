@@ -25,7 +25,7 @@ public class EnhancedEnumOptionLookupTests : EnhancedEnumOptionTestBase
 
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption]
+		                 [EnhancedEnumBase]
 		                 public abstract class CountryBase
 		                 {
 		                     public abstract string Name { get; }
@@ -86,7 +86,7 @@ public class EnhancedEnumOptionLookupTests : EnhancedEnumOptionTestBase
 
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption]
+		                 [EnhancedEnumBase]
 		                 public abstract class ProductBase
 		                 {
 		                     public abstract string Name { get; }
@@ -141,7 +141,7 @@ public class EnhancedEnumOptionLookupTests : EnhancedEnumOptionTestBase
 
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption]
+		                 [EnhancedEnumBase]
 		                 public abstract class UserRoleBase
 		                 {
 		                     public abstract string Name { get; }
@@ -197,7 +197,7 @@ public class EnhancedEnumOptionLookupTests : EnhancedEnumOptionTestBase
 
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption]
+		                 [EnhancedEnumBase]
 		                 public abstract class CurrencyBase
 		                 {
 		                     public abstract string Name { get; }
@@ -266,7 +266,7 @@ public class EnhancedEnumOptionLookupTests : EnhancedEnumOptionTestBase
 
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption]
+		                 [EnhancedEnumBase]
 		                 public abstract class ConfigBase
 		                 {
 		                     public abstract string Name { get; }
@@ -321,7 +321,7 @@ public class EnhancedEnumOptionLookupTests : EnhancedEnumOptionTestBase
 
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption]
+		                 [EnhancedEnumBase]
 		                 public abstract class DateRangeBase
 		                 {
 		                     public abstract string Name { get; }
@@ -376,7 +376,7 @@ public class EnhancedEnumOptionLookupTests : EnhancedEnumOptionTestBase
 
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption]
+		                 [EnhancedEnumBase]
 		                 public abstract class LookupOnlyBase
 		                 {
 		                     [EnumLookup]
@@ -429,7 +429,7 @@ public class EnhancedEnumOptionLookupTests : EnhancedEnumOptionTestBase
 
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption(NameComparison = StringComparison.Ordinal)]
+		                 [EnhancedEnumBase(NameComparison = StringComparison.Ordinal)]
 		                 public abstract class CaseSensitiveBase
 		                 {
 		                     public abstract string Name { get; }
@@ -454,6 +454,9 @@ public class EnhancedEnumOptionLookupTests : EnhancedEnumOptionTestBase
 
         // Assert
         var generatedCode = result["CaseSensitiveBases.g.cs"];
+        
+        // Write generated code to file for debugging
+        WriteGeneratedCodeToFile("GeneratorHandlesNameComparison_CaseSensitiveBases.g.cs", generatedCode);
 
         // Use ExpectationsFactory to verify the generated code structure
         ExpectationsFactory.ExpectCode(generatedCode)
@@ -467,6 +470,6 @@ public class EnhancedEnumOptionLookupTests : EnhancedEnumOptionTestBase
             .Assert();
         
         // GetByName should use specified comparison
-        generatedCode.ShouldContain("StringComparison.Ordinal");
+        generatedCode.ShouldContain("StringComparer.Ordinal");
     }
 }

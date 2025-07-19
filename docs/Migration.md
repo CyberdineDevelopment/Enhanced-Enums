@@ -38,7 +38,7 @@ public enum OrderStatus
 
 ```csharp
 // Enhanced enum advantages:
-[EnhancedEnumOption]
+[EnhancedEnumBase]
 public abstract class OrderStatus
 {
     public abstract string Name { get; }
@@ -82,7 +82,7 @@ public enum LegacyOrderStatus
 }
 
 // Phase 2: Create enhanced enum
-[EnhancedEnumOption]
+[EnhancedEnumBase]
 public abstract class OrderStatus
 {
     public abstract string Name { get; }
@@ -206,7 +206,7 @@ public OrderStatus Status { get; set; }
 Design the enhanced enum based on requirements:
 
 ```csharp
-[EnhancedEnumOption]
+[EnhancedEnumBase]
 public abstract class OrderStatus
 {
     public abstract string Name { get; }

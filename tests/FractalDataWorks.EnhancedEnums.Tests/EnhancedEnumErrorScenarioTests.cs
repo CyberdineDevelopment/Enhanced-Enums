@@ -25,7 +25,7 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
 
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption]
+		                 [EnhancedEnumBase]
 		                 public abstract class StatusBase
 		                 {
 		                     public abstract string Name { get; }
@@ -63,7 +63,7 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
 		             using FractalDataWorks.EnhancedEnums.Attributes;
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption("")] // Empty collection name
+		                 [EnhancedEnumBase("")] // Empty collection name
 		                 public abstract class ItemBase
 		                 {
 		                     public abstract string Name { get; }
@@ -93,7 +93,7 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
 		             using FractalDataWorks.EnhancedEnums.Attributes;
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption(null)] // Null collection name
+		                 [EnhancedEnumBase(null)] // Null collection name
 		                 public abstract class ItemBase
 		                 {
 		                     public abstract string Name { get; }
@@ -125,7 +125,7 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
 
 		             [assembly: EnableAssemblyScanner]
 
-		             [EnhancedEnumOption]
+		             [EnhancedEnumBase]
 		             public abstract class GlobalBase
 		             {
 		                 public abstract string Name { get; }
@@ -159,7 +159,7 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
 		             using FractalDataWorks.EnhancedEnums.Attributes;
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption]
+		                 [EnhancedEnumBase]
 		                 public abstract class ValidBase
 		                 {
 		                     public abstract string Name { get; }
@@ -190,13 +190,13 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
 		             using FractalDataWorks.EnhancedEnums.Attributes;
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption]
+		                 [EnhancedEnumBase]
 		                 public abstract class BaseA : BaseB
 		                 {
 		                     public abstract string NameA { get; }
 		                 }
 
-		                 [EnhancedEnumOption]
+		                 [EnhancedEnumBase]
 		                 public abstract class BaseB
 		                 {
 		                     public abstract string NameB { get; }
@@ -228,7 +228,7 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
 		             using FractalDataWorks.EnhancedEnums.Attributes;
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption]
+		                 [EnhancedEnumBase]
 		                 public abstract class AnimalBase
 		                 {
 		                     public abstract string Name { get; }
@@ -267,7 +267,7 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
 		             using FractalDataWorks.EnhancedEnums.Attributes;
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption]
+		                 [EnhancedEnumBase]
 		                 public abstract class GenericBase<T>
 		                 {
 		                     public abstract string Name { get; }
@@ -308,7 +308,7 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
 		              using FractalDataWorks.EnhancedEnums.Attributes;
 		              namespace TestNamespace
 		              {
-		                  [EnhancedEnumOption]
+		                  [EnhancedEnumBase]
 		                  public abstract partial class StatusBase
 		                  {
 		                      public abstract string Name { get; }
@@ -360,7 +360,7 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
 		             using FractalDataWorks.EnhancedEnums.Attributes;
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption]
+		                 [EnhancedEnumBase]
 		                 public abstract class StatusBase
 		                 {
 		                     public abstract string Name { get; }
@@ -401,7 +401,7 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
 		             using FractalDataWorks.EnhancedEnums.Attributes;
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption]
+		                 [EnhancedEnumBase]
 		                 public abstract class BrokenBase
 		                 {
 		                     public abstract string Name { get; } // Missing semicolon below
@@ -424,7 +424,7 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
     }
 
     [Fact]
-    public void GeneratorHandlesMultipleEnhancedEnumOptionAttributesUsesFirstAttribute()
+    public void GeneratorHandlesMultipleEnhancedEnumBaseAttributesUsesFirstAttribute()
     {
         // Arrange
         var source = """
@@ -432,8 +432,8 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
 		             using FractalDataWorks.EnhancedEnums.Attributes;
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption("FirstCollection")]
-		                 [EnhancedEnumOption("SecondCollection")] // Duplicate attribute
+		                 [EnhancedEnumBase("FirstCollection")]
+		                 [EnhancedEnumBase("SecondCollection")] // Duplicate attribute
 		                 public abstract class DuplicateBase
 		                 {
 		                     public abstract string Name { get; }

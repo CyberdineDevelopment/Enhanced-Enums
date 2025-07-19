@@ -188,23 +188,23 @@ public abstract class EnhancedEnumOptionTestBase : IDisposable
             MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
             MetadataReference.CreateFromFile(typeof(ImmutableArray).Assembly.Location),
             MetadataReference.CreateFromFile(typeof(System.Runtime.AssemblyTargetedPatchBandAttribute).Assembly.Location),
-            MetadataReference.CreateFromFile(typeof(EnhancedEnumOptionAttribute).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(EnhancedEnumBaseAttribute).Assembly.Location),
         };
 
         // Add System.Runtime for Attribute base class
-        var systemRuntimePath = System.IO.Path.Combine(
-            System.IO.Path.GetDirectoryName(typeof(object).Assembly.Location)!,
+        var systemRuntimePath = Path.Combine(
+            Path.GetDirectoryName(typeof(object).Assembly.Location)!,
             "System.Runtime.dll");
-        if (System.IO.File.Exists(systemRuntimePath))
+        if (File.Exists(systemRuntimePath))
         {
             refs.Add(MetadataReference.CreateFromFile(systemRuntimePath));
         }
 
         // Add netstandard reference
-        var netstandardPath = System.IO.Path.Combine(
-            System.IO.Path.GetDirectoryName(typeof(object).Assembly.Location)!,
+        var netstandardPath = Path.Combine(
+            Path.GetDirectoryName(typeof(object).Assembly.Location)!,
             "netstandard.dll");
-        if (System.IO.File.Exists(netstandardPath))
+        if (File.Exists(netstandardPath))
         {
             refs.Add(MetadataReference.CreateFromFile(netstandardPath));
         }
@@ -215,6 +215,25 @@ public abstract class EnhancedEnumOptionTestBase : IDisposable
         if (smartGeneratorsAssembly != null)
         {
             refs.Add(MetadataReference.CreateFromFile(smartGeneratorsAssembly.Location));
+        }
+        
+        // Add FractalDataWorks core assembly for IEnhancedEnumOption
+        var fractalDataWorksAssembly = AppDomain.CurrentDomain.GetAssemblies()
+            .FirstOrDefault(a => a.GetName().Name == "FractalDataWorks");
+        if (fractalDataWorksAssembly != null)
+        {
+            refs.Add(MetadataReference.CreateFromFile(fractalDataWorksAssembly.Location));
+        }
+        else
+        {
+            // If not loaded in AppDomain, try to load from test output directory
+            var testAssemblyLocation = typeof(EnhancedEnumOptionTestBase).Assembly.Location;
+            var testDirectory = Path.GetDirectoryName(testAssemblyLocation);
+            var fractalDataWorksPath = Path.Combine(testDirectory!, "FractalDataWorks.dll");
+            if (File.Exists(fractalDataWorksPath))
+            {
+                refs.Add(MetadataReference.CreateFromFile(fractalDataWorksPath));
+            }
         }
 
         return refs.ToArray();
@@ -233,7 +252,7 @@ public abstract class EnhancedEnumOptionTestBase : IDisposable
             GetDefaultReferences(),
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-        using var ms = new System.IO.MemoryStream();
+        using var ms = new MemoryStream();
         var result = compilation.Emit(ms, cancellationToken: CancellationToken);
 
         if (!result.Success)
@@ -246,7 +265,7 @@ public abstract class EnhancedEnumOptionTestBase : IDisposable
                 $"Compilation failed with errors:\n{string.Join("\n", errors)}");
         }
 
-        ms.Seek(0, System.IO.SeekOrigin.Begin);
+        ms.Seek(0, SeekOrigin.Begin);
         return System.Reflection.Assembly.Load(ms.ToArray());
     }
 

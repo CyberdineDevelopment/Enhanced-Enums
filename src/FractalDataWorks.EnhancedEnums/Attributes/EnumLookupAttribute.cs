@@ -17,4 +17,10 @@ public sealed class EnumLookupAttribute : Attribute
     /// Gets or sets a value indicating whether allow multiple results per lookup key.
     /// </summary>
     public bool AllowMultiple { get; set; }
+
+    /// <summary>
+    /// Gets or sets the return type for this specific lookup method.
+    /// If not specified, inherits from the EnhancedEnumBaseAttribute.ReturnType or auto-detected type.
+    /// </summary>
+    public string? ReturnType { get; set; }
 }

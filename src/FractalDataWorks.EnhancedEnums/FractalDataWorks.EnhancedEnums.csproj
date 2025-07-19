@@ -100,6 +100,7 @@
     <PackageReference Include="FractalDataWorks.SmartGenerators.CodeBuilders" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Bcl.HashCode" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" PrivateAssets="all" />
   </ItemGroup>
 </Project>
 

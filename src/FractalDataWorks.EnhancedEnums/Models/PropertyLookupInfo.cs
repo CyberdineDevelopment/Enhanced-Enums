@@ -59,6 +59,12 @@ public sealed class PropertyLookupInfo : IInputInfo, IEquatable<PropertyLookupIn
     public bool IsNullable { get; set; }
 
     /// <summary>
+    /// Gets or sets the return type for this specific lookup method.
+    /// If null, inherits from the EnumTypeInfo.ReturnType.
+    /// </summary>
+    public string? ReturnType { get; set; }
+
+    /// <summary>
     /// Gets a hash string representing the contents of this property lookup info for incremental generation.
     /// </summary>
     public string InputHash
@@ -119,6 +125,7 @@ public sealed class PropertyLookupInfo : IInputInfo, IEquatable<PropertyLookupIn
             writer.Write((int)StringComparison);
             writer.Write(Comparer ?? string.Empty);
             writer.Write(IsNullable);
+            writer.Write(ReturnType ?? string.Empty);
         }
         else
         {
@@ -158,7 +165,8 @@ string.Equals(LookupMethodName, other.LookupMethodName, StringComparison.Ordinal
                IsDefaultProperty == other.IsDefaultProperty &&
                StringComparison == other.StringComparison &&
 string.Equals(Comparer, other.Comparer, StringComparison.Ordinal) &&
-               IsNullable == other.IsNullable;
+               IsNullable == other.IsNullable &&
+string.Equals(ReturnType, other.ReturnType, StringComparison.Ordinal);
     }
 
     /// <summary>

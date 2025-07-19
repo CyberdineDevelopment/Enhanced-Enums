@@ -12,31 +12,31 @@ Complete API documentation for FractalDataWorks.EnhancedEnums.
 
 ## Attributes
 
-### EnhancedEnumOptionAttribute
+### EnhancedEnumBaseAttribute
 
 Marks a class or interface for enhanced enum generation.
 
 ```csharp
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
-public sealed class EnhancedEnumOptionAttribute : Attribute
+public sealed class EnhancedEnumBaseAttribute : Attribute
 ```
 
 #### Constructors
 
-##### EnhancedEnumOptionAttribute()
+##### EnhancedEnumBaseAttribute()
 
 Initializes a new instance with default settings.
 
 ```csharp
-public EnhancedEnumOptionAttribute()
+public EnhancedEnumBaseAttribute()
 ```
 
-##### EnhancedEnumOptionAttribute(string)
+##### EnhancedEnumBaseAttribute(string)
 
 Initializes a new instance with a custom collection name.
 
 ```csharp
-public EnhancedEnumOptionAttribute(string collectionName)
+public EnhancedEnumBaseAttribute(string collectionName)
 ```
 
 **Parameters:**
@@ -56,7 +56,7 @@ public string? CollectionName { get; set; }
 
 **Example:**
 ```csharp
-[EnhancedEnumOption("MyCustomCollection")]
+[EnhancedEnumBase("MyCustomCollection")]
 public abstract class MyEnum { }
 
 // Generates: MyCustomCollection.All, MyCustomCollection.GetByName()
@@ -83,7 +83,7 @@ public bool UseFactory { get; set; }
 
 **Example:**
 ```csharp
-[EnhancedEnumOption(UseFactory = true)]
+[EnhancedEnumBase(UseFactory = true)]
 public abstract class Connection
 {
     public abstract string Name { get; }
@@ -143,6 +143,34 @@ public bool IncludeReferencedAssemblies { get; set; }
 - Only scans the current assembly
 - Faster build times
 - Most common scenario
+
+##### ReturnType
+
+Gets or sets the return type for generated static properties and methods.
+
+```csharp
+public string? ReturnType { get; set; }
+```
+
+**Default Value:** `null` (auto-detects or uses base type)
+
+**Auto-detection:** If not specified, the generator will:
+1. Look for interfaces that extend `IEnhancedEnumOption`
+2. Use the first matching interface found
+3. Fall back to the concrete base class type
+
+**Example:**
+```csharp
+// Explicit return type
+[EnhancedEnumBase(ReturnType = "IMyInterface")]
+public abstract class MyEnum : IMyInterface { }
+
+// Auto-detection
+public interface IMyEnum : IEnhancedEnumOption { }
+
+[EnhancedEnumBase] // Will auto-detect IMyEnum as return type
+public abstract class MyEnum : IMyEnum { }
+```
 
 ### EnumOptionAttribute
 
@@ -244,6 +272,31 @@ public bool AllowMultiple { get; set; }
 public abstract string Category { get; }
 
 // Generates: IEnumerable<MyEnum> GetByCategory(string category)
+```
+
+##### ReturnType
+
+Gets or sets the return type for this specific lookup method.
+
+```csharp
+public string? ReturnType { get; set; }
+```
+
+**Default Value:** `null` (inherits from `EnhancedEnumBaseAttribute.ReturnType`)
+
+**Example:**
+```csharp
+[EnhancedEnumBase(ReturnType = "IMyInterface")]
+public abstract class MyEnum : IMyInterface 
+{
+    // This lookup returns the base return type (IMyInterface)
+    [EnumLookup]
+    public abstract string Code { get; }
+    
+    // This lookup overrides to return a specific type
+    [EnumLookup(ReturnType = "ISpecialInterface")]
+    public abstract string SpecialProperty { get; }
+}
 ```
 
 #### Usage Requirements
@@ -366,7 +419,7 @@ if (order.Status == OrderStatuses.Processing)
 
 ### GetByName Method
 
-Finds an enum instance by its name.
+Finds an enum instance by its name. Always generated.
 
 ```csharp
 public static {EnumType}? GetByName(string name)
@@ -379,7 +432,7 @@ public static {EnumType}? GetByName(string name)
 
 **Performance:** O(1) - Dictionary lookup with zero allocations.
 
-**Comparison:** Uses the `NameComparison` setting from `[EnhancedEnumOption]`.
+**Comparison:** Uses the `NameComparison` setting from `[EnhancedEnumBase]`.
 
 **Example:**
 ```csharp
@@ -387,6 +440,32 @@ var pending = OrderStatuses.GetByName("Pending");
 if (pending != null)
 {
     Console.WriteLine($"Found: {pending.Description}");
+}
+```
+
+### GetById Method
+
+Finds an enum instance by its Id. Automatically generated when the base class implements `IEnhancedEnumOption`.
+
+```csharp
+public static {EnumType}? GetById(int id)
+```
+
+**Parameters:**
+- `id` (int): The id to search for.
+
+**Returns:** The matching enum instance, or `null` if not found.
+
+**Performance:** O(1) - Dictionary lookup with zero allocations.
+
+**Requirements:** Base class must implement `FractalDataWorks.IEnhancedEnumOption`.
+
+**Example:**
+```csharp
+var order = OrderStatuses.GetById(123);
+if (order != null)
+{
+    Console.WriteLine($"Found: {order.Name}");
 }
 ```
 
@@ -423,18 +502,41 @@ var electronics = Products.GetByCategory("Electronics"); // IEnumerable<Product>
 
 ## Interfaces
 
-### IEnhancedEnum (Conceptual)
+### IEnhancedEnumOption
 
-While not explicitly implemented, enhanced enums follow this conceptual interface:
+All enhanced enum base classes must implement this interface from the FractalDataWorks core package:
 
 ```csharp
-public interface IEnhancedEnum
+namespace FractalDataWorks
 {
-    string Name { get; }
+    /// <summary>
+    /// Represents an enhanced enumeration type that provides additional functionality beyond standard enums.
+    /// This interface enables strongly-typed enumerations with identifiers, names, and the ability to represent an empty state.
+    /// </summary>
+    public interface IEnhancedEnumOption
+    {
+        /// <summary>
+        /// Gets the unique identifier for this enum value.
+        /// </summary>
+        int Id { get; }
+
+        /// <summary>
+        /// Gets the display name or string representation of this enum value.
+        /// </summary>
+        string Name { get; }
+    }
 }
 ```
 
-**Note:** This interface doesn't exist in the actual implementation, but all enhanced enums must have a `Name` property.
+**Purpose:**
+- Provides a standard contract for all enhanced enums
+- Enables automatic generation of `GetById` and `GetByName` methods
+- Supports interface-based return types and polymorphism
+
+**Implementation Requirements:**
+- All base classes marked with `[EnhancedEnumBase]` must implement this interface
+- The `Id` property should return a unique identifier for each enum value
+- The `Name` property should return a meaningful display name
 
 ## Extension Methods
 

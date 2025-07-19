@@ -61,6 +61,12 @@ public sealed class EnumTypeInfo : IInputInfo, IEquatable<EnumTypeInfo>
     public bool IncludeReferencedAssemblies { get; set; }
 
     /// <summary>
+    /// Gets or sets the return type for generated static properties and methods.
+    /// If null, will be auto-detected based on implemented interfaces.
+    /// </summary>
+    public string? ReturnType { get; set; }
+
+    /// <summary>
     /// Gets the list of properties that should be used for lookup methods.
     /// </summary>
     public EquatableArray<PropertyLookupInfo> LookupProperties { get; set; } = EquatableArray.Empty<PropertyLookupInfo>();
@@ -124,6 +130,7 @@ public sealed class EnumTypeInfo : IInputInfo, IEquatable<EnumTypeInfo>
         writer.Write(Strategy);
         writer.Write(NameComparison.ToString());
         writer.Write(IncludeReferencedAssemblies);
+        writer.Write(ReturnType ?? string.Empty);
 
         // Write lookup properties
         foreach (var lookup in LookupProperties.OrderBy(p => p.PropertyName, StringComparer.Ordinal))

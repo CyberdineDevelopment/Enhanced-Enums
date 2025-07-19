@@ -34,6 +34,7 @@ FractalDataWorks Enhanced Enums provides a powerful alternative to standard C# e
 - **Cross-assembly support** for shared enum definitions
 - **Empty value pattern** for representing "no selection" scenarios
 - **Static property accessors** for direct enum value access (e.g., `OrderStatuses.Pending`)
+- **Interface-based return types** for flexible type hierarchies
 
 ## Installation
 
@@ -66,7 +67,7 @@ Without proper configuration, the source generator won't run and the collection 
 ```csharp
 using FractalDataWorks.EnhancedEnums.Attributes;
 
-[EnhancedEnumOption]
+[EnhancedEnumBase]
 public abstract class OrderStatus
 {
     public abstract string Name { get; }
@@ -220,7 +221,7 @@ Benchmark results show:
 Mark properties with `[EnumLookup]` to generate lookup methods:
 
 ```csharp
-[EnhancedEnumOption]
+[EnhancedEnumBase]
 public abstract class Country
 {
     public abstract string Name { get; }
@@ -248,7 +249,7 @@ var byCurrency = Countries.GetByCurrency("USD");
 ### Custom Collection Names
 
 ```csharp
-[EnhancedEnumOption("MyStatuses")]
+[EnhancedEnumBase("MyStatuses")]
 public abstract class StatusBase
 {
     public abstract string Name { get; }
@@ -260,7 +261,7 @@ public abstract class StatusBase
 ### String Comparison Options
 
 ```csharp
-[EnhancedEnumOption(NameComparison = StringComparison.Ordinal)]
+[EnhancedEnumBase(NameComparison = StringComparison.Ordinal)]
 public abstract class CaseSensitive
 {
     public abstract string Name { get; }
@@ -270,7 +271,7 @@ public abstract class CaseSensitive
 ### Factory Pattern Support
 
 ```csharp
-[EnhancedEnumOption(UseFactory = true)]
+[EnhancedEnumBase(UseFactory = true)]
 public abstract class ConnectionType
 {
     public abstract string Name { get; }
@@ -286,7 +287,7 @@ public abstract class ConnectionType
 ### Multiple Lookup Properties
 
 ```csharp
-[EnhancedEnumOption]
+[EnhancedEnumBase]
 public abstract class Currency
 {
     public abstract string Name { get; }
@@ -342,7 +343,7 @@ var shipped = OrderStatuses.Shipped;
 ### Custom Lookup Method Names
 
 ```csharp
-[EnhancedEnumOption]
+[EnhancedEnumBase]
 public abstract class UserRole
 {
     public abstract string Name { get; }
@@ -353,6 +354,45 @@ public abstract class UserRole
 
 // Generates: FindByLevel() instead of GetByPermissionLevel()
 ```
+
+### Interface-Based Return Types
+
+Control the return type of generated collections to support interface-based patterns:
+
+```csharp
+// Define an interface that extends IEnhancedEnumOption
+public interface IOrderStatus : IEnhancedEnumOption
+{
+    string Description { get; }
+}
+
+// Base classes should implement IEnhancedEnumOption (required)
+[EnhancedEnumBase(ReturnType = "IOrderStatus")]
+public abstract class OrderStatus : IOrderStatus
+{
+    public abstract int Id { get; }      // Required by IEnhancedEnumOption
+    public abstract string Name { get; }  // Required by IEnhancedEnumOption
+    public abstract string Description { get; }
+}
+
+// Generated collection will return IOrderStatus
+IOrderStatus status = OrderStatuses.Pending;
+ImmutableArray<IOrderStatus> all = OrderStatuses.All;
+
+// GetById is automatically generated when IEnhancedEnumOption is implemented
+var order = OrderStatuses.GetById(123);
+```
+
+The ReturnType feature supports:
+- **Explicit types**: Specify any type with `ReturnType = "TypeName"`
+- **Auto-detection**: If not specified, detects interfaces extending `IEnhancedEnumOption`
+- **Per-lookup overrides**: Use `[EnumLookup(ReturnType = "SpecificType")]`
+
+**Note**: All enhanced enum base classes must implement `IEnhancedEnumOption`, which requires:
+- `int Id { get; }` - Unique identifier
+- `string Name { get; }` - Display name
+
+When implemented, the generator automatically provides `GetById(int id)` in addition to `GetByName(string name)`.
 
 ## Best Practices
 
@@ -370,6 +410,7 @@ public abstract class UserRole
 - **.NET Standard 2.0** or higher
 - **C# 8.0** or higher for nullable reference types
 - **Visual Studio 2022** or VS Code with C# extension for best experience
+- **FractalDataWorks** core package (for IEnhancedEnumOption interface)
 
 ## Migration from Traditional Enums
 
@@ -386,7 +427,7 @@ public enum OrderStatus
 
 ### After (Enhanced Enum)
 ```csharp
-[EnhancedEnumOption]
+[EnhancedEnumBase]
 public abstract class OrderStatus
 {
     public abstract string Name { get; }
@@ -417,7 +458,7 @@ Enhanced enums can be used across assembly boundaries by referencing the generat
 ### Nullable Properties
 
 ```csharp
-[EnhancedEnumOption]
+[EnhancedEnumBase]
 public abstract class Config
 {
     public abstract string Name { get; }
@@ -430,7 +471,7 @@ public abstract class Config
 ### Complex Property Types
 
 ```csharp
-[EnhancedEnumOption]
+[EnhancedEnumBase]
 public abstract class DateRange
 {
     public abstract string Name { get; }

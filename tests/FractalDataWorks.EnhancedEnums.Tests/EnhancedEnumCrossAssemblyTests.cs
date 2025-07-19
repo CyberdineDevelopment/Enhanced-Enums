@@ -18,7 +18,7 @@ namespace FractalDataWorks.EnhancedEnums.Tests;
 /// modify or generate code for referenced assemblies.
 /// 
 /// The correct approach would be:
-/// 1. Run the generator in the assembly that contains the [EnhancedEnumOption] base type
+/// 1. Run the generator in the assembly that contains the [EnhancedEnumBase] base type
 /// 2. Use IncludeReferencedAssemblies=true to scan referenced assemblies for options
 /// 3. Generate the collection in the base type's assembly
 /// 
@@ -41,7 +41,7 @@ public class EnhancedEnumOptionCrossAssemblyTests : EnhancedEnumOptionTestBase
 
 		                      namespace BaseLibrary
 		                      {
-		                          [EnhancedEnumOption(IncludeReferencedAssemblies = true)]
+		                          [EnhancedEnumBase(IncludeReferencedAssemblies = true)]
 		                          public abstract class PluginBase
 		                          {
 		                              public abstract string Name { get; }
@@ -109,7 +109,7 @@ public class EnhancedEnumOptionCrossAssemblyTests : EnhancedEnumOptionTestBase
 
 		                 namespace Core
 		                 {
-		                     [EnhancedEnumOption("Handlers", IncludeReferencedAssemblies = true)]
+		                     [EnhancedEnumBase("Handlers", IncludeReferencedAssemblies = true)]
 		                     public abstract class HandlerBase
 		                     {
 		                         public abstract string Type { get; }
@@ -219,7 +219,7 @@ public class EnhancedEnumOptionCrossAssemblyTests : EnhancedEnumOptionTestBase
 
 		                 namespace Core
 		                 {
-		                     [EnhancedEnumOption(IncludeReferencedAssemblies = false)] // Explicitly false
+		                     [EnhancedEnumBase(IncludeReferencedAssemblies = false)] // Explicitly false
 		                     public abstract class FeatureBase
 		                     {
 		                         public abstract string Name { get; }
@@ -294,7 +294,7 @@ public class EnhancedEnumOptionCrossAssemblyTests : EnhancedEnumOptionTestBase
 
 		             namespace Test
 		             {
-		                 [EnhancedEnumOption(IncludeReferencedAssemblies = true)]
+		                 [EnhancedEnumBase(IncludeReferencedAssemblies = true)]
 		                 public abstract class Base
 		                 {
 		                     public abstract string Name { get; }
@@ -329,7 +329,7 @@ public class EnhancedEnumOptionCrossAssemblyTests : EnhancedEnumOptionTestBase
 
 		                 namespace Core
 		                 {
-		                     [EnhancedEnumOption(IncludeReferencedAssemblies = true)]
+		                     [EnhancedEnumBase(IncludeReferencedAssemblies = true)]
 		                     public abstract class ServiceBase
 		                     {
 		                         public abstract string Name { get; }
@@ -403,7 +403,7 @@ public class EnhancedEnumOptionCrossAssemblyTests : EnhancedEnumOptionTestBase
         var syntaxTree = CSharpSyntaxTree.ParseText(source, cancellationToken: TestContext.Current.CancellationToken);
 
         return CSharpCompilation.Create(
-            $"TestAssembly_{System.Guid.NewGuid():N}",
+            $"TestAssembly_{Guid.NewGuid():N}",
             new[] { syntaxTree },
             GetDefaultReferences().Concat(references).ToArray(),
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));

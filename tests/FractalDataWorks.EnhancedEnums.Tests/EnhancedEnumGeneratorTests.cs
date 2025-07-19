@@ -26,7 +26,7 @@ public class EnhancedEnumOptionGeneratorTests : EnhancedEnumOptionTestBase
 
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption]
+		                 [EnhancedEnumBase]
 		                 public abstract class ColorBase
 		                 {
 		                     public abstract string Name { get; }
@@ -77,7 +77,7 @@ public class EnhancedEnumOptionGeneratorTests : EnhancedEnumOptionTestBase
 
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption("MyColors")]
+		                 [EnhancedEnumBase("MyColors")]
 		                 public abstract class ColorBase
 		                 {
 		                     public abstract string Name { get; }
@@ -119,7 +119,7 @@ public class EnhancedEnumOptionGeneratorTests : EnhancedEnumOptionTestBase
 
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption(UseFactory = true)]
+		                 [EnhancedEnumBase(UseFactory = true)]
 		                 public abstract class ShapeBase
 		                 {
 		                     public abstract string Name { get; }
@@ -194,7 +194,7 @@ public class EnhancedEnumOptionGeneratorTests : EnhancedEnumOptionTestBase
 
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption("TestShapes", UseFactory = true)]
+		                 [EnhancedEnumBase("TestShapes", UseFactory = true)]
 		                 public abstract class ShapeBase
 		                 {
 		                     public abstract string Name { get; }
@@ -251,7 +251,7 @@ public class EnhancedEnumOptionGeneratorTests : EnhancedEnumOptionTestBase
 
 		                 namespace TestNamespace
 		                 {
-		                     [EnhancedEnumOption]
+		                     [EnhancedEnumBase]
 		                     public abstract class AnimalBase
 		                     {
 		                         public abstract string Name { get; }
@@ -314,7 +314,7 @@ public class EnhancedEnumOptionGeneratorTests : EnhancedEnumOptionTestBase
 
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption]
+		                 [EnhancedEnumBase]
 		                 public abstract class EmptyBase
 		                 {
 		                     public abstract string Name { get; }
@@ -345,7 +345,7 @@ public class EnhancedEnumOptionGeneratorTests : EnhancedEnumOptionTestBase
 		             using FractalDataWorks.EnhancedEnums.Attributes;
 		             namespace Company.Product.Domain.Models
 		             {
-		                 [EnhancedEnumOption("OrderStatuses")]
+		                 [EnhancedEnumBase("OrderStatuses")]
 		                 public abstract class OrderStatusBase
 		                 {
 		                     public abstract string Name { get; }
@@ -395,7 +395,7 @@ public class EnhancedEnumOptionGeneratorTests : EnhancedEnumOptionTestBase
 
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption]
+		                 [EnhancedEnumBase]
 		                 public interface IPaymentMethod
 		                 {
 		                     string Name { get; }
@@ -441,7 +441,7 @@ public class EnhancedEnumOptionGeneratorTests : EnhancedEnumOptionTestBase
 
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption]
+		                 [EnhancedEnumBase]
 		                 public abstract class PriorityBase
 		                 {
 		                     public abstract string Name { get; }

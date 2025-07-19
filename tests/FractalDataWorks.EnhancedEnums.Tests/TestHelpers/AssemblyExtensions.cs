@@ -12,16 +12,16 @@ internal static class AssemblyExtensions
 
     public static MetadataReference ToMetadataReference(this Compilation compilation)
     {
-        using var stream = new System.IO.MemoryStream();
+        using var stream = new MemoryStream();
         var emitResult = compilation.Emit(stream);
 
         if (!emitResult.Success)
         {
-            throw new System.InvalidOperationException(
+            throw new InvalidOperationException(
                 $"Compilation failed: {string.Join("\n", emitResult.Diagnostics)}");
         }
 
-        stream.Seek(0, System.IO.SeekOrigin.Begin);
+        stream.Seek(0, SeekOrigin.Begin);
         return MetadataReference.CreateFromImage(stream.ToArray());
     }
 }

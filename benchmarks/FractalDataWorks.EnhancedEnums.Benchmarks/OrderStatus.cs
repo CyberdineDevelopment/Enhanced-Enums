@@ -3,7 +3,7 @@ using FractalDataWorks.EnhancedEnums.Attributes;
 namespace FractalDataWorks.EnhancedEnums.Benchmarks;
 
 // Small enum for basic testing
-[EnhancedEnumOption("OrderStatuses")]
+[EnhancedEnumBase("OrderStatuses")]
 public abstract class OrderStatus
 {
     public abstract string Name { get; }

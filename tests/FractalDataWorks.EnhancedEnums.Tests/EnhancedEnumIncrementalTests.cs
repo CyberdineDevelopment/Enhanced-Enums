@@ -25,7 +25,7 @@ public class EnhancedEnumOptionIncrementalTests : EnhancedEnumOptionTestBase
 		             using FractalDataWorks.EnhancedEnums.Attributes;
 		             namespace TestNamespace
 		             {
-		                 [EnhancedEnumOption]
+		                 [EnhancedEnumBase]
 		                 public abstract class StatusBase
 		                 {
 		                     public abstract string Name { get; }
@@ -85,7 +85,7 @@ public class EnhancedEnumOptionIncrementalTests : EnhancedEnumOptionTestBase
 		              using FractalDataWorks.EnhancedEnums.Attributes;
 		              namespace TestNamespace
 		              {
-		                  [EnhancedEnumOption]
+		                  [EnhancedEnumBase]
 		                  public abstract class ColorBase
 		                  {
 		                      public abstract string Name { get; }
@@ -104,7 +104,7 @@ public class EnhancedEnumOptionIncrementalTests : EnhancedEnumOptionTestBase
 		              using FractalDataWorks.EnhancedEnums.Attributes;
 		              namespace TestNamespace
 		              {
-		                  [EnhancedEnumOption("MyColors")] // Changed collection name
+		                  [EnhancedEnumBase("MyColors")] // Changed collection name
 		                  public abstract class ColorBase
 		                  {
 		                      public abstract string Name { get; }
@@ -146,7 +146,7 @@ public class EnhancedEnumOptionIncrementalTests : EnhancedEnumOptionTestBase
 		                 using FractalDataWorks.EnhancedEnums.Attributes;
 		                 namespace TestNamespace
 		                 {
-		                     [EnhancedEnumOption]
+		                     [EnhancedEnumBase]
 		                     public abstract class AnimalBase
 		                     {
 		                         public abstract string Name { get; }
@@ -203,7 +203,7 @@ public class EnhancedEnumOptionIncrementalTests : EnhancedEnumOptionTestBase
 		              using FractalDataWorks.EnhancedEnums.Attributes;
 		              namespace TestNamespace
 		              {
-		                  [EnhancedEnumOption]
+		                  [EnhancedEnumBase]
 		                  public abstract class StatusBase
 		                  {
 		                      public abstract string Name { get; }
@@ -228,7 +228,7 @@ public class EnhancedEnumOptionIncrementalTests : EnhancedEnumOptionTestBase
 		              using FractalDataWorks.EnhancedEnums.Attributes;
 		              namespace TestNamespace
 		              {
-		                  [EnhancedEnumOption]
+		                  [EnhancedEnumBase]
 		                  public abstract class StatusBase
 		                  {
 		                      public abstract string Name { get; }
@@ -272,7 +272,7 @@ public class EnhancedEnumOptionIncrementalTests : EnhancedEnumOptionTestBase
 		              using FractalDataWorks.EnhancedEnums.Attributes;
 		              namespace TestNamespace
 		              {
-		                  [EnhancedEnumOption]
+		                  [EnhancedEnumBase]
 		                  public abstract class ProductBase
 		                  {
 		                      public abstract string Name { get; }
@@ -293,7 +293,7 @@ public class EnhancedEnumOptionIncrementalTests : EnhancedEnumOptionTestBase
 		              using FractalDataWorks.EnhancedEnums.Attributes;
 		              namespace TestNamespace
 		              {
-		                  [EnhancedEnumOption]
+		                  [EnhancedEnumBase]
 		                  public abstract class ProductBase
 		                  {
 		                      public abstract string Name { get; }
@@ -340,7 +340,7 @@ public class EnhancedEnumOptionIncrementalTests : EnhancedEnumOptionTestBase
 		                         using FractalDataWorks.EnhancedEnums.Attributes;
 		                         namespace TestNamespace
 		                         {
-		                             [EnhancedEnumOption]
+		                             [EnhancedEnumBase]
 		                             public abstract class ItemBase
 		                             {
 		                                 public abstract string Name { get; }

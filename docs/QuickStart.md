@@ -38,7 +38,7 @@ using FractalDataWorks.SmartGenerators;
 ```csharp
 using FractalDataWorks.EnhancedEnums.Attributes;
 
-[EnhancedEnumOption]
+[EnhancedEnumBase]
 public abstract class TaskStatus
 {
     protected TaskStatus(string name, bool isCompleted)
@@ -160,7 +160,7 @@ The source generator automatically created a static class called `TaskStatuses` 
 ### Business Status Enums
 
 ```csharp
-[EnhancedEnumOption]
+[EnhancedEnumBase]
 public abstract class OrderStatus
 {
     protected OrderStatus(string name, string description, bool canBeCancelled)
@@ -196,7 +196,7 @@ public class Delivered() : OrderStatus("Delivered", "Order has been delivered", 
 ### Configuration Enums
 
 ```csharp
-[EnhancedEnumOption]
+[EnhancedEnumBase]
 public abstract class LogLevel
 {
     protected LogLevel(string name, int severity, ConsoleColor color)

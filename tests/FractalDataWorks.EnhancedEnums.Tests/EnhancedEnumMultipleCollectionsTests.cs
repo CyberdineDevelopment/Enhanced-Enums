@@ -21,8 +21,8 @@ public class EnhancedEnumOptionMultipleCollectionsTests : EnhancedEnumOptionTest
 
                      namespace TestNamespace
                      {
-                         [EnhancedEnumOption("PositionPlayers")]
-                         [EnhancedEnumOption("Pitchers")]
+                         [EnhancedEnumBase("PositionPlayers")]
+                         [EnhancedEnumBase("Pitchers")]
                          public abstract class BaseballPlayerBase
                          {
                              public abstract string Name { get; }
@@ -81,8 +81,8 @@ public class EnhancedEnumOptionMultipleCollectionsTests : EnhancedEnumOptionTest
 
                      namespace TestNamespace
                      {
-                         [EnhancedEnumOption("PositionPlayers")]
-                         [EnhancedEnumOption("Pitchers")]
+                         [EnhancedEnumBase("PositionPlayers")]
+                         [EnhancedEnumBase("Pitchers")]
                          public abstract class BaseballPlayerBase
                          {
                              public abstract string Name { get; }
@@ -142,8 +142,8 @@ public class EnhancedEnumOptionMultipleCollectionsTests : EnhancedEnumOptionTest
 
                      namespace TestNamespace
                      {
-                         [EnhancedEnumOption("ActiveUsers")]
-                         [EnhancedEnumOption("AdminUsers")]
+                         [EnhancedEnumBase("ActiveUsers")]
+                         [EnhancedEnumBase("AdminUsers")]
                          public abstract class UserBase
                          {
                              public abstract string Name { get; }
@@ -195,8 +195,8 @@ public class EnhancedEnumOptionMultipleCollectionsTests : EnhancedEnumOptionTest
 
                      namespace TestNamespace
                      {
-                         [EnhancedEnumOption("Circles", UseFactory = true)]
-                         [EnhancedEnumOption("Squares", UseFactory = true)]
+                         [EnhancedEnumBase("Circles", UseFactory = true)]
+                         [EnhancedEnumBase("Squares", UseFactory = true)]
                          public abstract class ShapeBase
                          {
                              public abstract string Name { get; }
@@ -257,9 +257,9 @@ public class EnhancedEnumOptionMultipleCollectionsTests : EnhancedEnumOptionTest
 
                      namespace TestNamespace
                      {
-                         [EnhancedEnumOption("Small")]
-                         [EnhancedEnumOption("Medium")]
-                         [EnhancedEnumOption("Large")]
+                         [EnhancedEnumBase("Small")]
+                         [EnhancedEnumBase("Medium")]
+                         [EnhancedEnumBase("Large")]
                          public abstract class SizeBase
                          {
                              public abstract string Name { get; }
