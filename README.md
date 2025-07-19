@@ -404,6 +404,8 @@ When implemented, the generator automatically provides `GetById(int id)` in addi
 6. **Leverage static properties** for commonly accessed values to improve readability
 7. **Use Empty value** instead of null for representing "no selection"
 8. **Target .NET 8+** when possible for FrozenDictionary performance benefits
+9. **Prefer constructor-based patterns** over abstract properties for better immutability
+10. **Implement IEnhancedEnumOption** on base classes for GetById support
 
 ## Requirements
 
@@ -451,9 +453,46 @@ public class Processing : OrderStatus
 
 ## Advanced Usage
 
+### Constructor-Based Pattern (Recommended)
+
+For better immutability and Empty value support, use constructor-based patterns:
+
+```csharp
+[EnhancedEnumBase]
+public abstract class OrderStatus
+{
+    protected OrderStatus(string name, string description, bool canBeCancelled)
+    {
+        Name = name;
+        Description = description;
+        CanBeCancelled = canBeCancelled;
+    }
+    
+    public string Name { get; }
+    public string Description { get; }
+    public bool CanBeCancelled { get; }
+}
+
+[EnumOption]
+public class Pending : OrderStatus
+{
+    public Pending() : base("Pending", "Order is awaiting processing", true) { }
+}
+
+// The generator will create an EmptyValue that calls the constructor with default values
+```
+
 ### Cross-Assembly Support
 
-Enhanced enums can be used across assembly boundaries by referencing the generated collection classes.
+Enhanced enums can be used across assembly boundaries by enabling cross-assembly discovery:
+
+```csharp
+[EnhancedEnumBase(IncludeReferencedAssemblies = true)]
+public abstract class SharedStatus
+{
+    public abstract string Name { get; }
+}
+```
 
 ### Nullable Properties
 
@@ -483,6 +522,16 @@ public abstract class DateRange
     public abstract Guid Id { get; }
 }
 ```
+
+## Roslyn Analyzers
+
+Enhanced Enums includes built-in analyzers to help you follow best practices:
+
+### ENH1001: IEnhancedEnumOption Implementation
+Warns when enhanced enum base classes don't implement `IEnhancedEnumOption`. The code fix automatically adds the interface and required properties.
+
+### ENH1002: Constructor Pattern Recommendation
+Suggests using constructor-based patterns instead of abstract properties for better immutability and Empty value support. The code fix converts abstract properties to constructor parameters.
 
 ## Troubleshooting
 

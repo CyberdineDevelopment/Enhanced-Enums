@@ -473,6 +473,69 @@ static OrderStatuses()
 
 Consider the memory impact for large enums with many instances.
 
+## Empty Value Pattern
+
+Enhanced Enums automatically generates an Empty value for representing "no selection":
+
+```csharp
+// Access the empty value
+var empty = OrderStatuses.Empty;
+Console.WriteLine(empty.Name); // Returns string.Empty
+
+// Use in comparisons
+if (selectedStatus == OrderStatuses.Empty)
+{
+    // Handle no selection
+}
+```
+
+### How Empty Value Generation Works
+
+The generator creates an `EmptyValue` class that:
+1. **Inspects base class constructors** and calls the most accessible one with default values
+2. **Provides default values** based on parameter types:
+   - `string` → `string.Empty`
+   - `int`, `long`, etc. → `0`
+   - `bool` → `false`
+   - `DateTime` → `DateTime.MinValue`
+   - `Guid` → `Guid.Empty`
+   - Reference types → `null`
+
+### Constructor-Based Pattern Support
+
+For best Empty value support, use constructor-based patterns:
+
+```csharp
+[EnhancedEnumBase]
+public abstract class Status
+{
+    protected Status(string name, string description, int priority)
+    {
+        Name = name;
+        Description = description;
+        Priority = priority;
+    }
+    
+    public string Name { get; }
+    public string Description { get; }
+    public int Priority { get; }
+}
+
+// Generated EmptyValue will call: base(string.Empty, string.Empty, 0)
+```
+
+### Custom Empty Values
+
+If the generated Empty value doesn't meet your needs, create a custom one:
+
+```csharp
+[EnumOption]
+public class None : Status
+{
+    public None() : base("None", "No status selected", -1) { }
+}
+```
+
 ## Best Practices
 
 1. **Use descriptive names** for enum options

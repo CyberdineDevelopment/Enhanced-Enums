@@ -9,6 +9,7 @@ Complete API documentation for FractalDataWorks.EnhancedEnums.
 - [Interfaces](#interfaces)
 - [Extension Methods](#extension-methods)
 - [Type Constraints](#type-constraints)
+- [Analyzers](#analyzers)
 
 ## Attributes
 
@@ -713,3 +714,117 @@ using FractalDataWorks.SmartGenerators;
 ```
 
 Without this attribute, the generator may not discover all enum options, especially in cross-assembly scenarios.
+
+## Analyzers
+
+Enhanced Enums includes Roslyn analyzers to help enforce best practices and catch common issues at compile time.
+
+### ENH1001: Enhanced Enum Base Should Implement IEnhancedEnumOption
+
+**Category**: Usage  
+**Severity**: Warning  
+**Default**: Enabled
+
+#### Description
+
+This analyzer detects when enhanced enum base classes don't implement the `IEnhancedEnumOption` interface. Implementing this interface enables:
+- Automatic `GetById(int id)` method generation
+- Better integration with FractalDataWorks ecosystem
+- Consistent interface-based return types
+
+#### Example
+
+```csharp
+// Triggers ENH1001
+[EnhancedEnumBase]
+public abstract class Status
+{
+    public abstract string Name { get; }
+}
+
+// Fixed
+[EnhancedEnumBase]
+public abstract class Status : IEnhancedEnumOption
+{
+    public abstract string Name { get; }
+    public virtual int Id => Name?.GetHashCode() ?? 0;
+}
+```
+
+#### Code Fix
+
+The provided code fix automatically:
+1. Adds `IEnhancedEnumOption` to the base class
+2. Adds the `Name` property if missing
+3. Adds the `Id` property with a default implementation
+4. Adds the necessary using directive
+
+### ENH1002: Enhanced Enum Should Use Constructor Pattern
+
+**Category**: Design  
+**Severity**: Warning  
+**Default**: Enabled
+
+#### Description
+
+This analyzer encourages using constructor-based patterns instead of abstract properties for enhanced enum base classes. Constructor patterns provide:
+- Better immutability
+- Proper Empty value generation
+- Clearer initialization semantics
+
+#### Example
+
+```csharp
+// Triggers ENH1002
+[EnhancedEnumBase]
+public abstract class OrderStatus
+{
+    public abstract string Name { get; }
+    public abstract string Description { get; }
+    public abstract bool CanBeCancelled { get; }
+}
+
+// Fixed
+[EnhancedEnumBase]
+public abstract class OrderStatus
+{
+    protected OrderStatus(string name, string description, bool canBeCancelled)
+    {
+        Name = name;
+        Description = description;
+        CanBeCancelled = canBeCancelled;
+    }
+    
+    public string Name { get; }
+    public string Description { get; }
+    public bool CanBeCancelled { get; }
+}
+```
+
+#### Code Fix
+
+The provided code fix automatically:
+1. Creates a protected constructor with parameters for all abstract properties
+2. Converts abstract properties to read-only properties
+3. Adds constructor body to initialize properties
+4. Preserves property order and documentation
+
+### Suppressing Analyzers
+
+To suppress a specific analyzer warning:
+
+```csharp
+// Suppress for a specific line
+#pragma warning disable ENH1001
+[EnhancedEnumBase]
+public abstract class MyEnum { }
+#pragma warning restore ENH1001
+
+// Suppress for entire file
+#pragma warning disable ENH1001, ENH1002
+
+// Suppress in project file
+<PropertyGroup>
+  <NoWarn>$(NoWarn);ENH1001;ENH1002</NoWarn>
+</PropertyGroup>
+```

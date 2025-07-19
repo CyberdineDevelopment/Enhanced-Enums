@@ -343,6 +343,34 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
         sourceCode.AppendLine("#if NET8_0_OR_GREATER");
         sourceCode.AppendLine("using System.Collections.Frozen;");
         sourceCode.AppendLine("#endif");
+        
+        // Add namespace for ReturnType if specified
+        if (!string.IsNullOrEmpty(def.ReturnTypeNamespace))
+        {
+            // Use the explicitly provided namespace
+            if (!def.ReturnTypeNamespace.StartsWith("System", StringComparison.Ordinal) && 
+                !string.Equals(def.ReturnTypeNamespace, targetNamespace, StringComparison.Ordinal))
+            {
+                sourceCode.AppendLine($"using {def.ReturnTypeNamespace};");
+            }
+        }
+        else if (!string.IsNullOrEmpty(effectiveReturnType))
+        {
+            // Extract namespace from ReturnType if not explicitly provided
+            var cleanReturnType = effectiveReturnType.TrimEnd('?');
+            var lastDotIndex = cleanReturnType.LastIndexOf('.');
+            if (lastDotIndex > 0)
+            {
+                var returnTypeNamespace = cleanReturnType.Substring(0, lastDotIndex);
+                // Don't add System namespaces or the current namespace
+                if (!returnTypeNamespace.StartsWith("System", StringComparison.Ordinal) && 
+                    !string.Equals(returnTypeNamespace, targetNamespace, StringComparison.Ordinal))
+                {
+                    sourceCode.AppendLine($"using {returnTypeNamespace};");
+                }
+            }
+        }
+        
         sourceCode.AppendLine();
         
         // Add the generated class
@@ -650,6 +678,7 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
                 IncludeReferencedAssemblies = named.TryGetValue(nameof(EnhancedEnumBaseAttribute.IncludeReferencedAssemblies), out var ira) && 
                     ira.Value is bool iraValue && iraValue,
                 ReturnType = named.TryGetValue(nameof(EnhancedEnumBaseAttribute.ReturnType), out var rt) && rt.Value is string rs ? rs : null,
+                ReturnTypeNamespace = named.TryGetValue(nameof(EnhancedEnumBaseAttribute.ReturnTypeNamespace), out var rtn) && rtn.Value is string rtns ? rtns : null,
                 LookupProperties = new EquatableArray<PropertyLookupInfo>(lookupProperties),
             };
 

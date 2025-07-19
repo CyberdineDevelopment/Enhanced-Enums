@@ -44,4 +44,10 @@ public sealed class EnhancedEnumBaseAttribute : Attribute
     /// or fall back to the concrete base class type.
     /// </summary>
     public string? ReturnType { get; set; }
+
+    /// <summary>
+    /// Gets or sets the namespace to import for the return type.
+    /// If not specified, the generator will attempt to extract it from the ReturnType.
+    /// </summary>
+    public string? ReturnTypeNamespace { get; set; }
 }

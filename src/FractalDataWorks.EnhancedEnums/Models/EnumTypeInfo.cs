@@ -67,6 +67,12 @@ public sealed class EnumTypeInfo : IInputInfo, IEquatable<EnumTypeInfo>
     public string? ReturnType { get; set; }
 
     /// <summary>
+    /// Gets or sets the namespace to import for the return type.
+    /// If null, will be extracted from ReturnType.
+    /// </summary>
+    public string? ReturnTypeNamespace { get; set; }
+
+    /// <summary>
     /// Gets the list of properties that should be used for lookup methods.
     /// </summary>
     public EquatableArray<PropertyLookupInfo> LookupProperties { get; set; } = EquatableArray.Empty<PropertyLookupInfo>();
@@ -131,6 +137,7 @@ public sealed class EnumTypeInfo : IInputInfo, IEquatable<EnumTypeInfo>
         writer.Write(NameComparison.ToString());
         writer.Write(IncludeReferencedAssemblies);
         writer.Write(ReturnType ?? string.Empty);
+        writer.Write(ReturnTypeNamespace ?? string.Empty);
 
         // Write lookup properties
         foreach (var lookup in LookupProperties.OrderBy(p => p.PropertyName, StringComparer.Ordinal))
