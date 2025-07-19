@@ -12,6 +12,7 @@ This guide covers advanced features and patterns for FractalDataWorks.EnhancedEn
 - [Complex Property Types](#complex-property-types)
 - [Multiple Lookup Properties](#multiple-lookup-properties)
 - [Cross-Assembly Usage](#cross-assembly-usage)
+- [Cross-Namespace Return Types](#cross-namespace-return-types)
 - [Integration Patterns](#integration-patterns)
 
 ## Lookup Properties
@@ -311,6 +312,49 @@ class Program
     }
 }
 ```
+
+## Cross-Namespace Return Types
+
+When your return type interface is in a different namespace than your enum base class, use the `ReturnTypeNamespace` parameter:
+
+### Scenario: Messages in Different Namespaces
+
+```csharp
+// In namespace: FractalDataWorks
+public interface IFdwMessage
+{
+    string Code { get; }
+    string Message { get; }
+    MessageSeverity Severity { get; }
+}
+
+// In namespace: FractalDataWorks.Messages
+[EnhancedEnumBase("Messages", 
+    ReturnType = "IFdwMessage", 
+    ReturnTypeNamespace = "FractalDataWorks")]
+public abstract class MessageBase : IFdwMessage, IEnhancedEnumOption
+{
+    // Implementation
+}
+```
+
+### Alternative: Fully Qualified Type Names
+
+You can also use fully qualified type names, and the namespace will be extracted automatically:
+
+```csharp
+[EnhancedEnumBase("Messages", 
+    ReturnType = "FractalDataWorks.IFdwMessage")]
+public abstract class MessageBase : IFdwMessage, IEnhancedEnumOption
+{
+    // Implementation
+}
+```
+
+This is particularly useful when:
+- Your interface is in a shared library
+- You're working across multiple projects
+- You want explicit control over generated imports
 
 ## Integration Patterns
 

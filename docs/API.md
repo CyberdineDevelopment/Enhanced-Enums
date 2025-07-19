@@ -173,6 +173,31 @@ public interface IMyEnum : IEnhancedEnumOption { }
 public abstract class MyEnum : IMyEnum { }
 ```
 
+##### ReturnTypeNamespace
+
+Gets or sets the namespace to import for the return type.
+
+```csharp
+public string? ReturnTypeNamespace { get; set; }
+```
+
+**Default Value:** `null` (extracted from ReturnType if not specified)
+
+**Usage:** When your return type is in a different namespace, you can explicitly specify which namespace to import in the generated code.
+
+**Example:**
+```csharp
+// Return type in different namespace
+[EnhancedEnumBase(
+    ReturnType = "IFdwMessage", 
+    ReturnTypeNamespace = "FractalDataWorks")]
+public abstract class MessageBase : IFdwMessage { }
+
+// Auto-extraction from fully qualified type
+[EnhancedEnumBase(ReturnType = "FractalDataWorks.IFdwMessage")]
+public abstract class MessageBase : IFdwMessage { }
+```
+
 ### EnumOptionAttribute
 
 Marks a class as an option for an enhanced enum.
