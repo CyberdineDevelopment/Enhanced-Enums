@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -19,6 +20,8 @@ namespace FractalDataWorks.EnhancedEnums.Generators;
 [Generator]
 public class EnhancedEnumOptionGenerator : IncrementalGeneratorBase<EnumTypeInfo>
 {
+    // Cache for assembly types to avoid re-scanning
+    private static readonly ConcurrentDictionary<string, List<INamedTypeSymbol>> _assemblyTypeCache = new();
     /// <summary>
     /// Generates the collection class for an enum definition with its values.
     /// </summary>
@@ -348,7 +351,7 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
         if (!string.IsNullOrEmpty(def.ReturnTypeNamespace))
         {
             // Use the explicitly provided namespace
-            if (!def.ReturnTypeNamespace.StartsWith("System", StringComparison.Ordinal) && 
+            if (!def.ReturnTypeNamespace!.StartsWith("System", StringComparison.Ordinal) && 
                 !string.Equals(def.ReturnTypeNamespace, targetNamespace, StringComparison.Ordinal))
             {
                 sourceCode.AppendLine($"using {def.ReturnTypeNamespace};");
@@ -357,7 +360,7 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
         else if (!string.IsNullOrEmpty(effectiveReturnType))
         {
             // Extract namespace from ReturnType if not explicitly provided
-            var cleanReturnType = effectiveReturnType.TrimEnd('?');
+            var cleanReturnType = effectiveReturnType!.TrimEnd('?');
             var lastDotIndex = cleanReturnType.LastIndexOf('.');
             if (lastDotIndex > 0)
             {
@@ -488,37 +491,68 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
             def.ReturnType = DetectReturnType(baseTypeSymbol, compilation);
         }
 
-        // Create a scanner to find all types
-        var scanner = new AssemblyScanner(compilation);
-
-        // Scan all types in the compilation and referenced assemblies (if enabled)
+        // Collect all types with EnumOption attribute
         var allTypes = new List<INamedTypeSymbol>();
 
-        // Add types from current compilation
+        // Step 1: Scan current compilation
         foreach (var tree in compilation.SyntaxTrees)
         {
             var root = tree.GetRoot();
             var model = compilation.GetSemanticModel(tree);
-            foreach (var cds in root.DescendantNodes().OfType<ClassDeclarationSyntax>())
+            
+            // Find all type declarations (classes, structs, records)
+            foreach (var typeDecl in root.DescendantNodes().OfType<TypeDeclarationSyntax>())
             {
-                if (!cds.AttributeLists.SelectMany(al => al.Attributes)
-                    .Any(a => a.Name.ToString().Contains("EnumOption")))
+                if (!HasEnumOptionAttribute(typeDecl))
                 {
                     continue;
                 }
 
-                var sym = (INamedTypeSymbol)model.GetDeclaredSymbol(cds)!;
-                allTypes.Add(sym);
+                var symbol = model.GetDeclaredSymbol(typeDecl) as INamedTypeSymbol;
+                if (symbol != null)
+                {
+                    allTypes.Add(symbol);
+                }
             }
         }
 
-        // Add types from referenced assemblies if enabled
+        // Step 2: Scan referenced assemblies if enabled
         if (def.IncludeReferencedAssemblies)
         {
-            var referencedTypesWithAttribute = scanner.AllNamedTypes
-                .Where(typeSymbol => typeSymbol.GetAttributes().Any(ad => string.Equals(ad.AttributeClass?.Name, "EnumOptionAttribute", StringComparison.Ordinal) ||
-string.Equals(ad.AttributeClass?.Name, "EnumOption", StringComparison.Ordinal)));
-            allTypes.AddRange(referencedTypesWithAttribute);
+            foreach (var reference in compilation.References)
+            {
+                if (compilation.GetAssemblyOrModuleSymbol(reference) is IAssemblySymbol assembly)
+                {
+                    // Use cached types if available
+                    var assemblyKey = assembly.Identity.ToString();
+                    var typesInAssembly = _assemblyTypeCache.GetOrAdd(assemblyKey, _ =>
+                    {
+                        // Get all types from the assembly
+                        return GetAllTypesInNamespace(assembly.GlobalNamespace).ToList();
+                    });
+                    
+                    // Filter for types with EnumOption attribute
+                    foreach (var type in typesInAssembly)
+                    {
+                        if (HasEnumOptionAttribute(type))
+                        {
+                            allTypes.Add(type);
+                        }
+                    }
+                }
+            }
+            
+            // Report diagnostic about cross-assembly scanning
+            var assemblyCount = compilation.References.Count();
+            context.ReportDiagnostic(Diagnostic.Create(
+                new DiagnosticDescriptor(
+                    "ENH_INFO_001",
+                    "Cross-assembly scan complete",
+                    $"Scanned {assemblyCount} referenced assemblies for enum options",
+                    "EnhancedEnumOptions",
+                    DiagnosticSeverity.Info,
+                    isEnabledByDefault: true),
+                null));
         }
 
         // Process all found types
@@ -931,5 +965,69 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
     private static string GetStringComparisonName(StringComparison comparison)
     {
         return $"StringComparison.{comparison}";
+    }
+
+    /// <summary>
+    /// Checks if a type declaration has the EnumOption attribute.
+    /// </summary>
+    private static bool HasEnumOptionAttribute(TypeDeclarationSyntax syntax)
+    {
+        return syntax.AttributeLists
+            .SelectMany(al => al.Attributes)
+            .Any(attr => attr.Name.ToString().Contains("EnumOption"));
+    }
+
+    /// <summary>
+    /// Checks if a type symbol has the EnumOption attribute.
+    /// </summary>
+    private static bool HasEnumOptionAttribute(INamedTypeSymbol type)
+    {
+        return type.GetAttributes().Any(attr =>
+            attr.AttributeClass?.Name == "EnumOptionAttribute" ||
+            attr.AttributeClass?.Name == "EnumOption");
+    }
+
+    /// <summary>
+    /// Gets all types in a namespace recursively.
+    /// </summary>
+    private static IEnumerable<INamedTypeSymbol> GetAllTypesInNamespace(INamespaceSymbol namespaceSymbol)
+    {
+        // Get types in this namespace
+        foreach (var type in namespaceSymbol.GetTypeMembers())
+        {
+            yield return type;
+            
+            // Get nested types
+            foreach (var nestedType in GetNestedTypes(type))
+            {
+                yield return nestedType;
+            }
+        }
+        
+        // Recurse into nested namespaces
+        foreach (var nestedNamespace in namespaceSymbol.GetNamespaceMembers())
+        {
+            foreach (var type in GetAllTypesInNamespace(nestedNamespace))
+            {
+                yield return type;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets all nested types within a type.
+    /// </summary>
+    private static IEnumerable<INamedTypeSymbol> GetNestedTypes(INamedTypeSymbol type)
+    {
+        foreach (var nestedType in type.GetTypeMembers())
+        {
+            yield return nestedType;
+            
+            // Recursively get nested types within nested types
+            foreach (var deeplyNested in GetNestedTypes(nestedType))
+            {
+                yield return deeplyNested;
+            }
+        }
     }
 }

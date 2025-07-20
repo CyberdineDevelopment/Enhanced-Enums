@@ -1,68 +1,52 @@
 # FractalDataWorks Enhanced Enums
 
-Part of the FractalDataWorks toolkit.
-
-## Build Status
-
-[![Master Build](https://github.com/CyberdineDevelopment/Enhanced-Enums/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/CyberdineDevelopment/Enhanced-Enums/actions/workflows/ci.yml)
-[![Develop Build](https://github.com/CyberdineDevelopment/Enhanced-Enums/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/CyberdineDevelopment/Enhanced-Enums/actions/workflows/ci.yml)
-
-## Release Status
-
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/CyberdineDevelopment/Enhanced-Enums)
-![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/CyberdineDevelopment/Enhanced-Enums?include_prereleases&label=pre-release)
-
-## Package Status
-
-![Nuget](https://img.shields.io/nuget/v/FractalDataWorks.EnhancedEnums)
-![GitHub Packages](https://img.shields.io/badge/github%20packages-available-blue)
-
-## License
-
+[![NuGet](https://img.shields.io/nuget/v/FractalDataWorks.EnhancedEnums.svg)](https://www.nuget.org/packages/FractalDataWorks.EnhancedEnums/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Advanced enumeration system with source generation for .NET applications.
+Advanced enumeration patterns with source generation for .NET applications.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Features](#features)
+- [Performance](#performance)
+- [Architecture](#architecture)
+- [API Reference](#api-reference)
+- [Developer Guide](#developer-guide)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
 
 ## Overview
 
-FractalDataWorks Enhanced Enums provides a powerful alternative to standard C# enums, offering:
+FractalDataWorks Enhanced Enums provides a powerful alternative to standard C# enums with:
 
 - **Type-safe enumeration patterns** with compile-time validation
-- **Source generation** for boilerplate code reduction
-- **High-performance lookups** with zero allocations and dictionary-based O(1) access
-- **Rich metadata** support through attributes
+- **Source generation** for zero boilerplate
+- **High-performance lookups** with O(1) dictionary access
+- **Rich metadata support** through properties and attributes  
 - **Cross-assembly support** for shared enum definitions
-- **Empty value pattern** for representing "no selection" scenarios
-- **Static property accessors** for direct enum value access (e.g., `OrderStatuses.Pending`)
-- **Interface-based return types** for flexible type hierarchies
+- **Empty value pattern** for "no selection" scenarios
+- **Static property accessors** for direct enum value access
 
 ## Installation
 
 ### NuGet Package
+
 ```bash
 dotnet add package FractalDataWorks.EnhancedEnums
 ```
 
-### Project Reference
-When referencing the source generator as a project (e.g., for local development or benchmarks), you must configure it properly:
+### Package Reference
 
 ```xml
-<ItemGroup>
-  <ProjectReference Include="path\to\FractalDataWorks.EnhancedEnums.csproj" 
-                    OutputItemType="Analyzer" 
-                    ReferenceOutputAssembly="true" />
-</ItemGroup>
+<PackageReference Include="FractalDataWorks.EnhancedEnums" Version="*" />
 ```
-
-**Important:** 
-- `OutputItemType="Analyzer"` - Registers the project as a Roslyn analyzer/source generator
-- `ReferenceOutputAssembly="true"` - Ensures the attributes are available at runtime
-
-Without proper configuration, the source generator won't run and the collection classes won't be generated.
 
 ## Quick Start
 
-### Define an Enhanced Enum
+### 1. Define Your Enhanced Enum
 
 ```csharp
 using FractalDataWorks.EnhancedEnums.Attributes;
@@ -70,8 +54,14 @@ using FractalDataWorks.EnhancedEnums.Attributes;
 [EnhancedEnumBase]
 public abstract class OrderStatus
 {
-    public abstract string Name { get; }
-    public abstract string Description { get; }
+    protected OrderStatus(string name, string description)
+    {
+        Name = name;
+        Description = description;
+    }
+    
+    public string Name { get; }
+    public string Description { get; }
     
     [EnumLookup]
     public abstract string Code { get; }
@@ -80,31 +70,19 @@ public abstract class OrderStatus
 [EnumOption]
 public class Pending : OrderStatus
 {
-    public override string Name => "Pending";
-    public override string Description => "Order is pending processing";
+    public Pending() : base("Pending", "Order is pending") { }
     public override string Code => "PEND";
-}
-
-[EnumOption]
-public class Processing : OrderStatus
-{
-    public override string Name => "Processing";
-    public override string Description => "Order is being processed";
-    public override string Code => "PROC";
 }
 
 [EnumOption]
 public class Shipped : OrderStatus
 {
-    public override string Name => "Shipped";
-    public override string Description => "Order has been shipped";
+    public Shipped() : base("Shipped", "Order has shipped") { }
     public override string Code => "SHIP";
 }
 ```
 
-### Use the Generated Collection
-
-The source generator creates a static collection class with lookup methods:
+### 2. Use the Generated Collection
 
 ```csharp
 // Get all values
@@ -116,109 +94,21 @@ foreach (var status in OrderStatuses.All)
 // Lookup by name
 var pending = OrderStatuses.GetByName("Pending");
 
-// Lookup by custom property (marked with [EnumLookup])
+// Lookup by custom property
 var shipped = OrderStatuses.GetByCode("SHIP");
 
-// Static property accessors for common values
-var pending = OrderStatuses.Pending;
-var shipped = OrderStatuses.Shipped;
+// Direct static access
+var status = OrderStatuses.Pending;
 
-// Handle not found cases
-var unknown = OrderStatuses.GetByName("Unknown"); // Returns null
-
-// Get empty/none value
-var empty = OrderStatuses.Empty; // Singleton with default values
+// Empty value
+var none = OrderStatuses.Empty;
 ```
-
-### Generated Code Example
-
-The generator produces optimized code like this:
-
-```csharp
-public static class OrderStatuses
-{
-    private static readonly List<OrderStatus> _all = new List<OrderStatus>();
-    private static readonly ImmutableArray<OrderStatus> _cachedAll;
-    private static readonly Dictionary<string, OrderStatus> _nameDict;
-    private static readonly Dictionary<string, OrderStatus> _codeDict;
-    private static readonly EmptyValue _empty = new EmptyValue();
-    
-    static OrderStatuses()
-    {
-        _all.Add(new Pending());
-        _all.Add(new Processing());
-        _all.Add(new Shipped());
-        
-        // Cache for zero-allocation access
-        _cachedAll = _all.ToImmutableArray();
-        
-        // Build dictionaries for O(1) lookups
-        _nameDict = _all.ToDictionary(x => x.Name, StringComparer.OrdinalIgnoreCase);
-        _codeDict = _all.ToDictionary(x => x.Code, StringComparer.OrdinalIgnoreCase);
-    }
-    
-    /// <summary>
-    /// Gets all available OrderStatus values.
-    /// </summary>
-    public static ImmutableArray<OrderStatus> All => _cachedAll; // Zero allocations!
-    
-    /// <summary>
-    /// Gets an empty instance representing no selection.
-    /// </summary>
-    public static OrderStatus Empty => _empty;
-    
-    /// <summary>
-    /// Gets the OrderStatus with the specified name.
-    /// </summary>
-    public static OrderStatus? GetByName(string name)
-    {
-        _nameDict.TryGetValue(name, out var result);
-        return result; // O(1) lookup, zero allocations
-    }
-    
-    /// <summary>
-    /// Gets the OrderStatus with the specified Code.
-    /// </summary>
-    public static OrderStatus? GetByCode(string code)
-    {
-        _codeDict.TryGetValue(code, out var result);
-        return result; // O(1) lookup, zero allocations
-    }
-    
-    // Static property accessors
-    public static OrderStatus Pending => _cachedAll[0];
-    public static OrderStatus Processing => _cachedAll[1];
-    public static OrderStatus Shipped => _cachedAll[2];
-    
-    private sealed class EmptyValue : OrderStatus
-    {
-        public override string Name => string.Empty;
-        public override string Description => string.Empty;
-        public override string Code => string.Empty;
-    }
-}
-```
-
-## Performance
-
-Enhanced Enums are optimized for high-performance scenarios:
-
-- **Zero allocations** for all lookup operations
-- **O(1) dictionary-based lookups** instead of O(n) linear search
-- **Cached All property** eliminates repeated array allocations
-- **FrozenDictionary support** on .NET 8+ for additional 35% performance improvement
-- **8-10x faster lookups** compared to traditional LINQ-based searches
-
-Benchmark results show:
-- Name lookups: ~850ns → ~93ns (9x faster)
-- All property access: ~57ns + 424B allocation → ~0.06ns + 0B allocation (950x faster)
-- Memory usage: 528B per lookup → 0B per lookup
 
 ## Features
 
 ### Lookup Properties
 
-Mark properties with `[EnumLookup]` to generate lookup methods:
+Mark properties with `[EnumLookup]` to generate efficient lookup methods:
 
 ```csharp
 [EnhancedEnumBase]
@@ -229,262 +119,56 @@ public abstract class Country
     [EnumLookup]
     public abstract string IsoCode { get; }
     
-    [EnumLookup]
+    [EnumLookup(MethodName = "FindByCurrency")]
     public abstract string Currency { get; }
 }
 
-[EnumOption]
-public class UnitedStates : Country
-{
-    public override string Name => "United States";
-    public override string IsoCode => "US";
-    public override string Currency => "USD";
-}
-
-// Usage:
-var country = Countries.GetByIsoCode("US");
-var byCurrency = Countries.GetByCurrency("USD");
+// Usage
+var us = Countries.GetByIsoCode("US");
+var euroCountries = Countries.FindByCurrency("EUR");
 ```
 
-### Custom Collection Names
+### Multiple Collections
+
+Support multiple categorizations of the same base type:
 
 ```csharp
-[EnhancedEnumBase("MyStatuses")]
-public abstract class StatusBase
+[EnhancedEnumBase("ActiveStatuses")]
+[EnhancedEnumBase("ErrorStatuses")]
+public abstract class Status
 {
     public abstract string Name { get; }
 }
 
-// Generates: MyStatuses.All, MyStatuses.GetByName()
-```
+[EnumOption(CollectionName = "ActiveStatuses")]
+public class Running : Status { }
 
-### String Comparison Options
-
-```csharp
-[EnhancedEnumBase(NameComparison = StringComparison.Ordinal)]
-public abstract class CaseSensitive
-{
-    public abstract string Name { get; }
-}
-```
-
-### Factory Pattern Support
-
-```csharp
-[EnhancedEnumBase(UseFactory = true)]
-public abstract class ConnectionType
-{
-    public abstract string Name { get; }
-    
-    // Factory method must be defined in base class
-    public static ConnectionType Create(Type type)
-    {
-        return (ConnectionType)Activator.CreateInstance(type);
-    }
-}
-```
-
-### Multiple Lookup Properties
-
-```csharp
-[EnhancedEnumBase]
-public abstract class Currency
-{
-    public abstract string Name { get; }
-    
-    [EnumLookup]
-    public abstract string Code { get; }
-    
-    [EnumLookup]
-    public abstract string Symbol { get; }
-    
-    [EnumLookup]
-    public abstract int NumericCode { get; }
-}
-
-// Generates: GetByCode(), GetBySymbol(), GetByNumericCode()
-```
-
-### Empty Value Pattern
-
-Every generated collection includes an Empty singleton for representing "no selection":
-
-```csharp
-// Get the empty value
-var none = OrderStatuses.Empty;
-
-// Check if a value is empty
-if (status == OrderStatuses.Empty)
-{
-    Console.WriteLine("No status selected");
-}
-
-// Empty returns appropriate defaults:
-// - string properties return string.Empty
-// - numeric properties return 0
-// - DateTime returns DateTime.MinValue
-// - Guid returns Guid.Empty
-// - nullable types return null
-```
-
-### Static Property Accessors
-
-Generated collections include static properties for direct access to enum values:
-
-```csharp
-// Direct access via static properties
-var pending = OrderStatuses.Pending;
-var shipped = OrderStatuses.Shipped;
-
-// Properties are named based on the enum value's Name
-// Use [EnumOption(Name = "CustomName")] to control the property name
-```
-
-### Custom Lookup Method Names
-
-```csharp
-[EnhancedEnumBase]
-public abstract class UserRole
-{
-    public abstract string Name { get; }
-    
-    [EnumLookup(MethodName = "FindByLevel")]
-    public abstract int PermissionLevel { get; }
-}
-
-// Generates: FindByLevel() instead of GetByPermissionLevel()
+[EnumOption(CollectionName = "ErrorStatuses")]
+public class Failed : Status { }
 ```
 
 ### Interface-Based Return Types
 
-Control the return type of generated collections to support interface-based patterns:
+Control return types for flexible hierarchies:
 
 ```csharp
-// Define an interface that extends IEnhancedEnumOption
 public interface IOrderStatus : IEnhancedEnumOption
 {
     string Description { get; }
 }
 
-// Base classes should implement IEnhancedEnumOption (required)
 [EnhancedEnumBase(ReturnType = "IOrderStatus")]
 public abstract class OrderStatus : IOrderStatus
 {
-    public abstract int Id { get; }      // Required by IEnhancedEnumOption
-    public abstract string Name { get; }  // Required by IEnhancedEnumOption
+    public abstract int Id { get; }
+    public abstract string Name { get; }
     public abstract string Description { get; }
 }
-
-// Generated collection will return IOrderStatus
-IOrderStatus status = OrderStatuses.Pending;
-ImmutableArray<IOrderStatus> all = OrderStatuses.All;
-
-// GetById is automatically generated when IEnhancedEnumOption is implemented
-var order = OrderStatuses.GetById(123);
-```
-
-The ReturnType feature supports:
-- **Explicit types**: Specify any type with `ReturnType = "TypeName"`
-- **Auto-detection**: If not specified, detects interfaces extending `IEnhancedEnumOption`
-- **Per-lookup overrides**: Use `[EnumLookup(ReturnType = "SpecificType")]`
-
-**Note**: All enhanced enum base classes must implement `IEnhancedEnumOption`, which requires:
-- `int Id { get; }` - Unique identifier
-- `string Name { get; }` - Display name
-
-When implemented, the generator automatically provides `GetById(int id)` in addition to `GetByName(string name)`.
-
-## Best Practices
-
-1. **Use descriptive names** for enum options and properties
-2. **Keep enums focused** - avoid too many responsibilities
-3. **Consider lookup patterns** - mark frequently searched properties with `[EnumLookup]`
-4. **Use factory pattern** sparingly - only when you need fresh instances
-5. **Document your enums** with XML comments
-6. **Leverage static properties** for commonly accessed values to improve readability
-7. **Use Empty value** instead of null for representing "no selection"
-8. **Target .NET 8+** when possible for FrozenDictionary performance benefits
-9. **Prefer constructor-based patterns** over abstract properties for better immutability
-10. **Implement IEnhancedEnumOption** on base classes for GetById support
-
-## Requirements
-
-- **.NET Standard 2.0** or higher
-- **C# 8.0** or higher for nullable reference types
-- **Visual Studio 2022** or VS Code with C# extension for best experience
-- **FractalDataWorks** core package (for IEnhancedEnumOption interface)
-
-## Migration from Traditional Enums
-
-### Before (Traditional Enum)
-```csharp
-public enum OrderStatus
-{
-    Pending = 1,
-    Processing = 2,
-    Shipped = 3,
-    Delivered = 4
-}
-```
-
-### After (Enhanced Enum)
-```csharp
-[EnhancedEnumBase]
-public abstract class OrderStatus
-{
-    public abstract string Name { get; }
-    public abstract int Value { get; }
-}
-
-[EnumOption]
-public class Pending : OrderStatus
-{
-    public override string Name => "Pending";
-    public override int Value => 1;
-}
-
-[EnumOption]
-public class Processing : OrderStatus
-{
-    public override string Name => "Processing";
-    public override int Value => 2;
-}
-```
-
-## Advanced Usage
-
-### Constructor-Based Pattern (Recommended)
-
-For better immutability and Empty value support, use constructor-based patterns:
-
-```csharp
-[EnhancedEnumBase]
-public abstract class OrderStatus
-{
-    protected OrderStatus(string name, string description, bool canBeCancelled)
-    {
-        Name = name;
-        Description = description;
-        CanBeCancelled = canBeCancelled;
-    }
-    
-    public string Name { get; }
-    public string Description { get; }
-    public bool CanBeCancelled { get; }
-}
-
-[EnumOption]
-public class Pending : OrderStatus
-{
-    public Pending() : base("Pending", "Order is awaiting processing", true) { }
-}
-
-// The generator will create an EmptyValue that calls the constructor with default values
 ```
 
 ### Cross-Assembly Support
 
-Enhanced enums can be used across assembly boundaries by enabling cross-assembly discovery:
+Share enum definitions across projects:
 
 ```csharp
 [EnhancedEnumBase(IncludeReferencedAssemblies = true)]
@@ -494,84 +178,254 @@ public abstract class SharedStatus
 }
 ```
 
-### Nullable Properties
+## Performance
+
+Enhanced Enums are optimized for high-performance scenarios:
+
+```mermaid
+graph LR
+    A[Lookup Request] --> B{Lookup Type}
+    B -->|By Name| C[O(1) Dictionary]
+    B -->|By Property| D[O(1) Dictionary]
+    B -->|All Values| E[Cached Array]
+    C --> F[Zero Allocations]
+    D --> F
+    E --> F
+```
+
+Benchmark results show:
+- **9x faster lookups** compared to LINQ searches
+- **Zero allocations** for all operations
+- **35% additional improvement** with .NET 8+ FrozenDictionary
+
+## Architecture
+
+### Source Generation Flow
+
+```mermaid
+sequenceDiagram
+    participant Code as Your Code
+    participant Attr as Attributes
+    participant Gen as Source Generator
+    participant Comp as Compiler
+    participant Out as Generated Code
+    
+    Code->>Attr: Apply [EnhancedEnumBase]
+    Code->>Attr: Apply [EnumOption]
+    Attr->>Gen: Trigger generation
+    Gen->>Gen: Scan types
+    Gen->>Gen: Build collection
+    Gen->>Out: Generate static class
+    Out->>Comp: Compile together
+    Comp->>Code: Available at compile time
+```
+
+### Generated Code Structure
+
+```mermaid
+classDiagram
+    class OrderStatus {
+        <<abstract>>
+        +string Name
+        +string Description
+        +string Code
+    }
+    
+    class Pending {
+        +Pending()
+        +string Code = "PEND"
+    }
+    
+    class Shipped {
+        +Shipped()
+        +string Code = "SHIP"
+    }
+    
+    class OrderStatuses {
+        <<static>>
+        +ImmutableArray~OrderStatus~ All
+        +OrderStatus Empty
+        +OrderStatus Pending
+        +OrderStatus Shipped
+        +GetByName(string) OrderStatus?
+        +GetByCode(string) OrderStatus?
+    }
+    
+    OrderStatus <|-- Pending
+    OrderStatus <|-- Shipped
+    OrderStatuses ..> OrderStatus : manages
+```
+
+## API Reference
+
+### Attributes
+
+#### `[EnhancedEnumBase]`
+
+Marks a class as an enhanced enum base type.
 
 ```csharp
-[EnhancedEnumBase]
-public abstract class Config
+[EnhancedEnumBase(
+    CollectionName = "MyStatuses",              // Custom collection name
+    UseFactory = false,                         // Use factory pattern
+    NameComparison = StringComparison.OrdinalIgnoreCase,  // Name comparison
+    IncludeReferencedAssemblies = false,        // Cross-assembly scanning
+    ReturnType = "IMyStatus"                    // Custom return type
+)]
+```
+
+#### `[EnumOption]`
+
+Marks a class as an enum option.
+
+```csharp
+[EnumOption(
+    Name = "CustomName",           // Override display name
+    Order = 1,                     // Sort order
+    CollectionName = "MyCollection" // Target collection
+)]
+```
+
+#### `[EnumLookup]`
+
+Marks a property for lookup generation.
+
+```csharp
+[EnumLookup(
+    MethodName = "FindByCode",     // Custom method name
+    AllowMultiple = false,         // Allow multiple matches
+    ReturnType = "IMyStatus"       // Custom return type
+)]
+```
+
+### Generated Methods
+
+Every generated collection includes:
+
+- `ImmutableArray<T> All` - All enum values
+- `T Empty` - Empty/none value
+- `T? GetByName(string name)` - Lookup by name
+- `T? GetByXxx(...)` - Custom lookups for `[EnumLookup]` properties
+- Static properties for each enum value
+
+## Developer Guide
+
+### Project Structure
+
+```
+FractalDataWorks.EnhancedEnums/
+├── src/
+│   ├── Attributes/           # Attribute definitions
+│   ├── Analyzers/           # Roslyn analyzers
+│   ├── Generators/          # Source generators
+│   └── Models/              # Data models
+├── tests/                   # Unit tests
+├── benchmarks/             # Performance benchmarks
+└── samples/                # Example projects
+```
+
+### Building from Source
+
+```bash
+# Clone repository
+git clone https://github.com/FractalDataWorks/enhanced-enums.git
+
+# Build
+dotnet build
+
+# Run tests
+dotnet test
+
+# Run benchmarks
+dotnet run -c Release --project benchmarks/FractalDataWorks.EnhancedEnums.Benchmarks
+```
+
+### Adding New Features
+
+1. **Attributes**: Define in `Attributes/` folder
+2. **Generation Logic**: Modify `EnhancedEnumGenerator.cs`
+3. **Tests**: Add to appropriate test project
+4. **Documentation**: Update this README
+
+### Testing Source Generators
+
+```csharp
+[Fact]
+public void GeneratesCollectionClass()
 {
-    public abstract string Name { get; }
+    var source = @"
+        [EnhancedEnumBase]
+        public abstract class Status { }
+        
+        [EnumOption]
+        public class Active : Status { }
+    ";
     
-    [EnumLookup]
-    public abstract string? OptionalKey { get; }
+    var result = TestHelper.GenerateSource(source);
+    
+    result.ShouldContain("public static class Statuses");
+    result.ShouldContain("public static Status Active");
 }
 ```
 
-### Complex Property Types
+### Debugging Tips
 
-```csharp
-[EnhancedEnumBase]
-public abstract class DateRange
-{
-    public abstract string Name { get; }
-    
-    [EnumLookup]
-    public abstract DateTime StartDate { get; }
-    
-    [EnumLookup]
-    public abstract Guid Id { get; }
-}
-```
+1. **Enable generator logging**:
+   ```xml
+   <PropertyGroup>
+     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+   </PropertyGroup>
+   ```
 
-## Roslyn Analyzers
+2. **Check generated files**: Look in `obj/Generated/`
 
-Enhanced Enums includes built-in analyzers to help you follow best practices:
+3. **Use diagnostics**: The generator reports informational diagnostics
 
-### ENH1001: IEnhancedEnumOption Implementation
-Warns when enhanced enum base classes don't implement `IEnhancedEnumOption`. The code fix automatically adds the interface and required properties.
+### Performance Considerations
 
-### ENH1002: Constructor Pattern Recommendation
-Suggests using constructor-based patterns instead of abstract properties for better immutability and Empty value support. The code fix converts abstract properties to constructor parameters.
+1. **Use constructor patterns** for better performance
+2. **Avoid complex logic** in enum constructors
+3. **Consider .NET 8+** for FrozenDictionary benefits
+4. **Cache enum instances** - they're singletons
 
 ## Troubleshooting
 
 ### Source Generator Not Running
 
-If your enhanced enum collection classes are not being generated:
+1. Ensure proper package/project reference configuration
+2. Check for build errors preventing generation
+3. Clean and rebuild the solution
 
-1. **Check Project Reference Configuration**
-   ```xml
-   <!-- Correct -->
-   <ProjectReference Include="..\..\src\FractalDataWorks.EnhancedEnums\FractalDataWorks.EnhancedEnums.csproj" 
-                     OutputItemType="Analyzer" 
-                     ReferenceOutputAssembly="true" />
-   
-   <!-- Incorrect - Generator won't run -->
-   <ProjectReference Include="..\..\src\FractalDataWorks.EnhancedEnums\FractalDataWorks.EnhancedEnums.csproj" />
-   ```
+### Missing Generated Code
 
-2. **Enable Assembly Scanner**
-   Add to your AssemblyInfo.cs or any source file:
-   ```csharp
-   using FractalDataWorks.SmartGenerators;
-   
-   [assembly: EnableAssemblyScanner]
-   ```
+1. Verify attributes are applied correctly
+2. Check that base class is `abstract`
+3. Ensure enum options are `public` and non-abstract
 
-3. **Check Build Output**
-   Look for warnings like:
-   - `CS8032: An instance of analyzer ... cannot be created`
-   - `CS0103: The name 'YourEnums' does not exist in the current context`
+### Performance Issues
 
-### Common Issues
-
-- **Missing Dependencies**: The generator requires SmartGenerators dependencies. When using PackageReference, these are included automatically. With ProjectReference, you may need to ensure dependencies are available.
-- **Case Sensitivity**: By default, name lookups are case-insensitive. Use `NameComparison` attribute property to change this.
-- **Nullable Reference Types**: Generated code may produce warnings in projects with nullable reference types enabled. This is a known issue that doesn't affect functionality.
+1. Review constructor complexity
+2. Check for excessive cross-assembly scanning
+3. Profile with included benchmarks
 
 ## Contributing
 
-See our [Contributing Guide](CONTRIBUTING.md) for details on how to contribute to this project.
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Development Setup
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Submit a pull request
+
+### Code Style
+
+- Follow existing patterns
+- Add XML documentation
+- Include unit tests
+- Update benchmarks if needed
 
 ## License
 
