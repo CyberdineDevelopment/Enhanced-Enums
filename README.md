@@ -178,6 +178,50 @@ public abstract class SharedStatus
 }
 ```
 
+### Generic Enhanced Enums
+
+Enhanced Enums now supports generic base types. Use the standard `[EnhancedEnumBase]` attribute:
+
+```csharp
+[EnhancedEnumBase]
+public abstract class Container<T> where T : IDisposable
+{
+    public abstract string Name { get; }
+    public abstract T Value { get; }
+}
+
+[EnumOption]
+public class StringContainer : Container<string>
+{
+    public override string Name => "String";
+    public override string Value => "Default";
+}
+
+[EnumOption]
+public class StreamContainer : Container<FileStream>
+{
+    public override string Name => "Stream";
+    public override FileStream Value => new FileStream(...);
+}
+```
+
+The generator will:
+- Extract type parameters and constraints
+- Add required using statements from constraint types
+- Generate type-safe collections
+
+For generic types with complex constraints, you can specify a default return type:
+
+```csharp
+[EnhancedEnumBase(
+    DefaultGenericReturnType = "IService",
+    DefaultGenericReturnTypeNamespace = "MyApp.Services")]
+public abstract class ServiceType<T> where T : IService
+{
+    public abstract string Name { get; }
+}
+```
+
 ## Performance
 
 Enhanced Enums are optimized for high-performance scenarios:

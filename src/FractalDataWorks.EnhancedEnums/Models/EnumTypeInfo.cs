@@ -73,6 +73,36 @@ public sealed class EnumTypeInfo : IInputInfo, IEquatable<EnumTypeInfo>
     public string? ReturnTypeNamespace { get; set; }
 
     /// <summary>
+    /// Gets or sets the list of type parameters for generic types.
+    /// </summary>
+    public List<string> TypeParameters { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the list of type constraints for generic types.
+    /// </summary>
+    public List<string> TypeConstraints { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the unbound type name for generic types (e.g., "MyType`2").
+    /// </summary>
+    public string UnboundTypeName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the namespaces required by generic constraints.
+    /// </summary>
+    public HashSet<string> RequiredNamespaces { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the default generic return type from the attribute.
+    /// </summary>
+    public string? DefaultGenericReturnType { get; set; }
+
+    /// <summary>
+    /// Gets or sets the namespace for the default generic return type.
+    /// </summary>
+    public string? DefaultGenericReturnTypeNamespace { get; set; }
+
+    /// <summary>
     /// Gets the list of properties that should be used for lookup methods.
     /// </summary>
     public EquatableArray<PropertyLookupInfo> LookupProperties { get; set; } = EquatableArray.Empty<PropertyLookupInfo>();
@@ -138,6 +168,26 @@ public sealed class EnumTypeInfo : IInputInfo, IEquatable<EnumTypeInfo>
         writer.Write(IncludeReferencedAssemblies);
         writer.Write(ReturnType ?? string.Empty);
         writer.Write(ReturnTypeNamespace ?? string.Empty);
+
+        // Write generic type information
+        writer.Write(UnboundTypeName);
+        writer.Write(DefaultGenericReturnType ?? string.Empty);
+        writer.Write(DefaultGenericReturnTypeNamespace ?? string.Empty);
+
+        foreach (var param in TypeParameters.OrderBy(p => p, StringComparer.Ordinal))
+        {
+            writer.Write(param);
+        }
+
+        foreach (var constraint in TypeConstraints.OrderBy(c => c, StringComparer.Ordinal))
+        {
+            writer.Write(constraint);
+        }
+
+        foreach (var ns in RequiredNamespaces.OrderBy(n => n, StringComparer.Ordinal))
+        {
+            writer.Write(ns);
+        }
 
         // Write lookup properties
         foreach (var lookup in LookupProperties.OrderBy(p => p.PropertyName, StringComparer.Ordinal))

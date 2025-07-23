@@ -50,4 +50,17 @@ public sealed class EnhancedEnumBaseAttribute : Attribute
     /// If not specified, the generator will attempt to extract it from the ReturnType.
     /// </summary>
     public string? ReturnTypeNamespace { get; set; }
+
+    /// <summary>
+    /// Gets or sets the default return type for collections when the base type is generic.
+    /// Use this to specify what type should be used in the generated collection.
+    /// Example: For ServiceType&lt;T&gt;, you might specify "IFdwService" as DefaultGenericReturnType.
+    /// </summary>
+    public string? DefaultGenericReturnType { get; set; }
+
+    /// <summary>
+    /// Gets or sets the namespace for the default generic return type.
+    /// If not specified, will attempt to extract from DefaultGenericReturnType.
+    /// </summary>
+    public string? DefaultGenericReturnTypeNamespace { get; set; }
 }

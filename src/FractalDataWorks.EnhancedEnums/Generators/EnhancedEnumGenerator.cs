@@ -39,17 +39,22 @@ public class EnhancedEnumOptionGenerator : IncrementalGeneratorBase<EnumTypeInfo
         string targetNamespace = def.Namespace;
 
         // Get the base type symbol for various checks
-        var baseTypeSymbol = compilation.GetTypeByMetadataName(def.FullTypeName);
+        var baseTypeSymbol = def.IsGenericType && !string.IsNullOrEmpty(def.UnboundTypeName)
+            ? compilation.GetTypeByMetadataName(def.UnboundTypeName)
+            : compilation.GetTypeByMetadataName(def.FullTypeName);
         
-        // Determine the effective return type - use explicit if specified, otherwise auto-detect
+        // Determine the effective return type
         string? effectiveReturnType;
         if (!string.IsNullOrEmpty(def.ReturnType))
         {
             effectiveReturnType = def.ReturnType;
         }
+        else if (def.IsGenericType && !string.IsNullOrEmpty(def.DefaultGenericReturnType))
+        {
+            effectiveReturnType = def.DefaultGenericReturnType;
+        }
         else
         {
-            // Auto-detect interface return type
             effectiveReturnType = baseTypeSymbol != null ? DetectReturnType(baseTypeSymbol, compilation) : def.FullTypeName;
         }
 
@@ -59,6 +64,7 @@ public class EnhancedEnumOptionGenerator : IncrementalGeneratorBase<EnumTypeInfo
             .MakeStatic()
             .WithNamespace(targetNamespace)
             .WithSummary($"Collection of all {def.ClassName} values.");
+
 
         // Add private fields for storing instances
         classBuilder.AddField($"List<{def.FullTypeName}>", "_all", field => field
@@ -347,6 +353,27 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
         sourceCode.AppendLine("using System.Collections.Frozen;");
         sourceCode.AppendLine("#endif");
         
+        // Add required namespaces from generic constraints
+        foreach (var ns in def.RequiredNamespaces.OrderBy(n => n))
+        {
+            if (!ns.StartsWith("System", StringComparison.Ordinal) && 
+                !string.Equals(ns, targetNamespace, StringComparison.Ordinal))
+            {
+                sourceCode.AppendLine($"using {ns};");
+            }
+        }
+
+        // Add default generic return type namespace if specified
+        if (!string.IsNullOrEmpty(def.DefaultGenericReturnTypeNamespace))
+        {
+            var ns = def.DefaultGenericReturnTypeNamespace!;
+            if (!ns.StartsWith("System", StringComparison.Ordinal) && 
+                !string.Equals(ns, targetNamespace, StringComparison.Ordinal))
+            {
+                sourceCode.AppendLine($"using {ns};");
+            }
+        }
+        
         // Add namespace for ReturnType if specified
         if (!string.IsNullOrEmpty(def.ReturnTypeNamespace))
         {
@@ -446,23 +473,6 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
             throw new ArgumentNullException(nameof(compilation));
 
 
-        // Validate: Generic types are not supported
-        if (def.IsGenericType)
-        {
-            var diagnostic = Diagnostic.Create(
-                new DiagnosticDescriptor(
-                    "ENH001",
-                    "Generic enhanced enum types are not supported",
-                    "Enhanced enum base type '{0}' cannot be generic. Generic types are not supported for enhanced enums.",
-                    "EnhancedEnumOptions",
-                    DiagnosticSeverity.Error,
-                    isEnabledByDefault: true),
-                null,
-                def.ClassName);
-
-            context.ReportDiagnostic(diagnostic);
-            return;
-        }
 
         var values = new List<EnumValueInfo>();
 
@@ -716,6 +726,13 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
                 LookupProperties = new EquatableArray<PropertyLookupInfo>(lookupProperties),
             };
 
+            // Extract generic type information
+            ExtractGenericTypeInfo(symbol, collectionInfo);
+
+            // Get default generic return type from attribute
+            collectionInfo.DefaultGenericReturnType = named.TryGetValue(nameof(EnhancedEnumBaseAttribute.DefaultGenericReturnType), out var dgrt) && dgrt.Value is string dgrts ? dgrts : null;
+            collectionInfo.DefaultGenericReturnTypeNamespace = named.TryGetValue(nameof(EnhancedEnumBaseAttribute.DefaultGenericReturnTypeNamespace), out var dgrtn) && dgrtn.Value is string dgrtns ? dgrtns : null;
+
             // Store the symbol temporarily for further processing
             // This will be used in Execute method but won't be part of equality
             results.Add(collectionInfo);
@@ -957,6 +974,60 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
 
         // No custom interface found, use the base type
         return baseTypeSymbol.ToDisplayString();
+    }
+
+    /// <summary>
+    /// Extracts generic type information from a symbol.
+    /// </summary>
+    private static void ExtractGenericTypeInfo(INamedTypeSymbol symbol, EnumTypeInfo info)
+    {
+        if (!symbol.IsGenericType) return;
+        
+        info.UnboundTypeName = symbol.ConstructUnboundGenericType().ToDisplayString();
+        
+        foreach (var typeParam in symbol.TypeParameters)
+        {
+            info.TypeParameters.Add(typeParam.Name);
+            
+            // Build constraint string
+            var constraints = new List<string>();
+            if (typeParam.HasReferenceTypeConstraint)
+                constraints.Add("class");
+            if (typeParam.HasValueTypeConstraint)
+                constraints.Add("struct");
+            
+            foreach (var constraintType in typeParam.ConstraintTypes)
+            {
+                constraints.Add(constraintType.ToDisplayString());
+                ExtractNamespacesFromType(constraintType, info.RequiredNamespaces);
+            }
+            
+            if (typeParam.HasConstructorConstraint)
+                constraints.Add("new()");
+                
+            if (constraints.Any())
+                info.TypeConstraints.Add($"where {typeParam.Name} : {string.Join(", ", constraints)}");
+        }
+    }
+
+    /// <summary>
+    /// Extracts namespace information from a type symbol.
+    /// </summary>
+    private static void ExtractNamespacesFromType(ITypeSymbol type, HashSet<string> namespaces)
+    {
+        if (type.ContainingNamespace != null && !type.ContainingNamespace.IsGlobalNamespace)
+        {
+            namespaces.Add(type.ContainingNamespace.ToDisplayString());
+        }
+        
+        // Handle generic type arguments
+        if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+        {
+            foreach (var arg in namedType.TypeArguments)
+            {
+                ExtractNamespacesFromType(arg, namespaces);
+            }
+        }
     }
     
     /// <summary>
