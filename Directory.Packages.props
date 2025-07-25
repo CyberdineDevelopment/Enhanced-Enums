@@ -5,6 +5,7 @@
   <ItemGroup>
     <!-- FractalDataWorks packages -->
     <PackageVersion Include="FractalDataWorks" Version="0.1.3-alpha-g1695442435" />
+    <PackageVersion Include="FractalDataWorks.EnhancedEnums" Version="0.1.14-alpha-g3488de1cd2" />
     <PackageVersion Include="FractalDataWorks.SmartGenerators" Version="0.1.4-alpha-g4415be49cc" />
     <PackageVersion Include="FractalDataWorks.SmartGenerators.CodeBuilders" Version="0.1.4-alpha-g4415be49cc" />
     <PackageVersion Include="FractalDataWorks.SmartGenerators.TestUtilities" Version="0.1.4-alpha-g4415be49cc" />

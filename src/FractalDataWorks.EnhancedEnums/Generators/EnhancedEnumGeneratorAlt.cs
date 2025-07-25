@@ -23,6 +23,20 @@ public class EnhancedEnumGeneratorAlt : IIncrementalGenerator
     /// </summary>
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        // Add a diagnostic to verify the generator runs
+        context.RegisterPostInitializationOutput(ctx =>
+        {
+            ctx.AddSource("EnhancedEnumGeneratorAlt.Diagnostic.g.cs", @"
+// This file verifies that EnhancedEnumGeneratorAlt is running
+namespace FractalDataWorks.EnhancedEnums.Generated
+{
+    internal static class EnhancedEnumGeneratorAltDiagnostic
+    {
+        public const string Message = ""EnhancedEnumGeneratorAlt is active"";
+    }
+}");
+        });
+
         // Create a provider that triggers on compilation changes
         var provider = context.CompilationProvider
             .Select((compilation, ct) => DiscoverInterfaceBasedOptions(compilation))
