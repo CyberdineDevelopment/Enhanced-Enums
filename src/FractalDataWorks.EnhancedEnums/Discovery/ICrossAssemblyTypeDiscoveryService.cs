@@ -9,11 +9,11 @@ namespace FractalDataWorks.EnhancedEnums.Discovery;
 public interface ICrossAssemblyTypeDiscoveryService
 {
     /// <summary>
-    /// Determines if cross-assembly discovery is enabled for the current compilation.
+    /// Gets the list of assembly names that should be included in cross-assembly discovery.
     /// </summary>
     /// <param name="compilation">The compilation context.</param>
-    /// <returns>True if cross-assembly discovery is enabled.</returns>
-    bool IsCrossAssemblyDiscoveryEnabled(Compilation compilation);
+    /// <returns>A collection of assembly names to include, or null/empty to include all referenced assemblies.</returns>
+    IEnumerable<string> GetIncludedAssemblies(Compilation compilation);
 
     /// <summary>
     /// Finds all types in the compilation and referenced assemblies that derive from the specified base type.

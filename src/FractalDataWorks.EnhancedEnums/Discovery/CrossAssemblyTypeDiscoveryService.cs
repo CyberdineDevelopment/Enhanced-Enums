@@ -12,7 +12,7 @@ namespace FractalDataWorks.EnhancedEnums.Discovery;
 /// </summary>
 public class CrossAssemblyTypeDiscoveryService : ICrossAssemblyTypeDiscoveryService
 {
-    private const string EnableCrossAssemblyDiscoveryProperty = "EnableCrossAssemblyDiscovery";
+    private const string IncludedEnhancedEnumAssembliesProperty = "IncludedEnhancedEnumAssemblies";
     private readonly ConcurrentDictionary<(INamedTypeSymbol, Compilation), INamedTypeSymbol[]> _derivedTypesCache =
         new(new TypeSymbolEqualityComparer());
     private readonly ConcurrentDictionary<(INamedTypeSymbol, Compilation), INamedTypeSymbol[]> _attributedTypesCache =
@@ -20,29 +20,27 @@ public class CrossAssemblyTypeDiscoveryService : ICrossAssemblyTypeDiscoveryServ
     private readonly ConcurrentDictionary<(string, Compilation), INamedTypeSymbol[]> _attributedTypesByNameCache = new();
 
     /// <summary>
-    /// Determines if cross-assembly discovery is enabled for the current compilation.
+    /// Gets the list of assembly names that should be included in cross-assembly discovery.
     /// </summary>
     /// <param name="compilation">The compilation context.</param>
-    /// <returns>True if cross-assembly discovery is enabled.</returns>
-    public bool IsCrossAssemblyDiscoveryEnabled(Compilation compilation)
+    /// <returns>A collection of assembly names to include, or null/empty to include all referenced assemblies.</returns>
+    public IEnumerable<string> GetIncludedAssemblies(Compilation compilation)
     {
         if (compilation == null)
             throw new ArgumentNullException(nameof(compilation));
 
         // Check for the MSBuild property
-        var enableCrossAssemblyDiscovery = GetMSBuildProperty(compilation, EnableCrossAssemblyDiscoveryProperty);
+        var includedAssemblies = GetMSBuildProperty(compilation, IncludedEnhancedEnumAssembliesProperty);
 
-        // Default to enabled if the property isn't explicitly set to false
-        if (string.IsNullOrEmpty(enableCrossAssemblyDiscovery))
-            return true;
+        // If not specified, return empty (no assemblies included)
+        if (string.IsNullOrEmpty(includedAssemblies))
+            return Enumerable.Empty<string>();
 
-        // Only return false if it's explicitly set to 'false' or '0'
-        if (string.Equals(enableCrossAssemblyDiscovery, "false", StringComparison.OrdinalIgnoreCase) ||
-            enableCrossAssemblyDiscovery == "0")
-            return false;
-
-        // Otherwise return true (for 'true', '1' or any other value)
-        return true;
+        // Parse the semicolon-separated list of assembly names
+        return includedAssemblies!
+            .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(a => a.Trim())
+            .Where(a => !string.IsNullOrEmpty(a));
     }
 
     /// <summary>
@@ -67,10 +65,11 @@ public class CrossAssemblyTypeDiscoveryService : ICrossAssemblyTypeDiscoveryServ
             var currentAssemblyTypes = FindDerivedTypesInCurrentAssembly(type, comp);
             results.AddRange(currentAssemblyTypes);
 
-            // Only include referenced assemblies if cross-assembly discovery is enabled
-            if (IsCrossAssemblyDiscoveryEnabled(comp))
+            // Include types from specified assemblies
+            var includedAssemblies = GetIncludedAssemblies(comp).ToList();
+            if (includedAssemblies.Any())
             {
-                var referencedAssemblyTypes = FindDerivedTypesInReferencedAssemblies(type, comp);
+                var referencedAssemblyTypes = FindDerivedTypesInReferencedAssemblies(type, comp, includedAssemblies);
                 results.AddRange(referencedAssemblyTypes);
             }
 
@@ -107,8 +106,9 @@ public class CrossAssemblyTypeDiscoveryService : ICrossAssemblyTypeDiscoveryServ
     /// </summary>
     /// <param name="baseType">Base type to derive from.</param>
     /// <param name="compilation">Compilation context.</param>
+    /// <param name="includedAssemblies">List of assembly names to include (null or empty means all).</param>
     /// <returns>Derived types.</returns>
-    private static List<INamedTypeSymbol> FindDerivedTypesInReferencedAssemblies(INamedTypeSymbol baseType, Compilation compilation)
+    private static List<INamedTypeSymbol> FindDerivedTypesInReferencedAssemblies(INamedTypeSymbol baseType, Compilation compilation, IList<string>? includedAssemblies = null)
     {
         var results = new List<INamedTypeSymbol>();
 
@@ -118,6 +118,18 @@ public class CrossAssemblyTypeDiscoveryService : ICrossAssemblyTypeDiscoveryServ
             // Get the assembly symbol for the reference
             if (compilation.GetAssemblyOrModuleSymbol(reference) is not IAssemblySymbol assemblySymbol)
                 continue;
+
+            // Check if this assembly should be included
+            if (includedAssemblies != null && includedAssemblies.Count > 0)
+            {
+                var assemblyName = assemblySymbol.Name;
+                if (!includedAssemblies.Any(included => 
+                    string.Equals(included, assemblyName, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(included, assemblySymbol.Identity.Name, StringComparison.OrdinalIgnoreCase)))
+                {
+                    continue;
+                }
+            }
 
             // Get the global namespace of the referenced assembly
             var globalNamespace = assemblySymbol.GlobalNamespace;
@@ -259,10 +271,11 @@ public class CrossAssemblyTypeDiscoveryService : ICrossAssemblyTypeDiscoveryServ
             var currentAssemblyTypes = FindTypesWithAttributeInCurrentAssembly(type, comp);
             results.AddRange(currentAssemblyTypes);
 
-            // Only include referenced assemblies if cross-assembly discovery is enabled
-            if (IsCrossAssemblyDiscoveryEnabled(comp))
+            // Include types from specified assemblies
+            var includedAssemblies = GetIncludedAssemblies(comp).ToList();
+            if (includedAssemblies.Any())
             {
-                var referencedAssemblyTypes = FindTypesWithAttributeInReferencedAssemblies(type, comp);
+                var referencedAssemblyTypes = FindTypesWithAttributeInReferencedAssemblies(type, comp, includedAssemblies);
                 results.AddRange(referencedAssemblyTypes);
             }
 
@@ -300,8 +313,9 @@ public class CrossAssemblyTypeDiscoveryService : ICrossAssemblyTypeDiscoveryServ
     /// </summary>
     /// <param name="attributeType">Attribute type.</param>
     /// <param name="compilation">Compilation context.</param>
+    /// <param name="includedAssemblies">List of assembly names to include.</param>
     /// <returns>Types with attribute.</returns>
-    private static List<INamedTypeSymbol> FindTypesWithAttributeInReferencedAssemblies(INamedTypeSymbol attributeType, Compilation compilation)
+    private static List<INamedTypeSymbol> FindTypesWithAttributeInReferencedAssemblies(INamedTypeSymbol attributeType, Compilation compilation, IList<string> includedAssemblies)
     {
         var results = new List<INamedTypeSymbol>();
         var attributeFullName = attributeType.GetFullMetadataName();
@@ -312,6 +326,18 @@ public class CrossAssemblyTypeDiscoveryService : ICrossAssemblyTypeDiscoveryServ
             // Get the assembly symbol for the reference
             if (compilation.GetAssemblyOrModuleSymbol(reference) is not IAssemblySymbol assemblySymbol)
                 continue;
+
+            // Check if this assembly should be included
+            if (includedAssemblies != null && includedAssemblies.Count > 0)
+            {
+                var assemblyName = assemblySymbol.Name;
+                if (!includedAssemblies.Any(included => 
+                    string.Equals(included, assemblyName, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(included, assemblySymbol.Identity.Name, StringComparison.OrdinalIgnoreCase)))
+                {
+                    continue;
+                }
+            }
 
             // Get the global namespace of the referenced assembly
             var globalNamespace = assemblySymbol.GlobalNamespace;
@@ -358,10 +384,11 @@ public class CrossAssemblyTypeDiscoveryService : ICrossAssemblyTypeDiscoveryServ
             var currentAssemblyTypes = FindTypesWithAttributeNameInCurrentAssembly(attrName, comp);
             results.AddRange(currentAssemblyTypes);
 
-            // Only include referenced assemblies if cross-assembly discovery is enabled
-            if (IsCrossAssemblyDiscoveryEnabled(comp))
+            // Include types from specified assemblies
+            var includedAssemblies = GetIncludedAssemblies(comp).ToList();
+            if (includedAssemblies.Any())
             {
-                var referencedAssemblyTypes = FindTypesWithAttributeNameInReferencedAssemblies(attrName, comp);
+                var referencedAssemblyTypes = FindTypesWithAttributeNameInReferencedAssemblies(attrName, comp, includedAssemblies);
                 results.AddRange(referencedAssemblyTypes);
             }
 
@@ -398,8 +425,9 @@ public class CrossAssemblyTypeDiscoveryService : ICrossAssemblyTypeDiscoveryServ
     /// </summary>
     /// <param name="attributeName">Attribute name.</param>
     /// <param name="compilation">Compilation context.</param>
+    /// <param name="includedAssemblies">List of assembly names to include.</param>
     /// <returns>Types with attribute name.</returns>
-    private static List<INamedTypeSymbol> FindTypesWithAttributeNameInReferencedAssemblies(string attributeName, Compilation compilation)
+    private static List<INamedTypeSymbol> FindTypesWithAttributeNameInReferencedAssemblies(string attributeName, Compilation compilation, IList<string> includedAssemblies)
     {
         var results = new List<INamedTypeSymbol>();
 
@@ -409,6 +437,18 @@ public class CrossAssemblyTypeDiscoveryService : ICrossAssemblyTypeDiscoveryServ
             // Get the assembly symbol for the reference
             if (compilation.GetAssemblyOrModuleSymbol(reference) is not IAssemblySymbol assemblySymbol)
                 continue;
+
+            // Check if this assembly should be included
+            if (includedAssemblies != null && includedAssemblies.Count > 0)
+            {
+                var assemblyName = assemblySymbol.Name;
+                if (!includedAssemblies.Any(included => 
+                    string.Equals(included, assemblyName, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(included, assemblySymbol.Identity.Name, StringComparison.OrdinalIgnoreCase)))
+                {
+                    continue;
+                }
+            }
 
             // Get the global namespace of the referenced assembly
             var globalNamespace = assemblySymbol.GlobalNamespace;
