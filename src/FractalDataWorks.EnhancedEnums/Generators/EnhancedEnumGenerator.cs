@@ -8,6 +8,7 @@ using FractalDataWorks.SmartGenerators;
 using FractalDataWorks.SmartGenerators.CodeBuilders;
 using FractalDataWorks.EnhancedEnums.Attributes;
 using FractalDataWorks.EnhancedEnums.Models;
+using FractalDataWorks.EnhancedEnums.Discovery;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -22,6 +23,9 @@ public class EnhancedEnumOptionGenerator : IncrementalGeneratorBase<EnumTypeInfo
 {
     // Cache for assembly types to avoid re-scanning
     private static readonly ConcurrentDictionary<string, List<INamedTypeSymbol>> _assemblyTypeCache = new();
+    
+    // Cross-assembly discovery service
+    private static readonly ICrossAssemblyTypeDiscoveryService _discoveryService = new CrossAssemblyTypeDiscoveryService();
     /// <summary>
     /// Generates the collection class for an enum definition with its values.
     /// </summary>
@@ -527,42 +531,33 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
         }
 
         // Step 2: Scan referenced assemblies if enabled
-        if (def.IncludeReferencedAssemblies)
+        if (def.IncludeReferencedAssemblies && _discoveryService.IsCrossAssemblyDiscoveryEnabled(compilation))
         {
-            foreach (var reference in compilation.References)
-            {
-                if (compilation.GetAssemblyOrModuleSymbol(reference) is IAssemblySymbol assembly)
-                {
-                    // Use cached types if available
-                    var assemblyKey = assembly.Identity.ToString();
-                    var typesInAssembly = _assemblyTypeCache.GetOrAdd(assemblyKey, _ =>
-                    {
-                        // Get all types from the assembly
-                        return GetAllTypesInNamespace(assembly.GlobalNamespace).ToList();
-                    });
-                    
-                    // Filter for types with EnumOption attribute
-                    foreach (var type in typesInAssembly)
-                    {
-                        if (HasEnumOptionAttribute(type))
-                        {
-                            allTypes.Add(type);
-                        }
-                    }
-                }
-            }
+            // Find the EnumOption attribute type
+            var enumOptionAttribute = compilation.GetTypeByMetadataName("FractalDataWorks.EnhancedEnums.Attributes.EnumOptionAttribute");
             
-            // Report diagnostic about cross-assembly scanning
-            var assemblyCount = compilation.References.Count();
-            context.ReportDiagnostic(Diagnostic.Create(
-                new DiagnosticDescriptor(
-                    "ENH_INFO_001",
-                    "Cross-assembly scan complete",
-                    $"Scanned {assemblyCount} referenced assemblies for enum options",
-                    "EnhancedEnumOptions",
-                    DiagnosticSeverity.Info,
-                    isEnabledByDefault: true),
-                null));
+            if (enumOptionAttribute != null)
+            {
+                // Use the discovery service to find types with EnumOption attribute
+                var typesWithAttribute = _discoveryService.FindTypesWithAttribute(enumOptionAttribute, compilation);
+                
+                foreach (var type in typesWithAttribute)
+                {
+                    allTypes.Add(type);
+                }
+                
+                // Report diagnostic about cross-assembly scanning
+                var typeCount = typesWithAttribute.Count();
+                context.ReportDiagnostic(Diagnostic.Create(
+                    new DiagnosticDescriptor(
+                        "ENH_INFO_001",
+                        "Cross-assembly scan complete",
+                        $"Found {typeCount} types with EnumOption attribute across all assemblies",
+                        "EnhancedEnumOptions",
+                        DiagnosticSeverity.Info,
+                        isEnabledByDefault: true),
+                    null));
+            }
         }
 
         // Process all found types
