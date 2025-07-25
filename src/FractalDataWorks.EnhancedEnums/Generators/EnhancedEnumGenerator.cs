@@ -21,7 +21,7 @@ namespace FractalDataWorks.EnhancedEnums.Generators;
 public class EnhancedEnumOptionGenerator : IncrementalGeneratorBase<EnumTypeInfo>
 {
     // Cache for assembly types to avoid re-scanning
-    private static readonly ConcurrentDictionary<string, List<INamedTypeSymbol>> _assemblyTypeCache = new();
+    private static readonly ConcurrentDictionary<string, List<INamedTypeSymbol>> _assemblyTypeCache = [];
     /// <summary>
     /// Generates the collection class for an enum definition with its values.
     /// </summary>
@@ -354,7 +354,7 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
         sourceCode.AppendLine("#endif");
         
         // Add required namespaces from generic constraints
-        foreach (var ns in def.RequiredNamespaces.OrderBy(n => n))
+        foreach (var ns in def.RequiredNamespaces.OrderBy(n => n,StringComparer.Ordinal))
         {
             if (!ns.StartsWith("System", StringComparison.Ordinal) && 
                 !string.Equals(ns, targetNamespace, StringComparison.Ordinal))
@@ -1005,7 +1005,7 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
             if (typeParam.HasConstructorConstraint)
                 constraints.Add("new()");
                 
-            if (constraints.Any())
+            if (constraints.Count > 0)
                 info.TypeConstraints.Add($"where {typeParam.Name} : {string.Join(", ", constraints)}");
         }
     }
@@ -1054,8 +1054,8 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
     private static bool HasEnumOptionAttribute(INamedTypeSymbol type)
     {
         return type.GetAttributes().Any(attr =>
-            attr.AttributeClass?.Name == "EnumOptionAttribute" ||
-            attr.AttributeClass?.Name == "EnumOption");
+            String.Equals(attr.AttributeClass?.Name , "EnumOptionAttribute",StringComparison.Ordinal) ||
+            string.Equals(attr.AttributeClass?.Name , "EnumOption",StringComparison.Ordinal));
     }
 
     /// <summary>

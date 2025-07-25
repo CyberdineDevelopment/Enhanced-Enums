@@ -75,12 +75,12 @@ public sealed class EnumTypeInfo : IInputInfo, IEquatable<EnumTypeInfo>
     /// <summary>
     /// Gets or sets the list of type parameters for generic types.
     /// </summary>
-    public List<string> TypeParameters { get; set; } = new();
+    public List<string> TypeParameters { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the list of type constraints for generic types.
     /// </summary>
-    public List<string> TypeConstraints { get; set; } = new();
+    public List<string> TypeConstraints { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the unbound type name for generic types (e.g., "MyType`2").
@@ -90,7 +90,7 @@ public sealed class EnumTypeInfo : IInputInfo, IEquatable<EnumTypeInfo>
     /// <summary>
     /// Gets or sets the namespaces required by generic constraints.
     /// </summary>
-    public HashSet<string> RequiredNamespaces { get; set; } = new();
+    public HashSet<string> RequiredNamespaces { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the default generic return type from the attribute.
