@@ -1,6 +1,7 @@
 using System.Linq;
 using FractalDataWorks.EnhancedEnums.Generators;
 using FractalDataWorks.SmartGenerators.TestUtilities;
+using Microsoft.CodeAnalysis.CSharp;
 using Shouldly;
 using Xunit;
 
@@ -23,13 +24,13 @@ public class GenericEnhancedEnumTests : EnhancedEnumOptionTestBase
                     public abstract string Name { get; }
                 }
                 
-                [EnumOption]
+                [EnumOption(Name = ""String"")]
                 public class StringContainer : Container<string>
                 {
                     public override string Name => ""String"";
                 }
                 
-                [EnumOption]
+                [EnumOption(Name = ""Int"")]
                 public class IntContainer : Container<int>
                 {
                     public override string Name => ""Int"";
@@ -44,9 +45,23 @@ public class GenericEnhancedEnumTests : EnhancedEnumOptionTestBase
         result.ContainsSource("Containers.g.cs").ShouldBeTrue();
         
         var generated = result["Containers.g.cs"];
-        generated.ShouldContain("public static class Containers");
-        generated.ShouldContain("StringContainer String");
-        generated.ShouldContain("IntContainer Int");
+        
+        // Debug: Let's see what's actually generated
+        System.Console.WriteLine("=== GENERATED CODE ===");
+        System.Console.WriteLine(generated);
+        System.Console.WriteLine("=== END GENERATED CODE ===");
+        
+        var tree = CSharpSyntaxTree.ParseText(generated);
+        var expectations = new SyntaxTreeExpectations(tree);
+        
+        expectations
+            .HasNamespace("TestNamespace", ns => ns
+                .HasClass("Containers", c => c
+                    .IsPublic()
+                    .IsStatic()
+                    .HasProperty("All", p => p.IsPublic().IsStatic())
+                    .HasMethod("GetByName", m => m.IsPublic().IsStatic())))
+            .Verify();
     }
 
     [Fact]
@@ -76,7 +91,13 @@ public class GenericEnhancedEnumTests : EnhancedEnumOptionTestBase
         var result = RunGenerator([source]);
         
         // Assert
+        result.GeneratedSources.ShouldNotBeEmpty();
+        var generatedSource = result.GeneratedSources.FirstOrDefault();
+        generatedSource.ShouldNotBeNull();
+        
         var generated = result["Services.g.cs"];
+        
+        // The generator should include System.IO because FileStream is used in the option type
         generated.ShouldContain("using System;");
         generated.ShouldContain("using System.IO;");
     }

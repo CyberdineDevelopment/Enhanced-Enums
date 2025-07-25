@@ -9,7 +9,16 @@ namespace FractalDataWorks.EnhancedEnums.Discovery;
 public interface ICrossAssemblyTypeDiscoveryService
 {
     /// <summary>
+    /// Checks if an assembly wants to be discovered by the current compilation.
+    /// </summary>
+    /// <param name="assemblyToCheck">The assembly to check if it wants to be discovered.</param>
+    /// <param name="currentAssemblyName">The name of the current assembly doing the discovery.</param>
+    /// <returns>True if the assembly wants to be discovered by the current assembly.</returns>
+    bool IsAssemblyDiscoverable(IAssemblySymbol assemblyToCheck, string currentAssemblyName);
+    
+    /// <summary>
     /// Gets the list of assembly names that should be included in cross-assembly discovery.
+    /// This is now deprecated - use IsAssemblyDiscoverable instead.
     /// </summary>
     /// <param name="compilation">The compilation context.</param>
     /// <returns>A collection of assembly names to include, or null/empty to include all referenced assemblies.</returns>

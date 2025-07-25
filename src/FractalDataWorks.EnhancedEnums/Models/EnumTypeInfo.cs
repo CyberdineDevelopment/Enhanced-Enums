@@ -90,7 +90,7 @@ public sealed class EnumTypeInfo : IInputInfo, IEquatable<EnumTypeInfo>
     /// <summary>
     /// Gets or sets the namespaces required by generic constraints.
     /// </summary>
-    public HashSet<string> RequiredNamespaces { get; set; } = new();
+    public HashSet<string> RequiredNamespaces { get; set; } = new(StringComparer.Ordinal);
 
     /// <summary>
     /// Gets or sets the default generic return type from the attribute.
