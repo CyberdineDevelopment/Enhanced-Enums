@@ -97,8 +97,18 @@ public class GenericEnhancedEnumTests : EnhancedEnumOptionTestBase
         
         var generated = result["Services.g.cs"];
         
-        // The generator should include System.IO because FileStream is used in the option type
+        // Check if the generated code has all expected parts
         generated.ShouldContain("using System;");
+        
+        // Print first few lines to debug
+        var lines = generated.Split('\n').Take(20);
+        System.Console.WriteLine("First 20 lines of generated code:");
+        foreach (var line in lines)
+        {
+            System.Console.WriteLine(line);
+        }
+        
+        // The generator should include System.IO because FileStream is used in the option type
         generated.ShouldContain("using System.IO;");
     }
 
