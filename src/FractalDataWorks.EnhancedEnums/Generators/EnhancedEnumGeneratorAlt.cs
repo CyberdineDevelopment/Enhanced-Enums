@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using FractalDataWorks.SmartGenerators;
 using FractalDataWorks.SmartGenerators.CodeBuilders;
 using FractalDataWorks.EnhancedEnums.Models;
@@ -84,8 +86,8 @@ namespace FractalDataWorks.EnhancedEnums.Generated
                         
                         // Check for EnumOption attribute for custom name/order
                         var enumOptionAttr = type.GetAttributes()
-                            .FirstOrDefault(a => a.AttributeClass?.Name == "EnumOptionAttribute" || 
-                                               a.AttributeClass?.Name == "EnumOption");
+                            .FirstOrDefault(a => string.Equals(a.AttributeClass?.Name, "EnumOptionAttribute", StringComparison.Ordinal) || 
+                                               string.Equals(a.AttributeClass?.Name, "EnumOption", StringComparison.Ordinal));
                         
                         string name = type.Name;
                         int order = 0;
@@ -127,8 +129,8 @@ namespace FractalDataWorks.EnhancedEnums.Generated
             
             // Check if base type has EnhancedEnumBase attribute for configuration
             var enhancedEnumAttr = baseType.GetAttributes()
-                .FirstOrDefault(a => a.AttributeClass?.Name == "EnhancedEnumBaseAttribute" || 
-                                   a.AttributeClass?.Name == "EnhancedEnumBase");
+                .FirstOrDefault(a => string.Equals(a.AttributeClass?.Name, "EnhancedEnumBaseAttribute", StringComparison.Ordinal) || 
+                                   string.Equals(a.AttributeClass?.Name, "EnhancedEnumBase", StringComparison.Ordinal));
             
             bool useFactory = false;
             StringComparison nameComparison = StringComparison.OrdinalIgnoreCase;
@@ -162,8 +164,8 @@ namespace FractalDataWorks.EnhancedEnums.Generated
             foreach (var prop in baseType.GetMembers().OfType<IPropertySymbol>())
             {
                 var lookupAttr = prop.GetAttributes()
-                    .FirstOrDefault(a => a.AttributeClass?.Name == "EnumLookupAttribute" || 
-                                       a.AttributeClass?.Name == "EnumLookup");
+                    .FirstOrDefault(a => string.Equals(a.AttributeClass?.Name, "EnumLookupAttribute", StringComparison.Ordinal) || 
+                                       string.Equals(a.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
                 if (lookupAttr != null)
                 {
                     var lnamed = lookupAttr.NamedArguments.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
@@ -196,7 +198,7 @@ namespace FractalDataWorks.EnhancedEnums.Generated
                 ReturnType = returnType ?? DetectReturnType(baseType, compilation),
                 ReturnTypeNamespace = returnTypeNamespace,
                 LookupProperties = new EquatableArray<PropertyLookupInfo>(lookupProperties),
-                ConcreteTypes = new EquatableArray<EnumValueInfo>(values.OrderBy(v => v.Order).ThenBy(v => v.Name))
+                ConcreteTypes = new EquatableArray<EnumValueInfo>(values.OrderBy(v => v.Order).ThenBy(v => v.Name, StringComparer.OrdinalIgnoreCase))
             };
             
             // Extract generic type information if needed
@@ -659,7 +661,7 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
         sourceCode.AppendLine("#endif");
         
         // Add required namespaces
-        foreach (var ns in def.RequiredNamespaces.OrderBy(n => n))
+        foreach (var ns in def.RequiredNamespaces.OrderBy(n => n, StringComparer.Ordinal))
         {
             if (!ns.StartsWith("System", StringComparison.Ordinal) && 
                 !string.Equals(ns, targetNamespace, StringComparison.Ordinal))
@@ -854,13 +856,13 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
         if (string.IsNullOrEmpty(name))
             return "_";
         
-        var result = System.Text.RegularExpressions.Regex.Replace(name, @"[^\w]", "_");
+        var result = Regex.Replace(name, @"[^\w]", "_", RegexOptions.None, TimeSpan.FromSeconds(1));
         
         if (char.IsDigit(result[0]))
             result = "_" + result;
         
-        result = System.Text.RegularExpressions.Regex.Replace(result, @"_+", "_");
-        result = System.Text.RegularExpressions.Regex.Replace(result, @"_", string.Empty);
+        result = Regex.Replace(result, @"_+", "_", RegexOptions.None, TimeSpan.FromSeconds(1));
+        result = Regex.Replace(result, @"_", string.Empty, RegexOptions.None, TimeSpan.FromSeconds(1));
         result = result.Trim('_');
         
         return string.IsNullOrEmpty(result) ? "_" : result;
