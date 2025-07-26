@@ -166,17 +166,72 @@ public abstract class OrderStatus : IOrderStatus
 }
 ```
 
-### Cross-Assembly Support
+### Cross-Assembly Support (Service Type Pattern)
 
-Share enum definitions across projects:
+Enhanced Enums fully supports the Service Type Pattern, allowing enum options to be discovered from multiple assemblies at compile time. This enables plugin architectures where new options can be added without modifying the base assembly.
+
+**How it works:**
+1. Define your base enum type in a shared assembly with `[EnhancedEnumBase]`
+2. Create option types in plugin assemblies with `[EnumOption]`
+3. Plugin assemblies declare which assemblies can discover them using MSBuild properties
+4. The generator discovers ALL options at compile time and includes them in the generated collection
+
+**Configuration:**
+
+Plugin assemblies opt-in to discovery by declaring which assemblies can discover them in their `.csproj`:
+
+```xml
+<!-- In PluginA.csproj -->
+<PropertyGroup>
+  <!-- Allow discovery by Main and Services assemblies -->
+  <IncludeInEnhancedEnumAssemblies>Main;FractalDataWorks.Services</IncludeInEnhancedEnumAssemblies>
+</PropertyGroup>
+
+<!-- In PluginB.csproj -->
+<PropertyGroup>
+  <!-- Allow discovery by any assembly containing "MyApp" -->
+  <IncludeInEnhancedEnumAssemblies>MyApp.Core;MyApp.Services;MyApp.Web</IncludeInEnhancedEnumAssemblies>
+</PropertyGroup>
+```
+
+**Example - Plugin Architecture:**
 
 ```csharp
+// Shared.dll - Base definition
 [EnhancedEnumBase(IncludeReferencedAssemblies = true)]
-public abstract class SharedStatus
+public abstract class ServiceType
 {
     public abstract string Name { get; }
+    public abstract Type ImplementationType { get; }
 }
+
+// PluginA.dll - Plugin assembly (with IncludeInEnhancedEnumAssemblies=Main)
+[EnumOption]
+public class EmailService : ServiceType
+{
+    public override string Name => "Email";
+    public override Type ImplementationType => typeof(SmtpEmailProvider);
+}
+
+// PluginB.dll - Another plugin (with IncludeInEnhancedEnumAssemblies=Main)
+[EnumOption]
+public class SmsService : ServiceType
+{
+    public override string Name => "SMS";
+    public override Type ImplementationType => typeof(TwilioSmsProvider);
+}
+
+// Main.dll - Application using the services
+// The generated ServiceTypes collection includes BOTH EmailService and SmsService!
+var allServices = ServiceTypes.All; // Contains instances from both plugins
+var emailService = ServiceTypes.GetByName("Email"); // Works!
 ```
+
+**Important:** 
+- Plugin assemblies must explicitly opt-in to discovery via `<IncludeInEnhancedEnumAssemblies>`
+- The generator reads compiled assembly metadata at compile time (not runtime)
+- Only assemblies that opt-in will have their enum options discovered
+- This provides security by preventing unwanted assemblies from injecting options
 
 ### Generic Enhanced Enums
 
