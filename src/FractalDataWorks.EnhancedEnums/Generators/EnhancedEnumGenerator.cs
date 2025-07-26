@@ -78,6 +78,27 @@ public class EnhancedEnumOptionGenerator : IncrementalGeneratorBase<EnumTypeInfo
         {
             effectiveReturnType = def.DefaultGenericReturnType;
         }
+        else if (def.IsGenericType)
+        {
+            // For generic types without a default return type, try to use constraints
+            effectiveReturnType = GetReturnTypeFromConstraints(baseTypeSymbol, def);
+            
+            if (effectiveReturnType == null)
+            {
+                // No suitable constraint found, use object as fallback
+                context.ReportDiagnostic(Diagnostic.Create(
+                    new DiagnosticDescriptor(
+                        "ENH003",
+                        "Generic enum base requires DefaultGenericReturnType",
+                        "Enhanced enum base type '{0}' is generic but doesn't specify DefaultGenericReturnType. Using 'object' as fallback.",
+                        "EnhancedEnumOptions",
+                        DiagnosticSeverity.Warning,
+                        isEnabledByDefault: true),
+                    null,
+                    def.FullTypeName));
+                effectiveReturnType = "object";
+            }
+        }
         else
         {
             effectiveReturnType = baseTypeSymbol != null ? DetectReturnType(baseTypeSymbol, compilation) : def.FullTypeName;
@@ -92,11 +113,17 @@ public class EnhancedEnumOptionGenerator : IncrementalGeneratorBase<EnumTypeInfo
 
 
         // Add private fields for storing instances
-        classBuilder.AddField($"List<{def.FullTypeName}>", "_all", field => field
+        // For generic types, use the effective return type for the list
+        var listType = def.IsGenericType && !string.IsNullOrEmpty(effectiveReturnType) 
+            ? effectiveReturnType 
+            : def.FullTypeName;
+            
+        
+        classBuilder.AddField($"List<{listType}>", "_all", field => field
             .MakePrivate()
             .MakeStatic()
             .MakeReadOnly()
-            .WithInitializer($"new List<{def.FullTypeName}>()"));
+            .WithInitializer($"new List<{listType}>()"));
         
         classBuilder.AddField($"ImmutableArray<{effectiveReturnType}>", "_cachedAll", field => field
             .MakePrivate()
@@ -360,6 +387,28 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
                     .WithXmlDocSummary($"Gets the {value.Name} instance."));
             }
         }
+        
+        // Generate static factory methods for each enum value
+        if (!values.IsEmpty)
+        {
+            classBuilder.AddCodeBlock("// Static factory methods");
+            foreach (var value in values)
+            {
+                var methodName = MakeValidIdentifier(value.Name);
+                
+                // Determine the return type for this specific value
+                var valueReturnType = !string.IsNullOrEmpty(value.ReturnType) 
+                    ? value.ReturnType 
+                    : (effectiveReturnType ?? def.FullTypeName);
+                
+                classBuilder.AddMethod(methodName, valueReturnType!, method => method
+                    .MakePublic()
+                    .MakeStatic()
+                    .WithXmlDocSummary($"Creates a new instance of {value.Name}.")
+                    .WithXmlDocReturns($"A new {value.Name} instance.")
+                    .WithExpressionBody($"new {value.FullTypeName}()"));
+            }
+        }
 
         // Generate Empty value
         GenerateEmptyValue(classBuilder, def, effectiveReturnType, baseTypeSymbol);
@@ -377,6 +426,35 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
         sourceCode.AppendLine("#if NET8_0_OR_GREATER");
         sourceCode.AppendLine("using System.Collections.Frozen;");
         sourceCode.AppendLine("#endif");
+        
+        // Extract additional namespaces from enum values
+        var additionalNamespaces = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var value in values)
+        {
+            // From return type overrides
+            if (!string.IsNullOrEmpty(value.ReturnTypeNamespace))
+            {
+                additionalNamespaces.Add(value.ReturnTypeNamespace!);
+            }
+            
+            // From constructor parameters
+            foreach (var ctor in value.Constructors)
+            {
+                foreach (var param in ctor.Parameters)
+                {
+                    if (!string.IsNullOrEmpty(param.Namespace) && !param.Namespace!.StartsWith("System", StringComparison.Ordinal))
+                    {
+                        additionalNamespaces.Add(param.Namespace);
+                    }
+                }
+            }
+        }
+        
+        // Merge additional namespaces with RequiredNamespaces
+        foreach (var ns in additionalNamespaces)
+        {
+            def.RequiredNamespaces.Add(ns);
+        }
         
         // Add required namespaces from generic constraints
         foreach (var ns in def.RequiredNamespaces.OrderBy(n => n, StringComparer.Ordinal))
@@ -540,12 +618,8 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
             return;
         }
 
-        // Determine the effective return type
-        if (string.IsNullOrEmpty(def.ReturnType))
-        {
-            // Auto-detect from implemented interfaces
-            def.ReturnType = DetectReturnType(baseTypeSymbol, compilation);
-        }
+        // Don't modify def.ReturnType here - it should remain as specified in the attribute or empty
+        // The GenerateCollection method will handle determining the effective return type
 
         // Collect all types with EnumOption attribute
         var allTypes = new List<INamedTypeSymbol>();
@@ -640,11 +714,20 @@ string.Equals(ad.AttributeClass?.Name, "EnumOption", StringComparison.Ordinal))
 
                 if (MatchesDefinition(typeSymbol, baseTypeSymbol))
                 {
+                    // Extract return type from attribute if specified
+                    var returnType = named.TryGetValue(nameof(EnumOptionAttribute.ReturnType), out var rt) && rt.Value is string rts
+                        ? rts : null;
+                    var returnTypeNamespace = named.TryGetValue(nameof(EnumOptionAttribute.ReturnTypeNamespace), out var rtn) && rtn.Value is string rtns
+                        ? rtns : null;
+                    
                     var info = new EnumValueInfo
                     {
                         ShortTypeName = typeSymbol.Name,
                         FullTypeName = typeSymbol.ToDisplayString(),
                         Name = name,
+                        ReturnType = returnType,
+                        ReturnTypeNamespace = returnTypeNamespace,
+                        Constructors = ExtractConstructors(typeSymbol)
                     };
                     values.Add(info);
                     
@@ -668,8 +751,15 @@ string.Equals(ad.AttributeClass?.Name, "EnumOption", StringComparison.Ordinal))
     /// <returns>True if the value matches the definition; otherwise, false.</returns>
     private static bool MatchesDefinition(INamedTypeSymbol valueSymbol, INamedTypeSymbol baseTypeSymbol)
     {
+        // For generic types, we need to compare the unbound type definitions
+        var baseToCompare = baseTypeSymbol.IsGenericType ? baseTypeSymbol.OriginalDefinition : baseTypeSymbol;
+        
         // interface implementation
-        if (valueSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, baseTypeSymbol)))
+        if (valueSymbol.AllInterfaces.Any(i => 
+        {
+            var interfaceToCompare = i.IsGenericType ? i.OriginalDefinition : i;
+            return SymbolEqualityComparer.Default.Equals(interfaceToCompare, baseToCompare);
+        }))
         {
             return true;
         }
@@ -677,7 +767,8 @@ string.Equals(ad.AttributeClass?.Name, "EnumOption", StringComparison.Ordinal))
         // base type inheritance
         for (var baseType = valueSymbol.BaseType; baseType != null; baseType = baseType.BaseType)
         {
-            if (SymbolEqualityComparer.Default.Equals(baseType, baseTypeSymbol))
+            var currentToCompare = baseType.IsGenericType ? baseType.OriginalDefinition : baseType;
+            if (SymbolEqualityComparer.Default.Equals(currentToCompare, baseToCompare))
             {
                 return true;
             }
@@ -1058,6 +1149,34 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
     }
 
     /// <summary>
+    /// Gets the return type from generic type constraints.
+    /// </summary>
+    private static string? GetReturnTypeFromConstraints(INamedTypeSymbol? baseTypeSymbol, EnumTypeInfo def)
+    {
+        if (baseTypeSymbol == null || !baseTypeSymbol.IsGenericType)
+            return null;
+            
+        // Check if we have exactly one type parameter with a single interface or class constraint
+        if (baseTypeSymbol.TypeParameters.Length == 1)
+        {
+            var typeParam = baseTypeSymbol.TypeParameters[0];
+            var constraints = typeParam.ConstraintTypes;
+            
+            // If there's exactly one constraint that's not a value type, use it
+            if (constraints.Length == 1)
+            {
+                var constraint = constraints[0];
+                if (constraint.TypeKind == TypeKind.Interface || constraint.TypeKind == TypeKind.Class)
+                {
+                    return constraint.ToDisplayString();
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    /// <summary>
     /// Extracts namespace information from a type symbol.
     /// </summary>
     private static void ExtractNamespacesFromType(ITypeSymbol type, HashSet<string> namespaces)
@@ -1233,5 +1352,80 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
                 yield return deeplyNested;
             }
         }
+    }
+    
+    /// <summary>
+    /// Extracts constructor information from a type symbol.
+    /// </summary>
+    /// <param name="typeSymbol">The type symbol to extract constructors from.</param>
+    /// <returns>A list of constructor information.</returns>
+    private static List<Models.ConstructorInfo> ExtractConstructors(INamedTypeSymbol typeSymbol)
+    {
+        var constructors = new List<Models.ConstructorInfo>();
+        
+        // Get all public constructors
+        foreach (var ctor in typeSymbol.Constructors)
+        {
+            if (ctor.DeclaredAccessibility != Accessibility.Public)
+                continue;
+                
+            var ctorInfo = new Models.ConstructorInfo
+            {
+                Accessibility = ctor.DeclaredAccessibility,
+                IsPrimary = IsPrimaryConstructor(ctor)
+            };
+            
+            foreach (var param in ctor.Parameters)
+            {
+                ctorInfo.Parameters.Add(new Models.ParameterInfo
+                {
+                    TypeName = param.Type.ToDisplayString(),
+                    Name = param.Name,
+                    HasDefaultValue = param.HasExplicitDefaultValue,
+                    DefaultValue = param.HasExplicitDefaultValue 
+                        ? GetDefaultValueString(param) : null,
+                    Namespace = param.Type.ContainingNamespace?.ToDisplayString()
+                });
+            }
+            
+            constructors.Add(ctorInfo);
+        }
+        
+        return constructors;
+    }
+    
+    /// <summary>
+    /// Determines if a constructor is a primary constructor.
+    /// </summary>
+    private static bool IsPrimaryConstructor(IMethodSymbol constructor)
+    {
+        // For now, we'll consider a constructor primary if it's the only public constructor
+        // In C# 12+, we'd check for actual primary constructor syntax
+        return constructor.ContainingType.Constructors
+            .Count(c => c.DeclaredAccessibility == Accessibility.Public && !c.IsStatic) == 1;
+    }
+    
+    /// <summary>
+    /// Gets the default value string representation for a parameter.
+    /// </summary>
+    private static string? GetDefaultValueString(IParameterSymbol parameter)
+    {
+        if (!parameter.HasExplicitDefaultValue)
+            return null;
+            
+        var value = parameter.ExplicitDefaultValue;
+        if (value == null)
+            return "null";
+            
+        if (value is string str)
+            return $"\"{str}\"";
+            
+        if (value is char ch)
+            return $"'{ch}'";
+            
+        if (value is bool b)
+            return b ? "true" : "false";
+            
+        return value.ToString();
     }
 }

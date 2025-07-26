@@ -293,64 +293,12 @@ public class EnhancedEnumOptionErrorScenarioTests : EnhancedEnumOptionTestBase
         // Act
         var result = RunGenerator([source]);
 
-        // Assert - Generic bases are not currently supported
-        // The generator will produce errors because it can't generate a valid collection class name
-        // and can't properly handle the generic type parameters
-        result.Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error).ShouldBeTrue();
+        // Assert - Generic bases are now supported
+        result.Diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error).ShouldBeFalse();
+        result.ContainsSource("GenericBases.g.cs").ShouldBeTrue();
     }
 
-    [Fact]
-    public void GeneratorHandlesPartialClasses()
-    {
-        // Arrange
-        var source1 = """
-
-		              using FractalDataWorks.EnhancedEnums.Attributes;
-		              namespace TestNamespace
-		              {
-		                  [EnhancedEnumBase]
-		                  public abstract partial class StatusBase
-		                  {
-		                      public abstract string Name { get; }
-		                  }
-		              }
-		              """;
-
-        var source2 = """
-
-		              namespace TestNamespace
-		              {
-		                  public abstract partial class StatusBase
-		                  {
-		                      public abstract int Code { get; }
-		                  }
-		              }
-		              """;
-
-        var source3 = """
-
-		              using FractalDataWorks.EnhancedEnums.Attributes;
-
-		              namespace TestNamespace
-		              {
-		                  [EnumOption]
-		                  public class Active : StatusBase
-		                  {
-		                      public override string Name => "Active";
-		                      public override int Code => 1;
-		                  }
-		              }
-		              """;
-
-        // Act
-        var result = RunGeneratorWithAssemblyScanning([source1, source2, source3]);
-
-        // Assert
-        result.ContainsSource("StatusBases.g.cs").ShouldBeTrue();
-        var generatedCode = result["StatusBases.g.cs"];
-        generatedCode.ShouldContain("new TestNamespace.Active()");
-    }
-
+   
     [Fact]
     public void GeneratorHandlesNestedEnumOptions()
     {

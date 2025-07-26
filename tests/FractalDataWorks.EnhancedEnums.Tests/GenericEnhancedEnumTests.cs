@@ -40,8 +40,9 @@ public class GenericEnhancedEnumTests : EnhancedEnumOptionTestBase
         // Act
         var result = RunGenerator([source]);
         
-        // Assert
-        result.Diagnostics.ShouldBeEmpty();
+        // Assert - We expect a warning about missing DefaultGenericReturnType
+        result.Diagnostics.Length.ShouldBe(1);
+        result.Diagnostics[0].Id.ShouldBe("ENH003");
         result.ContainsSource("Containers.g.cs").ShouldBeTrue();
         
         var generated = result["Containers.g.cs"];
@@ -71,7 +72,8 @@ public class GenericEnhancedEnumTests : EnhancedEnumOptionTestBase
         var source = @"
             using FractalDataWorks.EnhancedEnums.Attributes;
             using System;
-            
+            using System.IO;
+
             namespace TestNamespace
             {
                 [EnhancedEnumBase]
@@ -81,7 +83,7 @@ public class GenericEnhancedEnumTests : EnhancedEnumOptionTestBase
                 }
                 
                 [EnumOption]
-                public class FileService : Service<System.IO.FileStream>
+                public class FileService : Service<FileStream>
                 {
                     public override string Name => ""File"";
                 }
@@ -100,13 +102,10 @@ public class GenericEnhancedEnumTests : EnhancedEnumOptionTestBase
         // Check if the generated code has all expected parts
         generated.ShouldContain("using System;");
         
-        // Print first few lines to debug
-        var lines = generated.Split('\n').Take(20);
-        System.Console.WriteLine("First 20 lines of generated code:");
-        foreach (var line in lines)
-        {
-            System.Console.WriteLine(line);
-        }
+        // Print full generated code to debug
+        System.Console.WriteLine("=== FULL GENERATED CODE ===");
+        System.Console.WriteLine(generated);
+        System.Console.WriteLine("=== END GENERATED CODE ===");
         
         // The generator should include System.IO because FileStream is used in the option type
         generated.ShouldContain("using System.IO;");
@@ -172,8 +171,9 @@ public class GenericEnhancedEnumTests : EnhancedEnumOptionTestBase
         // Act
         var result = RunGenerator([source]);
         
-        // Assert
-        result.Diagnostics.ShouldBeEmpty();
+        // Assert - We expect a warning about missing DefaultGenericReturnType
+        result.Diagnostics.Length.ShouldBe(1);
+        result.Diagnostics[0].Id.ShouldBe("ENH003");
         result.ContainsSource("Pipelines.g.cs").ShouldBeTrue();
     }
 }
