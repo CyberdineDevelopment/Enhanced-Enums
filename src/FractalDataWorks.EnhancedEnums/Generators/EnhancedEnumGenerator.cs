@@ -8,6 +8,7 @@ using FractalDataWorks.SmartGenerators;
 using FractalDataWorks.SmartGenerators.CodeBuilders;
 using FractalDataWorks.EnhancedEnums.Attributes;
 using FractalDataWorks.EnhancedEnums.Models;
+using FractalDataWorks.EnhancedEnums.Discovery;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -16,12 +17,36 @@ namespace FractalDataWorks.EnhancedEnums.Generators;
 /// <summary>
 /// Source generator for EnhancedEnumOption definitions.
 /// Sets up syntax providers and generates collection classes for enums.
+/// 
+/// HOW IT WORKS:
+/// 1. Scans for classes/interfaces with [EnhancedEnumBase] attribute
+/// 2. For each base type found, discovers all types with [EnumOption] that derive from it
+/// 3. Generates a static collection class with all discovered options
+/// 
+/// CROSS-ASSEMBLY DISCOVERY:
+/// When IncludeReferencedAssemblies=true on [EnhancedEnumBase], the generator:
+/// 1. Checks the IncludedEnhancedEnumAssemblies MSBuild property
+/// 2. Scans ONLY the assemblies listed in that property (semicolon-separated)
+/// 3. Discovers [EnumOption] types in those assemblies that derive from the base
+/// 4. Includes them in the generated collection
+/// 
+/// This ENABLES the Service Type Pattern:
+/// - Define base enum type in a shared assembly with [EnhancedEnumBase]
+/// - Create option types in plugin assemblies with [EnumOption]
+/// - In the main app, reference all assemblies and set IncludedEnhancedEnumAssemblies
+/// - The generated collection will include ALL options from ALL scanned assemblies
+/// 
+/// IMPORTANT: The assemblies must be built and referenced for this to work.
+/// The generator reads compiled assembly metadata, not source code.
 /// </summary>
 [Generator]
 public class EnhancedEnumOptionGenerator : IncrementalGeneratorBase<EnumTypeInfo>
 {
     // Cache for assembly types to avoid re-scanning
-    private static readonly ConcurrentDictionary<string, List<INamedTypeSymbol>> _assemblyTypeCache = [];
+    private static readonly ConcurrentDictionary<string, List<INamedTypeSymbol>> _assemblyTypeCache = new(StringComparer.Ordinal);
+    
+    // Cross-assembly discovery service
+    private static readonly CrossAssemblyTypeDiscoveryService _discoveryService = new CrossAssemblyTypeDiscoveryService();
     /// <summary>
     /// Generates the collection class for an enum definition with its values.
     /// </summary>
@@ -53,6 +78,27 @@ public class EnhancedEnumOptionGenerator : IncrementalGeneratorBase<EnumTypeInfo
         {
             effectiveReturnType = def.DefaultGenericReturnType;
         }
+        else if (def.IsGenericType)
+        {
+            // For generic types without a default return type, try to use constraints
+            effectiveReturnType = GetReturnTypeFromConstraints(baseTypeSymbol, def);
+            
+            if (effectiveReturnType == null)
+            {
+                // No suitable constraint found, use object as fallback
+                context.ReportDiagnostic(Diagnostic.Create(
+                    new DiagnosticDescriptor(
+                        "ENH003",
+                        "Generic enum base requires DefaultGenericReturnType",
+                        "Enhanced enum base type '{0}' is generic but doesn't specify DefaultGenericReturnType. Using 'object' as fallback.",
+                        "EnhancedEnumOptions",
+                        DiagnosticSeverity.Warning,
+                        isEnabledByDefault: true),
+                    null,
+                    def.FullTypeName));
+                effectiveReturnType = "object";
+            }
+        }
         else
         {
             effectiveReturnType = baseTypeSymbol != null ? DetectReturnType(baseTypeSymbol, compilation) : def.FullTypeName;
@@ -67,11 +113,17 @@ public class EnhancedEnumOptionGenerator : IncrementalGeneratorBase<EnumTypeInfo
 
 
         // Add private fields for storing instances
-        classBuilder.AddField($"List<{def.FullTypeName}>", "_all", field => field
+        // For generic types, use the effective return type for the list
+        var listType = def.IsGenericType && !string.IsNullOrEmpty(effectiveReturnType) 
+            ? effectiveReturnType 
+            : def.FullTypeName;
+            
+        
+        classBuilder.AddField($"List<{listType}>", "_all", field => field
             .MakePrivate()
             .MakeStatic()
             .MakeReadOnly()
-            .WithInitializer($"new List<{def.FullTypeName}>()"));
+            .WithInitializer($"new List<{listType}>()"));
         
         classBuilder.AddField($"ImmutableArray<{effectiveReturnType}>", "_cachedAll", field => field
             .MakePrivate()
@@ -335,6 +387,28 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
                     .WithXmlDocSummary($"Gets the {value.Name} instance."));
             }
         }
+        
+        // Generate static factory methods for each enum value
+        if (!values.IsEmpty)
+        {
+            classBuilder.AddCodeBlock("// Static factory methods");
+            foreach (var value in values)
+            {
+                var methodName = MakeValidIdentifier(value.Name);
+                
+                // Determine the return type for this specific value
+                var valueReturnType = !string.IsNullOrEmpty(value.ReturnType) 
+                    ? value.ReturnType 
+                    : (effectiveReturnType ?? def.FullTypeName);
+                
+                classBuilder.AddMethod(methodName, valueReturnType!, method => method
+                    .MakePublic()
+                    .MakeStatic()
+                    .WithXmlDocSummary($"Creates a new instance of {value.Name}.")
+                    .WithXmlDocReturns($"A new {value.Name} instance.")
+                    .WithExpressionBody($"new {value.FullTypeName}()"));
+            }
+        }
 
         // Generate Empty value
         GenerateEmptyValue(classBuilder, def, effectiveReturnType, baseTypeSymbol);
@@ -353,11 +427,44 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
         sourceCode.AppendLine("using System.Collections.Frozen;");
         sourceCode.AppendLine("#endif");
         
-        // Add required namespaces from generic constraints
-        foreach (var ns in def.RequiredNamespaces.OrderBy(n => n,StringComparer.Ordinal))
+        // Extract additional namespaces from enum values
+        var additionalNamespaces = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var value in values)
         {
-            if (!ns.StartsWith("System", StringComparison.Ordinal) && 
-                !string.Equals(ns, targetNamespace, StringComparison.Ordinal))
+            // From return type overrides
+            if (!string.IsNullOrEmpty(value.ReturnTypeNamespace))
+            {
+                additionalNamespaces.Add(value.ReturnTypeNamespace!);
+            }
+            
+            // From constructor parameters
+            foreach (var ctor in value.Constructors)
+            {
+                foreach (var param in ctor.Parameters)
+                {
+                    if (!string.IsNullOrEmpty(param.Namespace) && !param.Namespace!.StartsWith("System", StringComparison.Ordinal))
+                    {
+                        additionalNamespaces.Add(param.Namespace);
+                    }
+                }
+            }
+        }
+        
+        // Merge additional namespaces with RequiredNamespaces
+        foreach (var ns in additionalNamespaces)
+        {
+            def.RequiredNamespaces.Add(ns);
+        }
+        
+        // Add required namespaces from generic constraints
+        foreach (var ns in def.RequiredNamespaces.OrderBy(n => n, StringComparer.Ordinal))
+        {
+            // Skip the current namespace and the standard System namespaces we already added
+            if (!string.Equals(ns, targetNamespace, StringComparison.Ordinal) &&
+                !string.Equals(ns, "System", StringComparison.Ordinal) &&
+                !string.Equals(ns, "System.Linq", StringComparison.Ordinal) &&
+                !string.Equals(ns, "System.Collections.Generic", StringComparison.Ordinal) &&
+                !string.Equals(ns, "System.Collections.Immutable", StringComparison.Ordinal))
             {
                 sourceCode.AppendLine($"using {ns};");
             }
@@ -477,7 +584,24 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
         var values = new List<EnumValueInfo>();
 
         // Find the base type symbol from the compilation
-        var baseTypeSymbol = compilation.GetTypeByMetadataName(def.FullTypeName);
+        INamedTypeSymbol? baseTypeSymbol = null;
+        
+        // For generic types, we need to find them differently
+        if (def.IsGenericType)
+        {
+            // Try to find the type by searching through all types in the namespace
+            var namespaceSymbol = GetNamespaceSymbol(compilation, def.Namespace);
+            if (namespaceSymbol != null)
+            {
+                baseTypeSymbol = FindTypeInNamespace(namespaceSymbol, def.ClassName);
+            }
+        }
+        else
+        {
+            // For non-generic types, use the metadata name
+            baseTypeSymbol = compilation.GetTypeByMetadataName(def.FullTypeName);
+        }
+        
         if (baseTypeSymbol == null)
         {
             // Type not found - this shouldn't happen but let's handle it gracefully
@@ -494,12 +618,8 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
             return;
         }
 
-        // Determine the effective return type
-        if (string.IsNullOrEmpty(def.ReturnType))
-        {
-            // Auto-detect from implemented interfaces
-            def.ReturnType = DetectReturnType(baseTypeSymbol, compilation);
-        }
+        // Don't modify def.ReturnType here - it should remain as specified in the attribute or empty
+        // The GenerateCollection method will handle determining the effective return type
 
         // Collect all types with EnumOption attribute
         var allTypes = new List<INamedTypeSymbol>();
@@ -527,42 +647,39 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
         }
 
         // Step 2: Scan referenced assemblies if enabled
+        // CROSS-ASSEMBLY DISCOVERY:
+        // This is where the "magic" happens for the Service Type Pattern.
+        // We scan compiled assemblies (DLLs) that are referenced by this project.
+        // Each assembly declares if it wants to be discovered via IncludeInEnhancedEnumAssemblies.
+        // We're reading assembly METADATA, not executing code, so this is safe and fast.
         if (def.IncludeReferencedAssemblies)
         {
-            foreach (var reference in compilation.References)
-            {
-                if (compilation.GetAssemblyOrModuleSymbol(reference) is IAssemblySymbol assembly)
-                {
-                    // Use cached types if available
-                    var assemblyKey = assembly.Identity.ToString();
-                    var typesInAssembly = _assemblyTypeCache.GetOrAdd(assemblyKey, _ =>
-                    {
-                        // Get all types from the assembly
-                        return GetAllTypesInNamespace(assembly.GlobalNamespace).ToList();
-                    });
-                    
-                    // Filter for types with EnumOption attribute
-                    foreach (var type in typesInAssembly)
-                    {
-                        if (HasEnumOptionAttribute(type))
-                        {
-                            allTypes.Add(type);
-                        }
-                    }
-                }
-            }
+            // Find the EnumOption attribute type
+            var enumOptionAttribute = compilation.GetTypeByMetadataName("FractalDataWorks.EnhancedEnums.Attributes.EnumOptionAttribute");
             
-            // Report diagnostic about cross-assembly scanning
-            var assemblyCount = compilation.References.Count();
-            context.ReportDiagnostic(Diagnostic.Create(
-                new DiagnosticDescriptor(
-                    "ENH_INFO_001",
-                    "Cross-assembly scan complete",
-                    $"Scanned {assemblyCount} referenced assemblies for enum options",
-                    "EnhancedEnumOptions",
-                    DiagnosticSeverity.Info,
-                    isEnabledByDefault: true),
-                null));
+            if (enumOptionAttribute != null)
+            {
+                // Use the discovery service to find types with EnumOption attribute
+                // The service will only return types from assemblies that have opted in
+                var typesWithAttribute = _discoveryService.FindTypesWithAttribute(enumOptionAttribute, compilation);
+                
+                foreach (var type in typesWithAttribute)
+                {
+                    allTypes.Add(type);
+                }
+                
+                // Report diagnostic about cross-assembly scanning
+                var typeCount = typesWithAttribute.Count();
+                context.ReportDiagnostic(Diagnostic.Create(
+                    new DiagnosticDescriptor(
+                        "ENH_INFO_001",
+                        "Cross-assembly scan complete",
+                        $"Found {typeCount} types with EnumOption attribute from assemblies that opted in",
+                        "EnhancedEnumOptions",
+                        DiagnosticSeverity.Info,
+                        isEnabledByDefault: true),
+                    null));
+            }
         }
 
         // Process all found types
@@ -597,13 +714,26 @@ string.Equals(ad.AttributeClass?.Name, "EnumOption", StringComparison.Ordinal))
 
                 if (MatchesDefinition(typeSymbol, baseTypeSymbol))
                 {
+                    // Extract return type from attribute if specified
+                    var returnType = named.TryGetValue(nameof(EnumOptionAttribute.ReturnType), out var rt) && rt.Value is string rts
+                        ? rts : null;
+                    var returnTypeNamespace = named.TryGetValue(nameof(EnumOptionAttribute.ReturnTypeNamespace), out var rtn) && rtn.Value is string rtns
+                        ? rtns : null;
+                    
                     var info = new EnumValueInfo
                     {
                         ShortTypeName = typeSymbol.Name,
                         FullTypeName = typeSymbol.ToDisplayString(),
                         Name = name,
+                        ReturnType = returnType,
+                        ReturnTypeNamespace = returnTypeNamespace,
+                        Constructors = ExtractConstructors(typeSymbol)
                     };
                     values.Add(info);
+                    
+                    // Extract namespaces from the option type's base type arguments
+                    ExtractNamespacesFromOptionType(typeSymbol, baseTypeSymbol, def);
+                    
                     break; // Only add once per type per collection, even if multiple matching attributes
                 }
             }
@@ -621,8 +751,15 @@ string.Equals(ad.AttributeClass?.Name, "EnumOption", StringComparison.Ordinal))
     /// <returns>True if the value matches the definition; otherwise, false.</returns>
     private static bool MatchesDefinition(INamedTypeSymbol valueSymbol, INamedTypeSymbol baseTypeSymbol)
     {
+        // For generic types, we need to compare the unbound type definitions
+        var baseToCompare = baseTypeSymbol.IsGenericType ? baseTypeSymbol.OriginalDefinition : baseTypeSymbol;
+        
         // interface implementation
-        if (valueSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, baseTypeSymbol)))
+        if (valueSymbol.AllInterfaces.Any(i => 
+        {
+            var interfaceToCompare = i.IsGenericType ? i.OriginalDefinition : i;
+            return SymbolEqualityComparer.Default.Equals(interfaceToCompare, baseToCompare);
+        }))
         {
             return true;
         }
@@ -630,7 +767,8 @@ string.Equals(ad.AttributeClass?.Name, "EnumOption", StringComparison.Ordinal))
         // base type inheritance
         for (var baseType = valueSymbol.BaseType; baseType != null; baseType = baseType.BaseType)
         {
-            if (SymbolEqualityComparer.Default.Equals(baseType, baseTypeSymbol))
+            var currentToCompare = baseType.IsGenericType ? baseType.OriginalDefinition : baseType;
+            if (SymbolEqualityComparer.Default.Equals(currentToCompare, baseToCompare))
             {
                 return true;
             }
@@ -1011,6 +1149,34 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
     }
 
     /// <summary>
+    /// Gets the return type from generic type constraints.
+    /// </summary>
+    private static string? GetReturnTypeFromConstraints(INamedTypeSymbol? baseTypeSymbol, EnumTypeInfo def)
+    {
+        if (baseTypeSymbol == null || !baseTypeSymbol.IsGenericType)
+            return null;
+            
+        // Check if we have exactly one type parameter with a single interface or class constraint
+        if (baseTypeSymbol.TypeParameters.Length == 1)
+        {
+            var typeParam = baseTypeSymbol.TypeParameters[0];
+            var constraints = typeParam.ConstraintTypes;
+            
+            // If there's exactly one constraint that's not a value type, use it
+            if (constraints.Length == 1)
+            {
+                var constraint = constraints[0];
+                if (constraint.TypeKind == TypeKind.Interface || constraint.TypeKind == TypeKind.Class)
+                {
+                    return constraint.ToDisplayString();
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    /// <summary>
     /// Extracts namespace information from a type symbol.
     /// </summary>
     private static void ExtractNamespacesFromType(ITypeSymbol type, HashSet<string> namespaces)
@@ -1026,6 +1192,50 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
             foreach (var arg in namedType.TypeArguments)
             {
                 ExtractNamespacesFromType(arg, namespaces);
+            }
+        }
+    }
+    
+    /// <summary>
+    /// Extracts namespaces from an option type's inheritance hierarchy.
+    /// </summary>
+    private static void ExtractNamespacesFromOptionType(INamedTypeSymbol optionType, INamedTypeSymbol baseTypeSymbol, EnumTypeInfo def)
+    {
+        // Extract namespaces from the option type itself
+        ExtractNamespacesFromType(optionType, def.RequiredNamespaces);
+        
+        // Walk up the inheritance chain to find the base type
+        for (var current = optionType.BaseType; current != null; current = current.BaseType)
+        {
+            // If this is a generic type, extract namespaces from type arguments
+            if (current.IsGenericType)
+            {
+                foreach (var typeArg in current.TypeArguments)
+                {
+                    ExtractNamespacesFromType(typeArg, def.RequiredNamespaces);
+                }
+            }
+            
+            // If we've reached the base type, stop
+            // For generic types, we need to compare the unbound/original definition
+            var currentToCompare = current.IsGenericType ? current.OriginalDefinition : current;
+            var baseToCompare = baseTypeSymbol.IsGenericType ? baseTypeSymbol.OriginalDefinition : baseTypeSymbol;
+            
+            if (SymbolEqualityComparer.Default.Equals(currentToCompare, baseToCompare))
+            {
+                break;
+            }
+        }
+        
+        // Also extract from interfaces in case the base type is an interface
+        foreach (var iface in optionType.AllInterfaces)
+        {
+            if (iface.IsGenericType)
+            {
+                foreach (var typeArg in iface.TypeArguments)
+                {
+                    ExtractNamespacesFromType(typeArg, def.RequiredNamespaces);
+                }
             }
         }
     }
@@ -1054,8 +1264,50 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
     private static bool HasEnumOptionAttribute(INamedTypeSymbol type)
     {
         return type.GetAttributes().Any(attr =>
-            String.Equals(attr.AttributeClass?.Name , "EnumOptionAttribute",StringComparison.Ordinal) ||
-            string.Equals(attr.AttributeClass?.Name , "EnumOption",StringComparison.Ordinal));
+            string.Equals(attr.AttributeClass?.Name, "EnumOptionAttribute", StringComparison.Ordinal) ||
+            string.Equals(attr.AttributeClass?.Name, "EnumOption", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// Gets a namespace symbol from a compilation by its full name.
+    /// </summary>
+    private static INamespaceSymbol? GetNamespaceSymbol(Compilation compilation, string namespaceName)
+    {
+        if (string.IsNullOrEmpty(namespaceName))
+            return compilation.GlobalNamespace;
+            
+        var parts = namespaceName.Split('.');
+        var current = compilation.GlobalNamespace;
+        
+        foreach (var part in parts)
+        {
+            current = current.GetNamespaceMembers().FirstOrDefault(n => string.Equals(n.Name, part, StringComparison.Ordinal));
+            if (current == null)
+                return null;
+        }
+        
+        return current;
+    }
+
+    /// <summary>
+    /// Finds a type in a namespace by name.
+    /// </summary>
+    private static INamedTypeSymbol? FindTypeInNamespace(INamespaceSymbol namespaceSymbol, string typeName)
+    {
+        // Direct search in the namespace
+        var type = namespaceSymbol.GetTypeMembers(typeName).FirstOrDefault();
+        if (type != null)
+            return type;
+            
+        // Search in nested namespaces
+        foreach (var nestedNamespace in namespaceSymbol.GetNamespaceMembers())
+        {
+            type = FindTypeInNamespace(nestedNamespace, typeName);
+            if (type != null)
+                return type;
+        }
+        
+        return null;
     }
 
     /// <summary>
@@ -1100,5 +1352,80 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
                 yield return deeplyNested;
             }
         }
+    }
+    
+    /// <summary>
+    /// Extracts constructor information from a type symbol.
+    /// </summary>
+    /// <param name="typeSymbol">The type symbol to extract constructors from.</param>
+    /// <returns>A list of constructor information.</returns>
+    private static List<Models.ConstructorInfo> ExtractConstructors(INamedTypeSymbol typeSymbol)
+    {
+        var constructors = new List<Models.ConstructorInfo>();
+        
+        // Get all public constructors
+        foreach (var ctor in typeSymbol.Constructors)
+        {
+            if (ctor.DeclaredAccessibility != Accessibility.Public)
+                continue;
+                
+            var ctorInfo = new Models.ConstructorInfo
+            {
+                Accessibility = ctor.DeclaredAccessibility,
+                IsPrimary = IsPrimaryConstructor(ctor)
+            };
+            
+            foreach (var param in ctor.Parameters)
+            {
+                ctorInfo.Parameters.Add(new Models.ParameterInfo
+                {
+                    TypeName = param.Type.ToDisplayString(),
+                    Name = param.Name,
+                    HasDefaultValue = param.HasExplicitDefaultValue,
+                    DefaultValue = param.HasExplicitDefaultValue 
+                        ? GetDefaultValueString(param) : null,
+                    Namespace = param.Type.ContainingNamespace?.ToDisplayString()
+                });
+            }
+            
+            constructors.Add(ctorInfo);
+        }
+        
+        return constructors;
+    }
+    
+    /// <summary>
+    /// Determines if a constructor is a primary constructor.
+    /// </summary>
+    private static bool IsPrimaryConstructor(IMethodSymbol constructor)
+    {
+        // For now, we'll consider a constructor primary if it's the only public constructor
+        // In C# 12+, we'd check for actual primary constructor syntax
+        return constructor.ContainingType.Constructors
+            .Count(c => c.DeclaredAccessibility == Accessibility.Public && !c.IsStatic) == 1;
+    }
+    
+    /// <summary>
+    /// Gets the default value string representation for a parameter.
+    /// </summary>
+    private static string? GetDefaultValueString(IParameterSymbol parameter)
+    {
+        if (!parameter.HasExplicitDefaultValue)
+            return null;
+            
+        var value = parameter.ExplicitDefaultValue;
+        if (value == null)
+            return "null";
+            
+        if (value is string str)
+            return $"\"{str}\"";
+            
+        if (value is char ch)
+            return $"'{ch}'";
+            
+        if (value is bool b)
+            return b ? "true" : "false";
+            
+        return value.ToString();
     }
 }
