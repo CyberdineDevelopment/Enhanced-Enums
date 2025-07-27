@@ -1022,6 +1022,12 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
 
             // Add lookup property overrides
             builder.AddCodeBlock(BuildLookupPropertiesForEmpty(def));
+            
+            // Add abstract method implementations
+            if (baseTypeSymbol != null)
+            {
+                builder.AddCodeBlock(BuildAbstractMethodImplementations(baseTypeSymbol));
+            }
         });
     }
     
@@ -1037,6 +1043,91 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
         {
             var defaultValue = GetDefaultValueForType(lookup.PropertyType);
             sb.AppendLine($"public override {lookup.PropertyType} {lookup.PropertyName} => {defaultValue};");
+        }
+        
+        return sb.ToString().TrimEnd();
+    }
+    
+    /// <summary>
+    /// Builds implementations for abstract methods in the base type.
+    /// </summary>
+    private static string BuildAbstractMethodImplementations(INamedTypeSymbol baseType)
+    {
+        var sb = new StringBuilder();
+        var abstractMethods = new List<IMethodSymbol>();
+        
+        // Collect all abstract methods from the inheritance hierarchy
+        var currentType = baseType;
+        while (currentType != null)
+        {
+            abstractMethods.AddRange(currentType.GetMembers()
+                .OfType<IMethodSymbol>()
+                .Where(m => m.IsAbstract && !m.IsStatic && m.MethodKind == MethodKind.Ordinary));
+            
+            currentType = currentType.BaseType;
+        }
+        
+        // Generate implementations for each abstract method
+        foreach (var method in abstractMethods.Distinct(SymbolEqualityComparer.Default).Cast<IMethodSymbol>())
+        {
+            // Build method signature
+            var modifiers = "public override";
+            var returnType = method.ReturnType.ToDisplayString();
+            var methodName = method.Name;
+            var parameters = string.Join(", ", method.Parameters.Select(p => 
+                $"{p.Type.ToDisplayString()} {p.Name}"));
+            
+            sb.AppendLine($"{modifiers} {returnType} {methodName}({parameters})");
+            sb.AppendLine("{");
+            
+            // Generate appropriate return value or throw
+            if (method.ReturnsVoid)
+            {
+                sb.AppendLine("    // Empty implementation for void method");
+            }
+            else
+            {
+                var defaultValue = GetDefaultValueForType(returnType);
+                if (string.Equals(defaultValue, "null!", StringComparison.Ordinal))
+                {
+                    sb.AppendLine($"    throw new NotImplementedException(\"Empty value does not support {methodName}\");");
+                }
+                else
+                {
+                    sb.AppendLine($"    return {defaultValue};");
+                }
+            }
+            
+            sb.AppendLine("}");
+            sb.AppendLine();
+        }
+        
+        // Also handle abstract properties
+        var abstractProperties = new List<IPropertySymbol>();
+        currentType = baseType;
+        while (currentType != null)
+        {
+            abstractProperties.AddRange(currentType.GetMembers()
+                .OfType<IPropertySymbol>()
+                .Where(p => p.IsAbstract && !p.IsStatic));
+            
+            currentType = currentType.BaseType;
+        }
+        
+        foreach (var property in abstractProperties.Distinct(SymbolEqualityComparer.Default).Cast<IPropertySymbol>())
+        {
+            var propertyType = property.Type.ToDisplayString();
+            var propertyName = property.Name;
+            
+            if (property.GetMethod != null)
+            {
+                var defaultValue = GetDefaultValueForType(propertyType);
+                sb.AppendLine($"public override {propertyType} {propertyName} => {defaultValue};");
+            }
+            else if (property.SetMethod != null)
+            {
+                sb.AppendLine($"public override {propertyType} {propertyName} {{ set {{ }} }}");
+            }
         }
         
         return sb.ToString().TrimEnd();
