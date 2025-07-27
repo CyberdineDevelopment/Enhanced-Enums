@@ -87,6 +87,9 @@
 			<!-- Include build props and targets files for cross-assembly discovery -->
 			<None Include="build\FractalDataWorks.EnhancedEnums.props" Pack="true" PackagePath="build" />
 			<None Include="build\FractalDataWorks.EnhancedEnums.targets" Pack="true" PackagePath="build" />
+			<!-- Also include in buildTransitive for development dependency packages -->
+			<None Include="buildTransitive\FractalDataWorks.EnhancedEnums.props" Pack="true" PackagePath="buildTransitive" />
+			<None Include="buildTransitive\FractalDataWorks.EnhancedEnums.targets" Pack="true" PackagePath="buildTransitive" />
 		</ItemGroup>
   
   <ItemGroup>

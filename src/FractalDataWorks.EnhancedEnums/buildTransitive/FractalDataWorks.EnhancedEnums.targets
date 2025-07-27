@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <!-- 
+    This targets file converts the IncludeInEnhancedEnumAssemblies MSBuild property
+    into an AssemblyMetadataAttribute so the Enhanced Enums generator can read it.
+    
+    Usage in consuming projects:
+    <PropertyGroup>
+      <IncludeInEnhancedEnumAssemblies>Main;Services;OtherAssembly</IncludeInEnhancedEnumAssemblies>
+    </PropertyGroup>
+  -->
+  
+  <ItemGroup Condition="'$(IncludeInEnhancedEnumAssemblies)' != ''">
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>IncludeInEnhancedEnumAssemblies</_Parameter1>
+      <_Parameter2>$(IncludeInEnhancedEnumAssemblies)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>
