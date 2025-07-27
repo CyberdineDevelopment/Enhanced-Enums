@@ -699,12 +699,44 @@ string.Equals(ad.AttributeClass?.Name, "EnumOption", StringComparison.Ordinal))
             foreach (var attr in attrs)
             {
                 var named = attr.NamedArguments.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-                var name = named.TryGetValue(nameof(EnumOptionAttribute.Name), out var n) && n.Value is string ns
-                    ? ns : typeSymbol.Name;
-
-                // Check if this enum option specifies a collection name
-                var collectionName = named.TryGetValue(nameof(EnumOptionAttribute.CollectionName), out var cn) && cn.Value is string cns
-                    ? cns : null;
+                
+                // Extract values from constructor arguments (new way)
+                string? collectionName = null;
+                string? name = null;
+                int order = 0;
+                string? returnType = null;
+                string? returnTypeNamespace = null;
+                
+                if (attr.ConstructorArguments.Length > 0)
+                {
+                    // Constructor: EnumOptionAttribute(string? collectionName = null, string? name = null, int order = 0, string? returnType = null, string? returnTypeNamespace = null)
+                    if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is string cname)
+                        collectionName = cname;
+                    if (attr.ConstructorArguments.Length > 1 && attr.ConstructorArguments[1].Value is string nm)
+                        name = nm;
+                    if (attr.ConstructorArguments.Length > 2 && attr.ConstructorArguments[2].Value is int o)
+                        order = o;
+                    if (attr.ConstructorArguments.Length > 3 && attr.ConstructorArguments[3].Value is string rt)
+                        returnType = rt;
+                    if (attr.ConstructorArguments.Length > 4 && attr.ConstructorArguments[4].Value is string rtn)
+                        returnTypeNamespace = rtn;
+                }
+                
+                // Fall back to named arguments for backward compatibility
+                if (name == null && named.TryGetValue(nameof(EnumOptionAttribute.Name), out var n) && n.Value is string ns)
+                    name = ns;
+                if (named.TryGetValue(nameof(EnumOptionAttribute.Order), out var ord) && ord.Value is int o2)
+                    order = o2;
+                if (returnType == null && named.TryGetValue(nameof(EnumOptionAttribute.ReturnType), out var r) && r.Value is string rts)
+                    returnType = rts;
+                if (returnTypeNamespace == null && named.TryGetValue(nameof(EnumOptionAttribute.ReturnTypeNamespace), out var rn) && rn.Value is string rtns)
+                    returnTypeNamespace = rtns;
+                if (collectionName == null && named.TryGetValue(nameof(EnumOptionAttribute.CollectionName), out var cn) && cn.Value is string cns)
+                    collectionName = cns;
+                
+                // Default name to type name if not specified
+                if (string.IsNullOrEmpty(name))
+                    name = typeSymbol.Name;
 
                 // If a collection name is specified, only include this option in matching collections
                 if (!string.IsNullOrEmpty(collectionName) && !string.Equals(collectionName, def.CollectionName, StringComparison.OrdinalIgnoreCase))
@@ -714,17 +746,13 @@ string.Equals(ad.AttributeClass?.Name, "EnumOption", StringComparison.Ordinal))
 
                 if (MatchesDefinition(typeSymbol, baseTypeSymbol))
                 {
-                    // Extract return type from attribute if specified
-                    var returnType = named.TryGetValue(nameof(EnumOptionAttribute.ReturnType), out var rt) && rt.Value is string rts
-                        ? rts : null;
-                    var returnTypeNamespace = named.TryGetValue(nameof(EnumOptionAttribute.ReturnTypeNamespace), out var rtn) && rtn.Value is string rtns
-                        ? rtns : null;
                     
                     var info = new EnumValueInfo
                     {
                         ShortTypeName = typeSymbol.Name,
                         FullTypeName = typeSymbol.ToDisplayString(),
-                        Name = name,
+                        Name = name!,
+                        Order = order,
                         ReturnType = returnType,
                         ReturnTypeNamespace = returnTypeNamespace,
                         Constructors = ExtractConstructors(typeSymbol)
@@ -739,8 +767,11 @@ string.Equals(ad.AttributeClass?.Name, "EnumOption", StringComparison.Ordinal))
             }
         }
 
+        // Sort values by Order, then by Name
+        var sortedValues = values.OrderBy(v => v.Order).ThenBy(v => v.Name, StringComparer.Ordinal).ToList();
+
         // Generate the collection class
-        GenerateCollection(context, def, new EquatableArray<EnumValueInfo>(values), compilation);
+        GenerateCollection(context, def, new EquatableArray<EnumValueInfo>(sortedValues), compilation);
     }
 
     /// <summary>
