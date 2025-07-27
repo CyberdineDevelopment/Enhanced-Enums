@@ -394,7 +394,7 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
             classBuilder.AddCodeBlock("// Static factory methods");
             foreach (var value in values)
             {
-                var methodName = MakeValidIdentifier(value.Name);
+                var methodName = $"Create{MakeValidIdentifier(value.Name)}";
                 
                 // Determine the return type for this specific value
                 var valueReturnType = !string.IsNullOrEmpty(value.ReturnType) 
