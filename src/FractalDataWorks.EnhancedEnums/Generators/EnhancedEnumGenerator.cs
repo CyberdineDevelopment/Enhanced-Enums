@@ -1070,14 +1070,58 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
         // Generate implementations for each abstract method
         foreach (var method in abstractMethods.Distinct(SymbolEqualityComparer.Default).Cast<IMethodSymbol>())
         {
-            // Build method signature
-            var modifiers = "public override";
+            // Build method signature respecting access modifiers
+            var accessibility = method.DeclaredAccessibility switch
+            {
+                Accessibility.Protected => "protected",
+                Accessibility.Internal => "internal",
+                Accessibility.ProtectedOrInternal => "protected internal",
+                Accessibility.ProtectedAndInternal => "private protected",
+                _ => "public"
+            };
+            var modifiers = $"{accessibility} override";
             var returnType = method.ReturnType.ToDisplayString();
             var methodName = method.Name;
+            
+            // Handle generic methods
+            var typeParameters = "";
+            var constraints = "";
+            if (method.IsGenericMethod)
+            {
+                typeParameters = $"<{string.Join(", ", method.TypeParameters.Select(tp => tp.Name))}>";
+                var constraintsList = new List<string>();
+                foreach (var tp in method.TypeParameters)
+                {
+                    var tpConstraints = new List<string>();
+                    
+                    if (tp.HasReferenceTypeConstraint)
+                        tpConstraints.Add("class");
+                    if (tp.HasValueTypeConstraint)
+                        tpConstraints.Add("struct");
+                    if (tp.HasConstructorConstraint)
+                        tpConstraints.Add("new()");
+                    
+                    foreach (var constraintType in tp.ConstraintTypes)
+                    {
+                        tpConstraints.Add(constraintType.ToDisplayString());
+                    }
+                    
+                    if (tpConstraints.Count > 0)
+                    {
+                        constraintsList.Add($"where {tp.Name} : {string.Join(", ", tpConstraints)}");
+                    }
+                }
+                
+                if (constraintsList.Count > 0)
+                {
+                    constraints = " " + string.Join(" ", constraintsList);
+                }
+            }
+            
             var parameters = string.Join(", ", method.Parameters.Select(p => 
                 $"{p.Type.ToDisplayString()} {p.Name}"));
             
-            sb.AppendLine($"{modifiers} {returnType} {methodName}({parameters})");
+            sb.AppendLine($"{modifiers} {returnType} {methodName}{typeParameters}({parameters}){constraints}");
             sb.AppendLine("{");
             
             // Generate appropriate return value or throw
@@ -1119,14 +1163,36 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
             var propertyType = property.Type.ToDisplayString();
             var propertyName = property.Name;
             
-            if (property.GetMethod != null)
+            // Determine property accessibility based on getter/setter
+            var getterAccessibility = property.GetMethod?.DeclaredAccessibility ?? Accessibility.Private;
+            var setterAccessibility = property.SetMethod?.DeclaredAccessibility ?? Accessibility.Private;
+            var propertyAccessibility = (Accessibility)Math.Max((int)getterAccessibility, (int)setterAccessibility);
+            
+            var accessibility = propertyAccessibility switch
             {
+                Accessibility.Protected => "protected",
+                Accessibility.Internal => "internal",
+                Accessibility.ProtectedOrInternal => "protected internal",
+                Accessibility.ProtectedAndInternal => "private protected",
+                _ => "public"
+            };
+            
+            if (property.GetMethod != null && property.SetMethod == null)
+            {
+                // Read-only property
                 var defaultValue = GetDefaultValueForType(propertyType);
-                sb.AppendLine($"public override {propertyType} {propertyName} => {defaultValue};");
+                sb.AppendLine($"{accessibility} override {propertyType} {propertyName} => {defaultValue};");
             }
-            else if (property.SetMethod != null)
+            else if (property.SetMethod != null && property.GetMethod == null)
             {
-                sb.AppendLine($"public override {propertyType} {propertyName} {{ set {{ }} }}");
+                // Write-only property
+                sb.AppendLine($"{accessibility} override {propertyType} {propertyName} {{ set {{ }} }}");
+            }
+            else if (property.GetMethod != null && property.SetMethod != null)
+            {
+                // Read-write property
+                var defaultValue = GetDefaultValueForType(propertyType);
+                sb.AppendLine($"{accessibility} override {propertyType} {propertyName} {{ get => {defaultValue}; set {{ }} }}");
             }
         }
         
