@@ -84,8 +84,9 @@
 			<None Include="$(OutputPath)\FractalDataWorks.SmartGenerators.CodeBuilders.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
 			<!-- Include code fixes assembly if it exists -->
 			<None Include="$(OutputPath)\FractalDataWorks.EnhancedEnums.CodeFixes.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" Condition="Exists('$(OutputPath)\FractalDataWorks.EnhancedEnums.CodeFixes.dll')" />
-			<!-- Include build props file for cross-assembly discovery -->
+			<!-- Include build props and targets files for cross-assembly discovery -->
 			<None Include="build\FractalDataWorks.EnhancedEnums.props" Pack="true" PackagePath="build" />
+			<None Include="build\FractalDataWorks.EnhancedEnums.targets" Pack="true" PackagePath="build" />
 		</ItemGroup>
   
   <ItemGroup>
