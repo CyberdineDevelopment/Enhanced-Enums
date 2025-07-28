@@ -654,11 +654,33 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
         // We're reading assembly METADATA, not executing code, so this is safe and fast.
         if (def.IncludeReferencedAssemblies)
         {
+            // Log diagnostic that we're starting cross-assembly scan
+            context.ReportDiagnostic(Diagnostic.Create(
+                new DiagnosticDescriptor(
+                    "ENH_INFO_002",
+                    "Starting cross-assembly scan",
+                    $"Starting cross-assembly scan for collection '{def.CollectionName}' with base type '{baseTypeSymbol.Name}' in assembly '{compilation.AssemblyName}'",
+                    "EnhancedEnumOptions",
+                    DiagnosticSeverity.Info,
+                    isEnabledByDefault: true),
+                null));
+            
             // Find the EnumOption attribute type
             var enumOptionAttribute = compilation.GetTypeByMetadataName("FractalDataWorks.EnhancedEnums.Attributes.EnumOptionAttribute");
             
             if (enumOptionAttribute != null)
             {
+                // Log found attribute
+                context.ReportDiagnostic(Diagnostic.Create(
+                    new DiagnosticDescriptor(
+                        "ENH_INFO_003",
+                        "Found EnumOption attribute",
+                        $"Found EnumOption attribute type, proceeding with discovery",
+                        "EnhancedEnumOptions",
+                        DiagnosticSeverity.Info,
+                        isEnabledByDefault: true),
+                    null));
+                
                 // Use the discovery service to find types with EnumOption attribute
                 // The service will only return types from assemblies that have opted in
                 var typesWithAttribute = _discoveryService.FindTypesWithAttribute(enumOptionAttribute, compilation);
@@ -666,6 +688,17 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
                 foreach (var type in typesWithAttribute)
                 {
                     allTypes.Add(type);
+                    
+                    // Log each found type
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        new DiagnosticDescriptor(
+                            "ENH_INFO_004",
+                            "Found cross-assembly type",
+                            $"Found cross-assembly type '{type.Name}' from assembly '{type.ContainingAssembly?.Name}'",
+                            "EnhancedEnumOptions",
+                            DiagnosticSeverity.Info,
+                            isEnabledByDefault: true),
+                        null));
                 }
                 
                 // Report diagnostic about cross-assembly scanning
@@ -677,6 +710,18 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
                         $"Found {typeCount} types with EnumOption attribute from assemblies that opted in",
                         "EnhancedEnumOptions",
                         DiagnosticSeverity.Info,
+                        isEnabledByDefault: true),
+                    null));
+            }
+            else
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    new DiagnosticDescriptor(
+                        "ENH_WARN_001",
+                        "EnumOption attribute not found",
+                        $"Could not find EnumOption attribute type for cross-assembly discovery",
+                        "EnhancedEnumOptions",
+                        DiagnosticSeverity.Warning,
                         isEnabledByDefault: true),
                     null));
             }
