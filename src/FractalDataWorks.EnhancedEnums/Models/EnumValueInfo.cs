@@ -56,6 +56,26 @@ public sealed class EnumValueInfo : IInputInfo, IEquatable<EnumValueInfo>
     /// </summary>
     public HashSet<string> Categories => _categories;
 
+    /// <summary>
+    /// Gets or sets the return type for this enum value.
+    /// </summary>
+    public string? ReturnType { get; set; }
+
+    /// <summary>
+    /// Gets or sets the namespace for the return type.
+    /// </summary>
+    public string? ReturnTypeNamespace { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether to generate a factory method for this enum value.
+    /// </summary>
+    public bool? GenerateFactoryMethod { get; set; }
+
+    /// <summary>
+    /// Gets or sets the constructor information for this enum value.
+    /// </summary>
+    public List<ConstructorInfo> Constructors { get; set; } = new();
+
     // Note: ISymbol removed per Roslyn cookbook - symbols are never equatable
     // Extract needed information to other properties instead
 
@@ -93,6 +113,9 @@ public sealed class EnumValueInfo : IInputInfo, IEquatable<EnumValueInfo>
         writer.Write(Include);
         writer.Write(Order);
         writer.Write(Description ?? string.Empty);
+        writer.Write(ReturnType ?? string.Empty);
+        writer.Write(ReturnTypeNamespace ?? string.Empty);
+        writer.Write(GenerateFactoryMethod?.ToString() ?? string.Empty);
 
         foreach (var kv in Properties.OrderBy(p => p.Key, StringComparer.Ordinal))
         {
@@ -103,6 +126,20 @@ public sealed class EnumValueInfo : IInputInfo, IEquatable<EnumValueInfo>
         foreach (var cat in Categories.OrderBy(c => c, StringComparer.Ordinal))
         {
             writer.Write(cat);
+        }
+
+        foreach (var ctor in Constructors.OrderBy(c => c.Parameters.Count))
+        {
+            writer.Write(ctor.Accessibility.ToString());
+            writer.Write(ctor.IsPrimary);
+            foreach (var param in ctor.Parameters)
+            {
+                writer.Write(param.Name);
+                writer.Write(param.TypeName);
+                writer.Write(param.HasDefaultValue);
+                writer.Write(param.DefaultValue ?? string.Empty);
+                writer.Write(param.Namespace ?? string.Empty);
+            }
         }
     }
 
