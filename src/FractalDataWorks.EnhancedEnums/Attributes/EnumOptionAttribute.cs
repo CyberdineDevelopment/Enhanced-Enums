@@ -19,15 +19,4 @@ public sealed class EnumOptionAttribute : Attribute
     /// When the base enum has multiple collections defined, this specifies which collection(s) to include this option in.
     /// </summary>
     public string? CollectionName { get; set; }
-    
-    /// <summary>
-    /// Gets or sets the return type for this specific enum option.
-    /// This overrides the default return type specified in the EnhancedEnumBase attribute.
-    /// </summary>
-    public string? ReturnType { get; set; }
-    
-    /// <summary>
-    /// Gets or sets the namespace for the return type if it's not in the same namespace.
-    /// </summary>
-    public string? ReturnTypeNamespace { get; set; }
 }

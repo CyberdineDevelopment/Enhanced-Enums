@@ -55,22 +55,6 @@ public sealed class EnumValueInfo : IInputInfo, IEquatable<EnumValueInfo>
     /// Gets a set of categories associated with this enum value.
     /// </summary>
     public HashSet<string> Categories => _categories;
-    
-    /// <summary>
-    /// Gets or sets the override return type for this specific enum option.
-    /// This overrides the default return type specified in the base enum.
-    /// </summary>
-    public string? ReturnType { get; set; }
-    
-    /// <summary>
-    /// Gets or sets the namespace for the return type if specified.
-    /// </summary>
-    public string? ReturnTypeNamespace { get; set; }
-    
-    /// <summary>
-    /// Gets the list of constructors for this enum value type.
-    /// </summary>
-    public List<ConstructorInfo> Constructors { get; set; } = new();
 
     // Note: ISymbol removed per Roslyn cookbook - symbols are never equatable
     // Extract needed information to other properties instead
@@ -109,8 +93,6 @@ public sealed class EnumValueInfo : IInputInfo, IEquatable<EnumValueInfo>
         writer.Write(Include);
         writer.Write(Order);
         writer.Write(Description ?? string.Empty);
-        writer.Write(ReturnType ?? string.Empty);
-        writer.Write(ReturnTypeNamespace ?? string.Empty);
 
         foreach (var kv in Properties.OrderBy(p => p.Key, StringComparer.Ordinal))
         {
@@ -121,16 +103,6 @@ public sealed class EnumValueInfo : IInputInfo, IEquatable<EnumValueInfo>
         foreach (var cat in Categories.OrderBy(c => c, StringComparer.Ordinal))
         {
             writer.Write(cat);
-        }
-        
-        writer.Write($"Constructors:{Constructors.Count}");
-        foreach (var ctor in Constructors)
-        {
-            writer.Write($"Ctor:{ctor.Accessibility}:{ctor.IsPrimary}:{ctor.Parameters.Count}");
-            foreach (var param in ctor.Parameters)
-            {
-                writer.Write($"P:{param.TypeName}:{param.Name}:{param.HasDefaultValue}:{param.DefaultValue ?? "null"}");
-            }
         }
     }
 
@@ -163,10 +135,7 @@ string.Equals(ShortTypeName, other.ShortTypeName, StringComparison.Ordinal) &&
 string.Equals(Name, other.Name, StringComparison.Ordinal) &&
                      Include == other.Include &&
                      Order == other.Order &&
-string.Equals(Description, other.Description, StringComparison.Ordinal) &&
-string.Equals(ReturnType, other.ReturnType, StringComparison.Ordinal) &&
-string.Equals(ReturnTypeNamespace, other.ReturnTypeNamespace, StringComparison.Ordinal) &&
-                     Constructors.SequenceEqual(other.Constructors);
+string.Equals(Description, other.Description, StringComparison.Ordinal);
         if (!basic)
         {
             return false;
