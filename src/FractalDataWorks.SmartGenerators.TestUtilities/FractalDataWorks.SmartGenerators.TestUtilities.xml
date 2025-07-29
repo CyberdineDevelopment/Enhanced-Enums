@@ -1,0 +1,1335 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FractalDataWorks.SmartGenerators.TestUtilities</name>
+    </assembly>
+    <members>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.Attributes.GenerateCodeAttribute">
+            <summary>
+            Attribute used to mark classes for code generation in tests.
+            </summary>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.Attributes.GenerateEqualsAttribute">
+            <summary>
+            Attribute used to mark classes for generating Equals and GetHashCode methods in tests.
+            </summary>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations">
+            <summary>
+            Provides expectations for a class declaration.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations.#ctor(Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax)">
+            <summary>
+            Initializes a new instance of the <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations"/> class.
+            </summary>
+            <param name="classDeclaration">The class declaration to verify.</param>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations.HasMethod(System.String)">
+            <summary>
+            Expects the class to have a method with the specified name.
+            </summary>
+            <param name="methodName">The name of the method to find.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations.HasMethod(System.String,System.Action{FractalDataWorks.SmartGenerators.TestUtilities.MethodExpectations})">
+            <summary>
+            Expects the class to have a method with the specified name and adds more expectations for that method.
+            </summary>
+            <param name="methodName">The name of the method to find.</param>
+            <param name="methodExpectations">A callback to add expectations for the found method.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations.HasProperty(System.String)">
+            <summary>
+            Expects the class to have a property with the specified name.
+            </summary>
+            <param name="propertyName">The name of the property to find.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations.HasProperty(System.String,System.Action{FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations})">
+            <summary>
+            Expects the class to have a property with the specified name and adds more expectations for that property.
+            </summary>
+            <param name="propertyName">The name of the property to find.</param>
+            <param name="propertyExpectations">A callback to add expectations for the found property.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations.HasField(System.String)">
+            <summary>
+            Expects the class to have a field with the specified name.
+            </summary>
+            <param name="fieldName">The name of the field to find.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations.HasField(System.String,System.Action{FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations})">
+            <summary>
+            Expects the class to have a field with the specified name and adds more expectations for that field.
+            </summary>
+            <param name="fieldName">The name of the field to find.</param>
+            <param name="fieldExpectations">A callback to add expectations for the found field.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations.IsPublic">
+            <summary>
+            Expects the class to be public.
+            </summary>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations.IsInternal">
+            <summary>
+            Expects the class to be internal.
+            </summary>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations.IsStatic">
+            <summary>
+            Expects the class to be static.
+            </summary>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations.IsAbstract">
+            <summary>
+            Expects the class to be abstract.
+            </summary>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations.IsPartial">
+            <summary>
+            Expects the class to be partial.
+            </summary>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations.IsSealed">
+            <summary>
+            Expects the class to be sealed.
+            </summary>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations.HasBaseType(System.String)">
+            <summary>
+            Expects the class to have the specified base type.
+            </summary>
+            <param name="baseTypeName">The name of the base type.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="P:FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations.Properties">
+            <summary>
+            Gets a collection of property names defined in this class.
+            </summary>
+        </member>
+        <member name="P:FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations.Methods">
+            <summary>
+            Gets a collection of method names defined in this class.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations.ImplementsInterface(System.String)">
+            <summary>
+            Expects the class to implement the specified interface.
+            </summary>
+            <param name="interfaceName">The name of the interface to check for.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations.HasInterface(System.String)">
+            <summary>
+            Alias for ImplementsInterface.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations.HasModifier(System.String)">
+            <summary>
+            Expects the class to have the specified modifier token.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations.HasXmlDoc(System.String,System.String)">
+            <summary>
+            Expects the class to have XML documentation for the given tag with specified content.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.CodeBlockExpectations">
+            <summary>
+            Provides expectations for code blocks.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.CodeBlockExpectations.#ctor(Microsoft.CodeAnalysis.CSharp.Syntax.BlockSyntax)">
+            <summary>
+            Initializes a new instance of the <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.CodeBlockExpectations"/> class.
+            </summary>
+            <param name="blockSyntax">The syntax node being evaluated.</param>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.CodeBlockExpectations.HasStatementOfType``1">
+            <summary>
+            Expects the block to contain at least one statement of the specified type.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.CodeBlockExpectations.HasInvocation(System.String)">
+            <summary>
+            Expects the block to contain an invocation of the specified method name.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.CodeBlockExpectations.HasReturnStatement">
+            <summary>
+            Expects the block to contain a return statement.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.CodeBlockExpectations.HasStatementCount(System.Int32)">
+            <summary>
+            Expects the block to contain the specified number of statements.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.CodeBlockExpectations.HasStatement(System.Int32,System.String)">
+            <summary>
+            Expects the block's statement at the specified index to match the given text.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.CompilationVerifier">
+            <summary>
+            Helper class for verifying that generated code compiles and runs correctly.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.CompilationVerifier.CompileAndVerify(System.String[],Microsoft.CodeAnalysis.MetadataReference[])">
+            <summary>
+            Compiles the specified source code and verifies that it compiles without errors.
+            </summary>
+            <param name="sources">The source code to compile.</param>
+            <param name="additionalReferences">Additional assembly references to include.</param>
+            <returns>The compiled assembly.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.CompilationVerifier.CompileWithSourceGenerator(System.String[],Microsoft.CodeAnalysis.IIncrementalGenerator,Microsoft.CodeAnalysis.MetadataReference[])">
+            <summary>
+            Compiles source code with a source generator and returns the resulting assembly.
+            </summary>
+            <param name="sources">The source code to compile.</param>
+            <param name="generator">The source generator to run.</param>
+            <param name="additionalReferences">Additional assembly references to include.</param>
+            <returns>A tuple containing the compiled assembly and any diagnostics.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.CompilationVerifier.InvokeMethod(System.Reflection.Assembly,System.String,System.String,System.Object[])">
+            <summary>
+            Dynamically invokes a method in the specified assembly.
+            </summary>
+            <param name="assembly">The assembly.</param>
+            <param name="typeName">The type name.</param>
+            <param name="methodName">The method name.</param>
+            <param name="parameters">The method parameters.</param>
+            <returns>The result of the method invocation.</returns>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.ExpectationsFactory">
+            <summary>
+            Factory class for creating syntax tree expectations.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ExpectationsFactory.Expect(Microsoft.CodeAnalysis.SyntaxTree)">
+            <summary>
+            Creates expectations for a syntax tree.
+            </summary>
+            <param name="syntaxTree">The syntax tree to verify.</param>
+            <returns>A new syntax tree expectations instance.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ExpectationsFactory.ExpectCode(System.String)">
+            <summary>
+            Creates expectations for a generated code string.
+            </summary>
+            <param name="generatedCode">The generated code as a string, typically from CodeBuilder.ToString().</param>
+            <returns>A new syntax tree expectations instance for the generated code.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ExpectationsFactory.HasNamespace(Microsoft.CodeAnalysis.CSharp.Syntax.CompilationUnitSyntax,System.String,System.Action{FractalDataWorks.SmartGenerators.TestUtilities.NamespaceExpectations})">
+            <summary>
+            Expects the syntax tree to contain a namespace with the specified name.
+            </summary>
+            <param name="compilationUnit">The compilation unit to check.</param>
+            <param name="namespaceName">The name of the namespace to find.</param>
+            <param name="namespaceExpectations">A callback to add expectations for the found namespace.</param>
+            <returns>True if the namespace is found, otherwise false.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ExpectationsFactory.HasClass(Microsoft.CodeAnalysis.CSharp.Syntax.CompilationUnitSyntax,System.String,System.Action{FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations})">
+            <summary>
+            Expects the syntax tree to contain a class with the specified name.
+            </summary>
+            <param name="compilationUnit">The compilation unit to check.</param>
+            <param name="className">The name of the class to find.</param>
+            <param name="classExpectations">A callback to add expectations for the found class.</param>
+            <returns>True if the class is found, otherwise false.</returns>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations">
+            <summary>
+            Provides fluent assertions and expectations for a <see cref="T:Microsoft.CodeAnalysis.CSharp.Syntax.FieldDeclarationSyntax"/> node.
+            </summary>
+            <remarks>
+            All methods throw <see cref="T:Shouldly.ShouldAssertException"/> on failure and return <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations"/> for method chaining.
+            </remarks>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations.#ctor(Microsoft.CodeAnalysis.CSharp.Syntax.FieldDeclarationSyntax)">
+            <summary>
+            Initializes a new instance of the <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations"/> class.
+            </summary>
+            <param name="fieldDeclaration">The field declaration to verify.</param>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations.IsPrivate">
+            <summary>
+            Asserts that the field is declared with the <c>private</c> modifier.
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations.IsProtected">
+            <summary>
+            Asserts that the field is declared with the <c>protected</c> modifier.
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations.IsPublic">
+            <summary>
+            Asserts that the field is declared with the <c>public</c> modifier.
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations.IsReadOnly">
+            <summary>
+            Asserts that the field is declared with the <c>readonly</c> modifier.
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations.IsStatic">
+            <summary>
+            Asserts that the field is declared with the <c>static</c> modifier.
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations.HasType(System.String)">
+            <summary>
+            Asserts that the field is of the specified type.
+            </summary>
+            <param name="typeName">The expected type name of the field.</param>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the field type does not match.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations.HasInitializer(System.String)">
+            <summary>
+            Asserts that the field has the specified initializer expression.
+            </summary>
+            <param name="initializer">The expected initializer expression as a string.</param>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the initializer is missing or does not match.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations.HasInitializer">
+            <summary>
+            Asserts that the field has an initializer.
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the initializer is missing.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations.HasNoInitializer">
+            <summary>
+            Asserts that the field does not have an initializer.
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the initializer is present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations.IsInternal">
+            <summary>
+            Asserts that the field is declared with the <c>internal</c> modifier.
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations.IsProtectedInternal">
+            <summary>
+            Asserts that the field is declared with both <c>protected</c> and <c>internal</c> modifiers (protected internal).
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if either modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations.IsPrivateProtected">
+            <summary>
+            Asserts that the field is declared with both <c>private</c> and <c>protected</c> modifiers (private protected).
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if either modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations.HasModifiers(Microsoft.CodeAnalysis.CSharp.SyntaxKind[])">
+            <summary>
+            Asserts that the field is declared with all specified modifiers.
+            </summary>
+            <param name="modifiers">The modifiers to check for on the field declaration.</param>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if any modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations.HasXmlDocSummary(System.String)">
+            <summary>
+            Asserts that the field has the specified XML documentation summary.
+            </summary>
+            <param name="expectedSummary">The expected summary text.</param>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations"/> instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations.HasName(System.String)">
+            <summary>
+            Asserts that the field has the specified name.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations.HasModifier(System.String)">
+            <summary>
+            Asserts that the field has the specified modifier.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations">
+            <summary>
+            Provides fluent assertions and expectations for an <see cref="T:Microsoft.CodeAnalysis.CSharp.Syntax.InterfaceDeclarationSyntax"/> node.
+            </summary>
+            <remarks>
+            All methods throw <see cref="T:Shouldly.ShouldAssertException"/> on failure and return <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations"/> for method chaining.
+            </remarks>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations.#ctor(Microsoft.CodeAnalysis.CSharp.Syntax.InterfaceDeclarationSyntax)">
+            <summary>
+            Initializes a new instance of the <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations"/> class.
+            </summary>
+            <param name="interfaceDeclaration">The interface declaration to verify.</param>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations.HasMethod(System.String)">
+            <summary>
+            Asserts that the interface contains a method with the specified name.
+            </summary>
+            <param name="methodName">The name of the method to search for in the interface.</param>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the method is not found.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations.HasMethod(System.String,System.Action{FractalDataWorks.SmartGenerators.TestUtilities.MethodExpectations})">
+            <summary>
+            Asserts that the interface contains a method with the specified name and applies additional expectations to it.
+            </summary>
+            <param name="methodName">The name of the method to search for in the interface.</param>
+            <param name="methodExpectations">A callback to apply further expectations to the found method.</param>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the method is not found.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations.HasProperty(System.String)">
+            <summary>
+            Asserts that the interface contains a property with the specified name.
+            </summary>
+            <param name="propertyName">The name of the property to search for in the interface.</param>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the property is not found.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations.HasProperty(System.String,System.Action{FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations})">
+            <summary>
+            Asserts that the interface contains a property with the specified name and applies additional expectations to it.
+            </summary>
+            <param name="propertyName">The name of the property to search for in the interface.</param>
+            <param name="propertyExpectations">A callback to apply further expectations to the found property.</param>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the property is not found.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations.IsPublic">
+            <summary>
+            Asserts that the interface is declared with the <c>public</c> modifier.
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations.IsInternal">
+            <summary>
+            Asserts that the interface is declared with the <c>internal</c> modifier.
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations.IsPartial">
+            <summary>
+            Asserts that the interface is declared with the <c>partial</c> modifier.
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations.IsPrivate">
+            <summary>
+            Asserts that the interface is declared with the <c>private</c> modifier.
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations.IsProtected">
+            <summary>
+            Asserts that the interface is declared with the <c>protected</c> modifier.
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations.IsProtectedInternal">
+            <summary>
+            Asserts that the interface is declared with both <c>protected</c> and <c>internal</c> modifiers (protected internal).
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if either modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations.IsPrivateProtected">
+            <summary>
+            Asserts that the interface is declared with both <c>private</c> and <c>protected</c> modifiers (private protected).
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if either modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations.HasModifiers(Microsoft.CodeAnalysis.CSharp.SyntaxKind[])">
+            <summary>
+            Asserts that the interface is declared with all specified modifiers.
+            </summary>
+            <param name="modifiers">The modifiers to check for on the interface declaration.</param>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if any modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations.ImplementsInterface(System.String)">
+            <summary>
+            Asserts that the interface implements the specified interface.
+            </summary>
+            <param name="interfaceName">The name of the interface that should be implemented.</param>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the interface is not implemented.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations.ImplementsInterfaces(System.String[])">
+            <summary>
+            Asserts that the interface implements all of the specified interfaces.
+            </summary>
+            <param name="interfaceNames">The names of the interfaces that should be implemented.</param>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if any interface is not implemented.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations.HasXmlDocSummary(System.String)">
+            <summary>
+            Asserts that the interface has the specified XML documentation summary.
+            </summary>
+            <param name="expectedSummary">The expected summary text.</param>
+            <returns>The builder instance for chaining.</returns>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.MethodExpectations">
+            <summary>
+            Provides expectations for a method declaration.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.MethodExpectations.#ctor(Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax)">
+            <summary>
+            Initializes a new instance of the <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.MethodExpectations"/> class.
+            </summary>
+            <param name="methodDeclaration">The method declaration to verify.</param>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.MethodExpectations.HasReturnType(System.String)">
+            <summary>
+            Expects the method to have the specified return type.
+            </summary>
+            <param name="returnTypeName">The name of the return type.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.MethodExpectations.HasParameter(System.String)">
+            <summary>
+            Expects the method to have a parameter with the specified name.
+            </summary>
+            <param name="parameterName">The name of the parameter.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.MethodExpectations.HasParameter(System.String,System.String)">
+            <summary>
+            Expects the method to have a parameter with the specified name and type.
+            </summary>
+            <param name="parameterName">The name of the parameter.</param>
+            <param name="parameterTypeName">The type of the parameter.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.MethodExpectations.HasParameter(System.String,System.Action{FractalDataWorks.SmartGenerators.TestUtilities.ParameterExpectations})">
+            <summary>
+            Expects the method to have a parameter with the specified name and adds more expectations for that parameter.
+            </summary>
+            <param name="parameterName">The name of the parameter.</param>
+            <param name="parameterExpectations">A callback to add expectations for the found parameter.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.MethodExpectations.HasNoParameters">
+            <summary>
+            Expects the method to have no parameters.
+            </summary>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.MethodExpectations.IsPublic">
+            <summary>
+            Expects the method to be public.
+            </summary>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.MethodExpectations.IsStatic">
+            <summary>
+            Expects the method to be static.
+            </summary>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.MethodExpectations.IsOverride">
+            <summary>
+            Expects the method to be marked as override.
+            </summary>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.MethodExpectations.HasNoGenericTypeParameters">
+            <summary>
+            Expects the method to have no generic type parameters.
+            </summary>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.MethodExpectations.HasBody">
+            <summary>
+            Expects the method to have a body.
+            </summary>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.MethodExpectations.HasBody(System.Action{FractalDataWorks.SmartGenerators.TestUtilities.CodeBlockExpectations})">
+            <summary>
+            Expects the method to have a body and allows further expectations on it.
+            </summary>
+            <param name="bodyExpectations">Callback to add expectations for the method's body.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.MethodExpectations.HasExpressionBody(System.String)">
+            <summary>
+            Expects the method to have an expression-bodied member with the specified expression.
+            </summary>
+            <param name="expression">The expected expression body.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.MethodExpectations.HasName(System.String)">
+            <summary>
+            Expects the method to have the specified name.
+            </summary>
+            <param name="name">The expected method name.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.NamespaceExpectations">
+            <summary>
+            Provides expectations for a namespace declaration.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.NamespaceExpectations.#ctor(Microsoft.CodeAnalysis.CSharp.Syntax.BaseNamespaceDeclarationSyntax)">
+            <summary>
+            Initializes a new instance of the <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.NamespaceExpectations"/> class.
+            </summary>
+            <param name="namespaceDeclaration">The namespace declaration to verify.</param>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.NamespaceExpectations.#ctor(Microsoft.CodeAnalysis.CSharp.Syntax.FileScopedNamespaceDeclarationSyntax)">
+            <summary>
+            Initializes a new instance of the <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.NamespaceExpectations"/> class.
+            </summary>
+            <param name="namespaceDeclaration">The file-scoped namespace declaration to verify.</param>
+        </member>
+        <member name="P:FractalDataWorks.SmartGenerators.TestUtilities.NamespaceExpectations.Members">
+            <summary>
+            Gets the members of the namespace declaration.
+            </summary>
+        </member>
+        <member name="P:FractalDataWorks.SmartGenerators.TestUtilities.NamespaceExpectations.Name">
+            <summary>
+            Gets the name of the namespace.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.NamespaceExpectations.HasClass(System.String)">
+            <summary>
+            Expects the namespace to contain a class with the specified name.
+            </summary>
+            <param name="className">The name of the class to find.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.NamespaceExpectations.HasClass(System.String,System.Action{FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations})">
+            <summary>
+            Expects the namespace to contain a class with the specified name and adds more expectations for that class.
+            </summary>
+            <param name="className">The name of the class to find.</param>
+            <param name="classExpectations">A callback to add expectations for the found class.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.NamespaceExpectations.HasInterface(System.String)">
+            <summary>
+            Expects the namespace to contain an interface with the specified name.
+            </summary>
+            <param name="interfaceName">The name of the interface to find.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.NamespaceExpectations.HasInterface(System.String,System.Action{FractalDataWorks.SmartGenerators.TestUtilities.InterfaceExpectations})">
+            <summary>
+            Expects the namespace to contain an interface with the specified name and adds more expectations for that interface.
+            </summary>
+            <param name="interfaceName">The name of the interface to find.</param>
+            <param name="interfaceExpectations">A callback to add expectations for the found interface.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.ParameterExpectations">
+            <summary>
+            Provides expectations for a parameter declaration.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ParameterExpectations.#ctor(Microsoft.CodeAnalysis.CSharp.Syntax.ParameterSyntax)">
+            <summary>
+            Initializes a new instance of the <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.ParameterExpectations"/> class.
+            </summary>
+            <param name="parameterSyntax">The parameter syntax to verify.</param>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ParameterExpectations.HasType(System.String)">
+            <summary>
+            Expects the parameter to have the specified type.
+            </summary>
+            <param name="typeName">The name of the type.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.ParameterExpectations.HasDefaultValue(System.String)">
+            <summary>
+            Expects the parameter to have the specified default value.
+            </summary>
+            <param name="defaultValue">The expected default value.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations">
+            <summary>
+            Provides fluent assertions and expectations for a <see cref="T:Microsoft.CodeAnalysis.CSharp.Syntax.PropertyDeclarationSyntax"/> node.
+            </summary>
+            <remarks>
+            All methods throw <see cref="T:Shouldly.ShouldAssertException"/> on failure and return <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations"/> for method chaining.
+            </remarks>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations.#ctor(Microsoft.CodeAnalysis.CSharp.Syntax.PropertyDeclarationSyntax)">
+            <summary>
+            Initializes a new instance of the <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations"/> class.
+            </summary>
+            <param name="propertyDeclaration">The property declaration to verify.</param>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations.HasType(System.String)">
+            <summary>
+            Asserts that the property is of the specified type.
+            </summary>
+            <param name="typeName">The expected type name of the property.</param>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the property type does not match.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations.HasGetter">
+            <summary>
+            Asserts that the property has a getter accessor.
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the getter is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations.HasSetter">
+            <summary>
+            Asserts that the property has a setter accessor.
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the setter is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations.IsPublic">
+            <summary>
+            Asserts that the property is declared with the <c>public</c> modifier.
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations.IsStatic">
+            <summary>
+            Asserts that the property is declared with the <c>static</c> modifier.
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations.IsOverride">
+            <summary>
+            Asserts that the property is declared with the <c>override</c> modifier.
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations.HasXmlDocs(System.String)">
+            <summary>
+            Asserts that the property has XML documentation containing the specified content.
+            </summary>
+            <param name="xmlDocContent">The expected XML documentation content.</param>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the XML documentation is missing or does not contain the expected content.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations.IsPrivate">
+            <summary>
+            Asserts that the property is declared with the <c>private</c> modifier.
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations.IsProtected">
+            <summary>
+            Asserts that the property is declared with the <c>protected</c> modifier.
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations.IsInternal">
+            <summary>
+            Asserts that the property is declared with the <c>internal</c> modifier.
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if the modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations.IsProtectedInternal">
+            <summary>
+            Asserts that the property is declared with both <c>protected</c> and <c>internal</c> modifiers (protected internal).
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if either modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations.IsPrivateProtected">
+            <summary>
+            Asserts that the property is declared with both <c>private</c> and <c>protected</c> modifiers (private protected).
+            </summary>
+            <returns>This <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations"/> instance for method chaining.</returns>
+            <exception cref="T:Shouldly.ShouldAssertException">Thrown if either modifier is not present.</exception>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations.HasModifiers(Microsoft.CodeAnalysis.CSharp.SyntaxKind[])">
+            <summary>
+            Expects the property to have the specified modifiers.
+            </summary>
+            <param name="modifiers">The modifiers to check for.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations.IsAutoProperty">
+            <summary>
+            Expects the property to be an auto-property (with no explicit backing field or custom accessors).
+            </summary>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations.HasName(System.String)">
+            <summary>
+            Asserts that the property has the specified name.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations.HasGetter(System.String)">
+            <summary>
+            Asserts that the property getter matches the specified code.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations.HasSetter(System.String)">
+            <summary>
+            Asserts that the property setter matches the specified code.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations.HasExpressionBody(System.String)">
+            <summary>
+            Asserts that the property has an expression-bodied member with the specified expression.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.SourceGeneratorTestHelper">
+            <summary>
+            Helper class for running source generators and examining their output.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SourceGeneratorTestHelper.RunGenerator(Microsoft.CodeAnalysis.IIncrementalGenerator,System.String[],System.Collections.Immutable.ImmutableArray{Microsoft.CodeAnalysis.Diagnostic}@,Microsoft.CodeAnalysis.MetadataReference[])">
+            <summary>
+            Runs a source generator with the specified sources and returns the generated output.
+            </summary>
+            <param name="generator">The source generator to run.</param>
+            <param name="sources">The source code to compile.</param>
+            <param name="diagnostics">The diagnostics produced during compilation.</param>
+            <param name="additionalReferences">Additional assembly references to include.</param>
+            <returns>A dictionary of generated sources with hintName as the key and content as the value.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SourceGeneratorTestHelper.GetSyntaxTree(System.Collections.Generic.Dictionary{System.String,System.String},System.String)">
+            <summary>
+            Gets a syntax tree from the generated output.
+            </summary>
+            <param name="generatedOutput">The generated output.</param>
+            <param name="hintName">The hint name of the generated file to get.</param>
+            <returns>The syntax tree of the generated file.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SourceGeneratorTestHelper.RunGeneratorAndCompile(Microsoft.CodeAnalysis.IIncrementalGenerator,System.String[],Microsoft.CodeAnalysis.MetadataReference[])">
+            <summary>
+            Gets a compilation with generator output included.
+            </summary>
+            <param name="generator">The source generator to run.</param>
+            <param name="sources">The source code to compile.</param>
+            <param name="additionalReferences">Additional assembly references to include.</param>
+            <returns>A tuple containing the output compilation and the run result.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SourceGeneratorTestHelper.CompileCode(System.String[],System.Collections.Immutable.ImmutableArray{Microsoft.CodeAnalysis.Diagnostic}@,Microsoft.CodeAnalysis.MetadataReference[])">
+            <summary>
+            Compiles the provided code and returns the resulting compilation.
+            </summary>
+            <param name="sources">The source code to compile.</param>
+            <param name="diagnostics">The diagnostics produced during compilation.</param>
+            <param name="additionalReferences">Additional assembly references to include.</param>
+            <returns>The compilation output or null if compilation failed.</returns>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxNodeAssertions">
+            <summary>
+            Provides assertions for syntax nodes.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxNodeAssertions.ShouldContainClass(Microsoft.CodeAnalysis.SyntaxTree,System.String)">
+            <summary>
+            Asserts that a syntax tree contains a class with the specified name.
+            </summary>
+            <param name="syntaxTree">The syntax tree.</param>
+            <param name="className">The class name.</param>
+            <returns>The class declaration syntax.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxNodeAssertions.ShouldContainEnum(Microsoft.CodeAnalysis.SyntaxTree,System.String)">
+            <summary>
+            Asserts that a syntax tree contains an enum with the specified name.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxNodeAssertions.ShouldContainMethod(Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax,System.String)">
+            <summary>
+            Asserts that a class declaration has a method with the specified name.
+            </summary>
+            <param name="classDeclaration">The class declaration.</param>
+            <param name="methodName">The method name.</param>
+            <returns>The method declaration syntax.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxNodeAssertions.ShouldContainProperty(Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax,System.String)">
+            <summary>
+            Asserts that a class declaration has a property with the specified name.
+            </summary>
+            <param name="classDeclaration">The class declaration.</param>
+            <param name="propertyName">The property name.</param>
+            <returns>The property declaration syntax.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxNodeAssertions.ShouldContainParameter(Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax,System.String)">
+            <summary>
+            Asserts that a method declaration has a parameter with the specified name.
+            </summary>
+            <param name="methodDeclaration">The method declaration.</param>
+            <param name="parameterName">The parameter name.</param>
+            <returns>The parameter syntax.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxNodeAssertions.ShouldHaveModifier``1(``0,Microsoft.CodeAnalysis.CSharp.SyntaxKind)">
+            <summary>
+            Asserts that a node has a modifier of the specified kind.
+            </summary>
+            <param name="node">The node.</param>
+            <param name="modifierKind">The modifier kind.</param>
+            <typeparam name="T">The type of the syntax node being checked.</typeparam>
+            <returns>The node for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxNodeAssertions.ShouldReturnType(Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax,System.String)">
+            <summary>
+            Asserts that a method declaration returns a specific type.
+            </summary>
+            <param name="methodDeclaration">The method declaration.</param>
+            <param name="typeName">The type name.</param>
+            <returns>The method declaration for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxNodeAssertions.ShouldHaveType(Microsoft.CodeAnalysis.CSharp.Syntax.ParameterSyntax,System.String)">
+            <summary>
+            Asserts that a parameter has a specific type.
+            </summary>
+            <param name="parameter">The parameter syntax.</param>
+            <param name="typeName">The expected type name.</param>
+            <returns>The parameter syntax for chaining.</returns>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxNodeHelpers">
+            <summary>
+            Extension methods for syntax nodes to aid in testing code generation.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxNodeHelpers.ShouldHaveModifier(Microsoft.CodeAnalysis.CSharp.Syntax.MemberDeclarationSyntax,Microsoft.CodeAnalysis.CSharp.SyntaxKind)">
+            <summary>
+            Checks if a syntax node has a specific modifier.
+            </summary>
+            <param name="node">The syntax node to check.</param>
+            <param name="modifier">The modifier to look for.</param>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxNodeHelpers.FindMethod(Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax,System.String)">
+            <summary>
+            Finds a method in a class declaration and returns it.
+            </summary>
+            <param name="classDeclaration">The class declaration to search in.</param>
+            <param name="methodName">The name of the method to find.</param>
+            <returns>The method declaration if found.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxNodeHelpers.FindProperty(Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax,System.String)">
+            <summary>
+            Finds a property in a class declaration and returns it.
+            </summary>
+            <param name="classDeclaration">The class declaration to search in.</param>
+            <param name="propertyName">The name of the property to find.</param>
+            <returns>The property declaration if found.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxNodeHelpers.FindField(Microsoft.CodeAnalysis.CSharp.Syntax.ClassDeclarationSyntax,System.String)">
+            <summary>
+            Finds a field in a class declaration and returns it.
+            </summary>
+            <param name="classDeclaration">The class declaration to search in.</param>
+            <param name="fieldName">The name of the field to find.</param>
+            <returns>The field declaration if found.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxNodeHelpers.FindClass(Microsoft.CodeAnalysis.SyntaxTree,System.String)">
+            <summary>
+            Finds a class in a syntax tree and returns it.
+            </summary>
+            <param name="syntaxTree">The syntax tree to search in.</param>
+            <param name="className">The name of the class to find.</param>
+            <returns>The class declaration if found.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxNodeHelpers.FindEnumMember(Microsoft.CodeAnalysis.CSharp.Syntax.EnumDeclarationSyntax,System.String)">
+            <summary>
+            Finds an enum member in an enum declaration and returns it.
+            </summary>
+            <param name="enumDeclaration">The enum declaration to search in.</param>
+            <param name="memberName">The name of the enum member to find.</param>
+            <returns>The enum member declaration if found.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxNodeHelpers.FindInterface(Microsoft.CodeAnalysis.SyntaxTree,System.String)">
+            <summary>
+            Finds an interface in a syntax tree and returns it.
+            </summary>
+            <param name="syntaxTree">The syntax tree to search in.</param>
+            <param name="interfaceName">The name of the interface to find.</param>
+            <returns>The interface declaration if found.</returns>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxTreeExpectations">
+            <summary>
+            Provides a fluent API for creating and validating expectations about syntax trees.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxTreeExpectations.#ctor(Microsoft.CodeAnalysis.SyntaxTree)">
+            <summary>
+            Initializes a new instance of the <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxTreeExpectations"/> class.
+            </summary>
+            <param name="syntaxTree">The syntax tree to verify.</param>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxTreeExpectations.HasClass(System.String)">
+            <summary>
+            Expects the syntax tree to contain a class with the specified name.
+            </summary>
+            <param name="className">The name of the class to find.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxTreeExpectations.HasClass(System.String,System.Action{FractalDataWorks.SmartGenerators.TestUtilities.ClassExpectations})">
+            <summary>
+            Expects the syntax tree to contain a class with the specified name and adds more expectations for that class.
+            </summary>
+            <param name="className">The name of the class to find.</param>
+            <param name="classExpectations">A callback to add expectations for the found class.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxTreeExpectations.HasNamespace(System.String)">
+            <summary>
+            Expects the syntax tree to contain a namespace with the specified name.
+            </summary>
+            <param name="namespaceName">The name of the namespace to find.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxTreeExpectations.HasNamespace(System.String,System.Action{FractalDataWorks.SmartGenerators.TestUtilities.NamespaceExpectations})">
+            <summary>
+            Expects the syntax tree to contain a namespace with the specified name and adds more expectations for that namespace.
+            </summary>
+            <param name="namespaceName">The name of the namespace to find.</param>
+            <param name="namespaceExpectations">A callback to add expectations for the found namespace.</param>
+            <returns>The current expectations instance for chaining.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxTreeExpectations.Verify">
+            <summary>
+            Verifies that all expectations are met by the syntax tree.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxTreeExpectations.Assert">
+            <summary>
+            Alias for Verify, to end fluent expectations.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxTreeExpectations.HasMethod(System.Action{FractalDataWorks.SmartGenerators.TestUtilities.MethodExpectations})">
+            <summary>
+            Expects the syntax tree to contain a method declaration and allows expectations on it.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxTreeExpectations.HasField(System.Action{FractalDataWorks.SmartGenerators.TestUtilities.FieldExpectations})">
+            <summary>
+            Expects the syntax tree to contain a field declaration and allows expectations on it.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.SyntaxTreeExpectations.HasProperty(System.Action{FractalDataWorks.SmartGenerators.TestUtilities.PropertyExpectations})">
+            <summary>
+            Expects the syntax tree to contain a property declaration and allows expectations on it.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.TestGeneratorContext">
+            <summary>
+            A mock implementation of SourceProductionContext for testing source generators.
+            This class provides a simplified interface for capturing generated source code
+            and diagnostics during testing.
+            </summary>
+        </member>
+        <member name="P:FractalDataWorks.SmartGenerators.TestUtilities.TestGeneratorContext.GeneratedSources">
+            <summary>
+            Gets the dictionary of generated source code files.
+            </summary>
+            <remarks>
+            Keys are hint names for the source files, values are the source code content.
+            </remarks>
+        </member>
+        <member name="P:FractalDataWorks.SmartGenerators.TestUtilities.TestGeneratorContext.ReportedDiagnostics">
+            <summary>
+            Gets the list of reported diagnostics.
+            </summary>
+        </member>
+        <member name="P:FractalDataWorks.SmartGenerators.TestUtilities.TestGeneratorContext.CancellationToken">
+            <summary>
+            Gets the cancellation token.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.TestGeneratorContext.AddSource(System.String,System.String)">
+            <summary>
+            Adds a source file to the context.
+            </summary>
+            <param name="hintName">The hint name for the source file.</param>
+            <param name="source">The source code.</param>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.TestGeneratorContext.ReportDiagnostic(Microsoft.CodeAnalysis.Diagnostic)">
+            <summary>
+            Reports a diagnostic.
+            </summary>
+            <param name="diagnostic">The diagnostic to report.</param>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.TestGenerators">
+            <summary>
+            Contains test generators used in tests.
+            </summary>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.TestGenerators.MockGenerator">
+            <summary>
+            A simple mock generator that generates code for classes with the [GenerateCode] attribute.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.TestGenerators.MockGenerator.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.TestGenerators.MockGenerator"/> class.
+            </summary>
+            <param name="attributeSource">The source code for the GenerateCode attribute.</param>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.TestGenerators.MockGenerator.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.TestGenerators.MockGenerator"/> class with default attribute source.
+            </summary>
+        </member>
+        <member name="P:FractalDataWorks.SmartGenerators.TestUtilities.TestGenerators.MockGenerator.DefaultAttributeSource">
+            <summary>
+            Gets the default source for the GenerateCode attribute.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.TestGenerators.MockGenerator.Initialize(Microsoft.CodeAnalysis.IncrementalGeneratorInitializationContext)">
+            <inheritdoc/>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.TestGenerators.DiagnosticGenerator">
+            <summary>
+            Test source generator that reports diagnostics.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.TestGenerators.DiagnosticGenerator.#ctor(System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.TestGenerators.DiagnosticGenerator"/> class.
+            </summary>
+            <param name="diagnosticId">The diagnostic ID.</param>
+            <param name="title">The diagnostic title.</param>
+            <param name="messageFormat">The diagnostic message format.</param>
+            <param name="category">The diagnostic category.</param>
+            <param name="attributeName">The name of the attribute to check for.</param>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.TestGenerators.DiagnosticGenerator.Initialize(Microsoft.CodeAnalysis.IncrementalGeneratorInitializationContext)">
+            <inheritdoc/>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.TestGenerators.EqualsGenerator">
+            <summary>
+            Generator that creates Equals/GetHashCode implementations for marked classes.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.TestGenerators.EqualsGenerator.#ctor(System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.TestGenerators.EqualsGenerator"/> class.
+            </summary>
+            <param name="attributeSource">The source code for the GenerateEquals attribute.</param>
+            <param name="attributeName">The name of the attribute to look for.</param>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.TestGenerators.EqualsGenerator.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.TestGenerators.EqualsGenerator"/> class with default attribute source.
+            </summary>
+        </member>
+        <member name="P:FractalDataWorks.SmartGenerators.TestUtilities.TestGenerators.EqualsGenerator.DefaultAttributeSource">
+            <summary>
+            Gets the default source for the GenerateEquals attribute.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.TestGenerators.EqualsGenerator.Initialize(Microsoft.CodeAnalysis.IncrementalGeneratorInitializationContext)">
+            <inheritdoc/>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks">
+            <summary>
+            Helper class for creating mock objects used in testing.
+            </summary>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.GeneratorContextResult">
+            <summary>
+            Result of a source production context for testing diagnostic reporting.
+            </summary>
+        </member>
+        <member name="P:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.GeneratorContextResult.ReportedDiagnostics">
+            <summary>
+            Gets list of reported diagnostics.
+            </summary>
+        </member>
+        <member name="P:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.GeneratorContextResult.GeneratedSources">
+            <summary>
+            Gets dictionary of generated sources.
+            </summary>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.TestDiagnosticGenerator">
+            <summary>
+            Test generator that reports diagnostics for testing the DiagnosticReporter.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.TestDiagnosticGenerator.#ctor(Microsoft.CodeAnalysis.DiagnosticDescriptor,Microsoft.CodeAnalysis.Location,System.Object[])">
+            <summary>
+            Initializes a new instance of the <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.TestDiagnosticGenerator"/> class.
+            </summary>
+            <param name="descriptor">The diagnostic descriptor.</param>
+            <param name="location">Optional location for the diagnostic.</param>
+            <param name="args">The diagnostic message arguments.</param>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.TestDiagnosticGenerator.Initialize(Microsoft.CodeAnalysis.IncrementalGeneratorInitializationContext)">
+            <inheritdoc />
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.TestInputInfo">
+            <summary>
+            Mock implementation of <see cref="T:FractalDataWorks.SmartGenerators.IInputInfo"/>.
+            </summary>
+        </member>
+        <member name="P:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.TestInputInfo.Name">
+            <summary>
+            Gets or sets the name.
+            </summary>
+        </member>
+        <member name="P:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.TestInputInfo.Value">
+            <summary>
+            Gets or sets the value.
+            </summary>
+        </member>
+        <member name="P:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.TestInputInfo.InputHash">
+            <summary>
+            Gets the input hash.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.TestInputInfo.CalculateInputHash">
+            <summary>
+            Calculates the input hash.
+            </summary>
+            <returns>The calculated hash.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.TestInputInfo.WriteToHash(System.IO.TextWriter)">
+            <summary>
+            Writes the model state to a TextWriter for hash calculation.
+            </summary>
+            <param name="writer">The text writer to write to.</param>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.ComplexInputInfo">
+            <summary>
+            Another test implementation of <see cref="T:FractalDataWorks.SmartGenerators.IInputInfo"/> with different properties.
+            </summary>
+        </member>
+        <member name="P:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.ComplexInputInfo.Id">
+            <summary>
+            Gets or sets the ID.
+            </summary>
+        </member>
+        <member name="P:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.ComplexInputInfo.Tags">
+            <summary>
+            Gets or sets the tags.
+            </summary>
+        </member>
+        <member name="P:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.ComplexInputInfo.Properties">
+            <summary>
+            Gets or sets the properties.
+            </summary>
+        </member>
+        <member name="P:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.ComplexInputInfo.InputHash">
+            <summary>
+            Gets the input hash.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.ComplexInputInfo.WriteToHash(System.IO.TextWriter)">
+            <summary>
+            Writes the model state to a TextWriter for hash calculation.
+            </summary>
+            <param name="writer">The text writer to write to.</param>
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.ErrorSourceGenerator">
+            <summary>
+            A mock implementation of a source generator that reports system errors.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.ErrorSourceGenerator.#ctor(System.String,System.String,System.Action)">
+            <summary>
+            Initializes a new instance of the <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.ErrorSourceGenerator"/> class.
+            </summary>
+            <param name="message">The error message to report.</param>
+            <param name="id">The error ID.</param>
+            <param name="onExceptionAction">Optional action to execute when exception is thrown.</param>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.ErrorSourceGenerator.Initialize(Microsoft.CodeAnalysis.IncrementalGeneratorInitializationContext)">
+            <inheritdoc />
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.UnhandledExceptionGenerator">
+            <summary>
+            A mock implementation of a source generator that throws an unhandled exception.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.UnhandledExceptionGenerator.#ctor(System.String,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.UnhandledExceptionGenerator"/> class.
+            </summary>
+            <param name="message">The error message.</param>
+            <param name="exceptionType">The exception type to throw.</param>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.TestMocks.UnhandledExceptionGenerator.Initialize(Microsoft.CodeAnalysis.IncrementalGeneratorInitializationContext)">
+            <inheritdoc />
+        </member>
+        <member name="T:FractalDataWorks.SmartGenerators.TestUtilities.TestSourceProvider">
+            <summary>
+            Helper class for creating test sources.
+            </summary>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.TestSourceProvider.CreateClassSource(System.String,System.String,System.String[])">
+            <summary>
+            Creates a simple class source for testing.
+            </summary>
+            <param name="className">The class name.</param>
+            <param name="namespace">The namespace.</param>
+            <param name="attributes">The attributes to apply to the class.</param>
+            <returns>The source code for the class.</returns>
+        </member>
+        <member name="M:FractalDataWorks.SmartGenerators.TestUtilities.TestSourceProvider.CreateEnumSource(System.String,System.String,System.String[])">
+            <summary>
+            Creates a simple enum source for testing.
+            </summary>
+            <param name="enumName">The enum name.</param>
+            <param name="namespace">The namespace.</param>
+            <param name="values">The enum values.</param>
+            <returns>The source code for the enum.</returns>
+        </member>
+    </members>
+</doc>

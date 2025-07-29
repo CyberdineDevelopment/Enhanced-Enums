@@ -46,6 +46,11 @@ public sealed class EnumTypeInfo : IInputInfo, IEquatable<EnumTypeInfo>
     public bool UseFactory { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether to generate factory methods for enum values.
+    /// </summary>
+    public bool GenerateFactoryMethods { get; set; } = true;
+
+    /// <summary>
     /// Gets or sets the generation strategy name to use.
     /// </summary>
     public string Strategy { get; set; } = "Default";
@@ -163,6 +168,7 @@ public sealed class EnumTypeInfo : IInputInfo, IEquatable<EnumTypeInfo>
         writer.Write(IsGenericType);
         writer.Write(CollectionName);
         writer.Write(UseFactory);
+        writer.Write(GenerateFactoryMethods);
         writer.Write(Strategy);
         writer.Write(NameComparison.ToString());
         writer.Write(IncludeReferencedAssemblies);

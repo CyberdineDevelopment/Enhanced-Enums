@@ -11,7 +11,7 @@
     <!-- Language and Compiler Settings -->
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <ImplicitUsings>disable</ImplicitUsings>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     
     <!-- Suppress warnings for tests -->
@@ -71,13 +71,18 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="xunit.v3" />
-    <!-- Use package reference for TestUtilities -->
-    <PackageReference Include="FractalDataWorks.SmartGenerators.TestUtilities" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- Reference the generator project -->
     <ProjectReference Include="..\..\src\FractalDataWorks.EnhancedEnums\FractalDataWorks.EnhancedEnums.csproj" />
+    <ProjectReference Include="..\..\src\FractalDataWorks\FractalDataWorks.csproj" />
+    <ProjectReference Include="..\..\src\FractalDataWorks.SmartGenerators.TestUtilities\FractalDataWorks.SmartGenerators.TestUtilities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\" />
+    <Folder Include="TestHelpers\" />
   </ItemGroup>
 
 </Project>

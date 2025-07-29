@@ -101,6 +101,7 @@
     <PackageReference Include="FractalDataWorks" />
     <PackageReference Include="FractalDataWorks.SmartGenerators" PrivateAssets="all" />
     <PackageReference Include="FractalDataWorks.SmartGenerators.CodeBuilders" PrivateAssets="all" />
+    <PackageReference Include="Humanizer" />
     <PackageReference Include="Microsoft.Bcl.HashCode" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
   </ItemGroup>

@@ -4,11 +4,16 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- FractalDataWorks packages -->
-    <PackageVersion Include="FractalDataWorks" Version="0.1.3-alpha-g1695442435" />
-    <PackageVersion Include="FractalDataWorks.SmartGenerators" Version="0.1.4-alpha-g4415be49cc" />
-    <PackageVersion Include="FractalDataWorks.SmartGenerators.CodeBuilders" Version="0.1.4-alpha-g4415be49cc" />
-    <PackageVersion Include="FractalDataWorks.SmartGenerators.TestUtilities" Version="0.1.4-alpha-g4415be49cc" />
+    <PackageVersion Include="FractalDataWorks" Version="0.1.7-alpha-g85e105cc5b" />
+    <PackageVersion Include="FractalDataWorks.SmartGenerators" Version="0.1.5-alpha-g8cae162c25" />
+    <PackageVersion Include="FractalDataWorks.SmartGenerators.CodeBuilders" Version="0.1.5-alpha-g8cae162c25" />
+    <PackageVersion Include="FractalDataWorks.SmartGenerators.TestUtilities" Version="0.1.5-alpha-g8cae162c25" />
+    <PackageVersion Include="Humanizer" Version="3.0.0-beta.96" />
     <PackageVersion Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
+    <!-- System packages -->
+    <PackageVersion Include="System.Collections.Immutable" Version="9.0.7" />
+    <PackageVersion Include="System.Runtime.Loader" Version="4.3.0" />
+    <PackageVersion Include="System.Text.RegularExpressions" Version="4.3.1" />
     <!-- Microsoft packages -->
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0" />
@@ -31,8 +36,8 @@
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
     <!-- Analyzers -->
     <PackageVersion Include="AsyncFixer" Version="1.6.0" />
-    <PackageVersion Include="Meziantou.Analyzer" Version="2.0.205" />
+    <PackageVersion Include="Meziantou.Analyzer" Version="2.0.208" />
     <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.14.15" />
-    <PackageVersion Include="Roslynator.Analyzers" Version="4.13.1" />
+    <PackageVersion Include="Roslynator.Analyzers" Version="4.14.0" />
   </ItemGroup>
 </Project>

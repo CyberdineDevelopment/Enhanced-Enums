@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>FractalDataWorks</PackageId>
+    <Description>Core interface definitions for FractalDataWorks platform including IEnhancedEnum</Description>
+    <PackageTags>fractaldataworks;interfaces;enhanced-enum;layer-0.5</PackageTags>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,60 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- Target Framework -->
+    <TargetFramework>netstandard2.0</TargetFramework>
+    
+    <!-- Language and Compiler Settings -->
+    <LangVersion>preview</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);SA1202;SA1201;SA1208;CS5001</NoWarn>
+    
+    <!-- Code Analysis -->
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    
+    <!-- Source Generator Specific -->
+    <IsPackable>true</IsPackable>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    
+    <!-- Build Settings -->
+    <Deterministic>true</Deterministic>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    
+    <!-- Package Management -->
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <EnablePackageValidation>false</EnablePackageValidation>
+    
+    <!-- NuGet Package Properties -->
+    <Authors>FractalDataWorks Development Team</Authors>
+    <Company>FractalDataWorks</Company>
+    <Copyright>Copyright © FractalDataWorks $([System.DateTime]::Now.Year)</Copyright>
+    <PackageProjectUrl>https://github.com/FractalDataWorks/FractalDataWorks</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/FractalDataWorks/FractalDataWorks.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>enterprise;framework;source-generator;roslyn;sdk;dotnet;code-builder</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageDescription>Code building utilities for FractalDataWorks source generators</PackageDescription>
+    
+    <!-- Strong Naming -->
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile Condition="Exists('$(MSBuildThisFileDirectory)..\..\FractalDataWorks.snk')">$(MSBuildThisFileDirectory)..\..\FractalDataWorks.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <PackageReference Include="System.Text.RegularExpressions" />
+    
+    <!-- Build Tools -->
+    <!-- These are provided by Directory.Build.props -->
+  </ItemGroup>
+</Project>
