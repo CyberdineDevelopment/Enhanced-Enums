@@ -12,7 +12,7 @@ namespace FractalDataWorks.EnhancedEnums.Discovery;
 /// 
 /// HOW IT WORKS:
 /// 1. Source generators run at compile time for each project independently
-/// 2. When a project with [EnhancedEnumBase] compiles, this service can scan:
+/// 2. When a project with [EnumOptionBase] compiles, this service can scan:
 ///    - The current project's types (always scanned)
 ///    - Types in referenced assemblies (only if listed in IncludedEnhancedEnumAssemblies)
 /// 
@@ -22,12 +22,12 @@ namespace FractalDataWorks.EnhancedEnums.Discovery;
 /// 4. For each included assembly, the service:
 ///    - Loads the assembly metadata (NOT runtime execution)
 ///    - Scans all types looking for [EnumOption] attributes
-///    - Checks if those types derive from the base type with [EnhancedEnumBase]
+///    - Checks if those types derive from the base type with [EnumOptionBase]
 ///    - Adds matching types to the generated collection
 /// 
 /// IMPORTANT: This DOES work for the Service Type Pattern because:
 /// - Plugin assemblies compile independently with their [EnumOption] types
-/// - The main assembly (with [EnhancedEnumBase]) compiles later
+/// - The main assembly (with [EnumOptionBase]) compiles later
 /// - During main assembly compilation, plugin assemblies are already built
 /// - The generator can read metadata from the built plugin assemblies
 /// - The generated collection includes ALL discovered options
@@ -37,7 +37,7 @@ namespace FractalDataWorks.EnhancedEnums.Discovery;
 /// - PluginA.csproj has: <IncludeInEnhancedEnumAssemblies>Main</IncludeInEnhancedEnumAssemblies>
 /// - PluginB.dll has: class OptionB : BaseEnum { } with [EnumOption]  
 /// - PluginB.csproj has: <IncludeInEnhancedEnumAssemblies>Main</IncludeInEnhancedEnumAssemblies>
-/// - Main.dll has: abstract class BaseEnum { } with [EnhancedEnumBase]
+/// - Main.dll has: abstract class BaseEnum { } with [EnumOptionBase]
 /// - Main.dll references PluginA.dll and PluginB.dll
 /// - Result: Generated collection in Main.dll includes OptionA and OptionB
 /// </summary>

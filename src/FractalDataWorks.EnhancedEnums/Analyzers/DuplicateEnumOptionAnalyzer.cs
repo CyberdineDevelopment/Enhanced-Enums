@@ -134,12 +134,12 @@ public class DuplicateEnumOptionAnalyzer : DiagnosticAnalyzer
         while (baseType != null)
         {
             var baseAttrs = baseType.GetAttributes()
-                .Where(a => string.Equals(a.AttributeClass?.Name, "EnhancedEnumBaseAttribute", StringComparison.Ordinal) || string.Equals(a.AttributeClass?.Name, "EnhancedEnumBase", StringComparison.Ordinal))
+                .Where(a => string.Equals(a.AttributeClass?.Name, "EnhancedEnumBaseAttribute", StringComparison.Ordinal) || string.Equals(a.AttributeClass?.Name, "EnumOptionBase", StringComparison.Ordinal))
                 .ToList();
 
             if (baseAttrs.Count > 0)
             {
-                // Found the base type with EnhancedEnumBase attribute
+                // Found the base type with EnumOptionBase attribute
                 return GetCollectionName(baseAttrs.First(), baseType);
             }
 

@@ -69,7 +69,7 @@ public sealed class EnhancedEnumBaseAttribute : Attribute
 
     /// <summary>
     /// Gets the return type for generated static properties and methods.
-    /// If not specified, the generator will auto-detect interfaces that extend IEnhancedEnumOption,
+    /// If not specified, the generator will auto-detect interfaces that extend IEnumOption,
     /// or fall back to the concrete base class type.
     /// </summary>
     public string? ReturnType { get; }

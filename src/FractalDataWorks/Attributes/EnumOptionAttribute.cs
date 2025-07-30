@@ -64,7 +64,7 @@ public sealed class EnumOptionAttribute : Attribute
     
     /// <summary>
     /// Gets the return type for this specific enum option.
-    /// This overrides the default return type specified in the EnhancedEnumBase attribute.
+    /// This overrides the default return type specified in the EnumOptionBase attribute.
     /// </summary>
     public string? ReturnType { get; }
     

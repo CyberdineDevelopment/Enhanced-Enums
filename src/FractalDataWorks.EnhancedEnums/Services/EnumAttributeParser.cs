@@ -27,10 +27,10 @@ internal static class EnumAttributeParser
             return new List<EnumTypeInfo>();
         }
         
-        // Verify the type inherits from EnhancedEnumBase<T>
+        // Verify the type inherits from EnumOptionBase<T>
         if (!InheritsFromEnhancedEnumBase(symbol))
         {
-            // Type must inherit from EnhancedEnumBase<T> to use EnumCollection attribute
+            // Type must inherit from EnumOptionBase<T> to use EnumCollection attribute
             return new List<EnumTypeInfo>();
         }
 
@@ -179,7 +179,7 @@ internal static class EnumAttributeParser
     }
     
     /// <summary>
-    /// Checks if a type inherits from EnhancedEnumBase&lt;T&gt;.
+    /// Checks if a type inherits from EnumOptionBase&lt;T&gt;.
     /// </summary>
     private static bool InheritsFromEnhancedEnumBase(INamedTypeSymbol symbol)
     {
@@ -189,9 +189,9 @@ internal static class EnumAttributeParser
             var typeName = currentType.Name;
             var fullName = currentType.ToDisplayString();
             
-            // Check if it's EnhancedEnumBase or EnhancedEnumBase<T>
-            if (string.Equals(typeName, "EnhancedEnumBase", StringComparison.Ordinal) ||
-                fullName.Contains("EnhancedEnumBase<"))
+            // Check if it's EnumOptionBase or EnumOptionBase<T>
+            if (string.Equals(typeName, "EnumOptionBase", StringComparison.Ordinal) ||
+                fullName.Contains("EnumOptionBase<"))
             {
                 return true;
             }

@@ -48,10 +48,10 @@ public class EnhancedEnumConstructorAnalyzer : DiagnosticAnalyzer
         if (classSymbol == null || !classSymbol.IsAbstract)
             return;
 
-        // Check if class has [EnhancedEnumBase] attribute
+        // Check if class has [EnumOptionBase] attribute
         var hasEnhancedEnumBaseAttribute = classSymbol.GetAttributes()
             .Any(attr => string.Equals(attr.AttributeClass?.Name, "EnhancedEnumBaseAttribute", StringComparison.Ordinal) || 
-                         string.Equals(attr.AttributeClass?.Name, "EnhancedEnumBase", StringComparison.Ordinal));
+                         string.Equals(attr.AttributeClass?.Name, "EnumOptionBase", StringComparison.Ordinal));
 
         if (!hasEnhancedEnumBaseAttribute)
             return;

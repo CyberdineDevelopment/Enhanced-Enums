@@ -12,14 +12,14 @@ public class CompilationTests
     [Fact]
     public void AssemblyShouldCompile()
     {
-        var assembly = typeof(IEnhancedEnumOption).Assembly;
+        var assembly = typeof(IEnumOption).Assembly;
         assembly.ShouldNotBeNull();
     }
 
     [Fact]
     public void IEnhancedEnumShouldBePublic()
     {
-        var type = typeof(IEnhancedEnumOption);
+        var type = typeof(IEnumOption);
         type.IsPublic.ShouldBeTrue();
         type.IsInterface.ShouldBeTrue();
     }
@@ -27,17 +27,17 @@ public class CompilationTests
     [Fact]
     public void EnhancedEnumGenericShouldHaveCorrectConstraints()
     {
-        var type = typeof(IEnhancedEnumOption<>);
+        var type = typeof(IEnumOption<>);
         var genericArgument = type.GetGenericArguments().First();
         var constraints = genericArgument.GetGenericParameterConstraints();
         
-        constraints.ShouldContain(c => c == typeof(IEnhancedEnumOption<>).MakeGenericType(genericArgument));
+        constraints.ShouldContain(c => c == typeof(IEnumOption<>).MakeGenericType(genericArgument));
     }
 
     [Fact]
     public void PublicTypesShouldFollowExpectedPattern()
     {
-        var assembly = typeof(IEnhancedEnumOption).Assembly;
+        var assembly = typeof(IEnumOption).Assembly;
         var types = assembly.GetTypes().Where(t => t.IsPublic && !t.IsEnum);
         
         foreach (var type in types)
@@ -54,7 +54,7 @@ public class CompilationTests
     [Fact]
     public void EnhancedEnumShouldHaveExpectedMembers()
     {
-        var type = typeof(IEnhancedEnumOption);
+        var type = typeof(IEnumOption);
         
         // Check for Id property
         var idProperty = type.GetProperty("Id");
@@ -70,7 +70,7 @@ public class CompilationTests
     [Fact]
     public void EnhancedEnumGenericShouldHaveEmptyMethod()
     {
-        var type = typeof(IEnhancedEnumOption<>);
+        var type = typeof(IEnumOption<>);
         var emptyMethod = type.GetMethod("Empty");
         
         emptyMethod.ShouldNotBeNull();

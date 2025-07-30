@@ -9,16 +9,16 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace FractalDataWorks.EnhancedEnums.Analyzers;
 
 /// <summary>
-/// Analyzer that enforces IEnhancedEnumOption implementation on enhanced enum base classes.
+/// Analyzer that enforces IEnumOption implementation on enhanced enum base classes.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class EnhancedEnumBaseAnalyzer : DiagnosticAnalyzer
 {
     public const string DiagnosticId = "ENH1001";
 
-    private static readonly LocalizableString Title = "Enhanced enum base class should implement IEnhancedEnumOption";
-    private static readonly LocalizableString MessageFormat = "Enhanced enum base class '{0}' should implement IEnhancedEnumOption for full functionality";
-    private static readonly LocalizableString Description = "Enhanced enum base classes should implement IEnhancedEnumOption to enable features like GetById generation and proper interface-based return types.";
+    private static readonly LocalizableString Title = "Enhanced enum base class should implement IEnumOption";
+    private static readonly LocalizableString MessageFormat = "Enhanced enum base class '{0}' should implement IEnumOption for full functionality";
+    private static readonly LocalizableString Description = "Enhanced enum base classes should implement IEnumOption to enable features like GetById generation and proper interface-based return types.";
     private const string Category = "Usage";
 
     private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(
@@ -48,16 +48,16 @@ public class EnhancedEnumBaseAnalyzer : DiagnosticAnalyzer
         if (classSymbol == null)
             return;
 
-        // Check if class has [EnhancedEnumBase] attribute
+        // Check if class has [EnumOptionBase] attribute
         var hasEnhancedEnumBaseAttribute = classSymbol.GetAttributes()
             .Any(attr => string.Equals(attr.AttributeClass?.Name, "EnhancedEnumBaseAttribute", StringComparison.Ordinal) || 
-                         string.Equals(attr.AttributeClass?.Name, "EnhancedEnumBase", StringComparison.Ordinal));
+                         string.Equals(attr.AttributeClass?.Name, "EnumOptionBase", StringComparison.Ordinal));
 
         if (!hasEnhancedEnumBaseAttribute)
             return;
 
-        // Check if class implements IEnhancedEnumOption
-        var enhancedEnumOptionInterface = context.Compilation.GetTypeByMetadataName("FractalDataWorks.IEnhancedEnumOption");
+        // Check if class implements IEnumOption
+        var enhancedEnumOptionInterface = context.Compilation.GetTypeByMetadataName("FractalDataWorks.IEnumOption");
         if (enhancedEnumOptionInterface == null)
         {
             // If the interface isn't available in the compilation, we can't check

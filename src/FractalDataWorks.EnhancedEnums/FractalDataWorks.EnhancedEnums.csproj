@@ -82,13 +82,12 @@
 			<None Include="$(OutputPath)\FractalDataWorks.SmartGenerators.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
 			<!-- Include SmartGenerators.CodeBuilders dependency -->
 			<None Include="$(OutputPath)\FractalDataWorks.SmartGenerators.CodeBuilders.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+			<!-- Include FractalDataWorks dependency for attributes -->
+			<None Include="$(OutputPath)\FractalDataWorks.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
 			<!-- Include code fixes assembly if it exists -->
 			<None Include="$(OutputPath)\FractalDataWorks.EnhancedEnums.CodeFixes.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" Condition="Exists('$(OutputPath)\FractalDataWorks.EnhancedEnums.CodeFixes.dll')" />
 		</ItemGroup>
   
-  <ItemGroup>
-    <EmbeddedResource Include="Attributes\*.cs" />
-  </ItemGroup>
   
   <ItemGroup>
     <PackageReference Update="Microsoft.CodeAnalysis.Analyzers">
@@ -98,6 +97,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FractalDataWorks" />
     <PackageReference Include="Humanizer" />
     <PackageReference Include="Microsoft.Bcl.HashCode" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />

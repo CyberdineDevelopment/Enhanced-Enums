@@ -5,8 +5,8 @@ namespace FractalDataWorks;
 /// This interface enables strongly-typed enumerations with identifiers, names, and the ability to represent an empty state.
 /// </summary>
 /// <typeparam name="T">The implementing type, used for self-referencing generics pattern.</typeparam>
-public interface IEnhancedEnumOption<T> : IEnhancedEnumOption
-	where T : IEnhancedEnumOption<T>
+public interface IEnumOption<T> : IEnumOption
+	where T : IEnumOption<T>
 {
 
 }
@@ -15,7 +15,7 @@ public interface IEnhancedEnumOption<T> : IEnhancedEnumOption
 /// Represents an enhanced enumeration type that provides additional functionality beyond standard enums.
 /// This interface enables strongly-typed enumerations with identifiers, names, and the ability to represent an empty state.
 /// </summary>
-public interface IEnhancedEnumOption
+public interface IEnumOption
 {
 	/// <summary>
 	/// Gets the unique identifier for this enum value.

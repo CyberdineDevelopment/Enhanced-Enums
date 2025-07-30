@@ -40,10 +40,6 @@ public sealed class EnumTypeInfo : IInputInfo, IEquatable<EnumTypeInfo>
     /// </summary>
     public string CollectionName { get; set; } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets a value indicating whether factory-based instance creation should be used.
-    /// </summary>
-    public bool UseFactory { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether to generate factory methods for enum values.
@@ -167,7 +163,6 @@ public sealed class EnumTypeInfo : IInputInfo, IEquatable<EnumTypeInfo>
         writer.Write(FullTypeName);
         writer.Write(IsGenericType);
         writer.Write(CollectionName);
-        writer.Write(UseFactory);
         writer.Write(GenerateFactoryMethods);
         writer.Write(Strategy);
         writer.Write(NameComparison.ToString());

@@ -79,13 +79,13 @@ public class EnumOptionConstructorAnalyzer : DiagnosticAnalyzer
                 // If generateFactoryMethod is null (not specified), use collection setting
                 if (generateFactoryMethod == null)
                 {
-                    // Check if ANY collection has factory methods enabled (default is true)
+                    // Check if ANY collection has factory methods enabled (default is false)
                     var anyCollectionHasFactoryMethods = false;
                     
                     foreach (var collectionAttr in collectionAttrs)
                     {
                         var collectionGeneratesFactoryMethods = GetGenerateFactoryMethodsValue(collectionAttr);
-                        if (collectionGeneratesFactoryMethods != false) // null or true
+                        if (collectionGeneratesFactoryMethods == true) // explicitly true
                         {
                             anyCollectionHasFactoryMethods = true;
                             break;
@@ -144,6 +144,6 @@ public class EnumOptionConstructorAnalyzer : DiagnosticAnalyzer
                 return value;
             }
         }
-        return null; // Default is true in the generator
+        return null; // Default is false in the generator
     }
 }

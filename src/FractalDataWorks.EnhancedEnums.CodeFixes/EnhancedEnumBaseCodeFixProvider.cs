@@ -15,7 +15,7 @@ using FractalDataWorks.EnhancedEnums.Analyzers;
 namespace FractalDataWorks.EnhancedEnums.CodeFixes;
 
 /// <summary>
-/// Code fix provider that implements IEnhancedEnumOption on enhanced enum base classes.
+/// Code fix provider that implements IEnumOption on enhanced enum base classes.
 /// </summary>
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(EnhancedEnumBaseCodeFixProvider)), Shared]
 public class EnhancedEnumBaseCodeFixProvider : CodeFixProvider
@@ -38,7 +38,7 @@ public class EnhancedEnumBaseCodeFixProvider : CodeFixProvider
         // Register a code action that will invoke the fix
         context.RegisterCodeFix(
             CodeAction.Create(
-                title: "Implement IEnhancedEnumOption",
+                title: "Implement IEnumOption",
                 createChangedDocument: c => ImplementIEnhancedEnumOptionAsync(context.Document, classDeclaration, c),
                 equivalenceKey: nameof(EnhancedEnumBaseCodeFixProvider)),
             diagnostic);
@@ -58,7 +58,7 @@ public class EnhancedEnumBaseCodeFixProvider : CodeFixProvider
         var interfaceTypeSyntax = SyntaxFactory.SimpleBaseType(
             SyntaxFactory.QualifiedName(
                 SyntaxFactory.IdentifierName("FractalDataWorks"),
-                SyntaxFactory.IdentifierName("IEnhancedEnumOption")));
+                SyntaxFactory.IdentifierName("IEnumOption")));
 
         var newClassDeclaration = classDeclaration;
 

@@ -242,7 +242,7 @@ internal static class EnumCollectionBuilder
     {
         // GetByName method
         var getByNameBody = new CodeBuilder(8);
-        getByNameBody.AppendLine("if (name == null)");
+        getByNameBody.AppendLine("if (string.IsNullOrEmpty(name))");
         getByNameBody.AppendLine("    return Empty;");
         getByNameBody.AppendLine();
         getByNameBody.AppendLine("if (_byName.TryGetValue(name, out var value))");
@@ -261,7 +261,7 @@ internal static class EnumCollectionBuilder
 
         // TryGetByName method
         var tryGetByNameBody = new CodeBuilder(8);
-        tryGetByNameBody.AppendLine("if (name == null)");
+        tryGetByNameBody.AppendLine("if (string.IsNullOrEmpty(name))");
         tryGetByNameBody.AppendLine("{");
         tryGetByNameBody.AppendLine("    value = null;");
         tryGetByNameBody.AppendLine("    return false;");
@@ -430,7 +430,7 @@ internal static class EnumCollectionBuilder
         // Add constructor that calls base with default values
         emptyClass.AddConstructor(ctor => ctor
             .MakePublic()
-            .WithBaseCall("0", "\"Empty\""));
+            .WithBaseCall("0", "string.Empty"));
         
         // Add singleton instance
         emptyClass.AddField($"{effectiveReturnType}?", "_instance", field => field
