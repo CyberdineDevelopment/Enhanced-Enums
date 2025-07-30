@@ -74,9 +74,9 @@ public class CrossAssemblyTypeDiscoveryService : ICrossAssemblyTypeDiscoveryServ
             .Select(a => a.Trim())
             .Where(a => !string.IsNullOrEmpty(a));
 
-        // Check if current assembly is in the allowed list
+        // Check if current assembly is in the allowed list or if wildcard is specified
         return allowedAssemblies.Any(allowed => 
-            string.Equals(allowed, currentAssemblyName, StringComparison.OrdinalIgnoreCase));
+            allowed == "*" || string.Equals(allowed, currentAssemblyName, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>
@@ -162,12 +162,7 @@ public class CrossAssemblyTypeDiscoveryService : ICrossAssemblyTypeDiscoveryServ
             if (compilation.GetAssemblyOrModuleSymbol(reference) is not IAssemblySymbol assemblySymbol)
                 continue;
 
-            // Check if this assembly wants to be discovered by the current compilation
-            var currentAssemblyName = compilation.AssemblyName ?? compilation.Assembly.Name;
-            if (!IsAssemblyDiscoverable(assemblySymbol, currentAssemblyName))
-            {
-                continue;
-            }
+            // Always discover from all referenced assemblies
 
             // Get the global namespace of the referenced assembly
             var globalNamespace = assemblySymbol.GlobalNamespace;
@@ -360,12 +355,7 @@ public class CrossAssemblyTypeDiscoveryService : ICrossAssemblyTypeDiscoveryServ
             if (compilation.GetAssemblyOrModuleSymbol(reference) is not IAssemblySymbol assemblySymbol)
                 continue;
 
-            // Check if this assembly wants to be discovered by the current compilation
-            var currentAssemblyName = compilation.AssemblyName ?? compilation.Assembly.Name;
-            if (!IsAssemblyDiscoverable(assemblySymbol, currentAssemblyName))
-            {
-                continue;
-            }
+            // Always discover from all referenced assemblies
 
             // Get the global namespace of the referenced assembly
             var globalNamespace = assemblySymbol.GlobalNamespace;
@@ -461,12 +451,7 @@ public class CrossAssemblyTypeDiscoveryService : ICrossAssemblyTypeDiscoveryServ
             if (compilation.GetAssemblyOrModuleSymbol(reference) is not IAssemblySymbol assemblySymbol)
                 continue;
 
-            // Check if this assembly wants to be discovered by the current compilation
-            var currentAssemblyName = compilation.AssemblyName ?? compilation.Assembly.Name;
-            if (!IsAssemblyDiscoverable(assemblySymbol, currentAssemblyName))
-            {
-                continue;
-            }
+            // Always discover from all referenced assemblies
 
             // Get the global namespace of the referenced assembly
             var globalNamespace = assemblySymbol.GlobalNamespace;

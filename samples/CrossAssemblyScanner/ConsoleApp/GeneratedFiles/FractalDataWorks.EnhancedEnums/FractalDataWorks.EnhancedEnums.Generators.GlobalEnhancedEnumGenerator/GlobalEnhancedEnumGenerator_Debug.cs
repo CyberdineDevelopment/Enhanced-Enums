@@ -1,0 +1,1 @@
+﻿// GlobalEnhancedEnumGenerator Initialize() was called - generator is loaded!

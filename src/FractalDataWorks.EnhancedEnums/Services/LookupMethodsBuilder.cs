@@ -67,6 +67,7 @@ internal static class LookupMethodsBuilder
             "));
     }
 
+
     private static void AddCustomLookupMethod(ClassBuilder classBuilder, EnumTypeInfo def, PropertyLookupInfo lookup, string effectiveReturnType)
     {
         var paramName = ToCamelCase(lookup.PropertyName);

@@ -46,6 +46,13 @@ public sealed class EnumCollectionAttribute : Attribute
     public Type? DefaultGenericReturnType { get; set; }
 
     /// <summary>
+    /// Gets or sets whether to include enum options from referenced assemblies.
+    /// When true, the generator will scan referenced assemblies for EnumOption types that derive from this base.
+    /// Defaults to false.
+    /// </summary>
+    public bool IncludeReferencedAssemblies { get; set; }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="EnumCollectionAttribute"/> class.
     /// </summary>
     public EnumCollectionAttribute()
@@ -63,13 +70,15 @@ public sealed class EnumCollectionAttribute : Attribute
     /// <param name="nameComparison">The string comparison type for name lookups.</param>
     /// <param name="namespace">The namespace for the generated collection.</param>
     /// <param name="defaultGenericReturnType">The default return type for generic enum bases.</param>
+    /// <param name="includeReferencedAssemblies">Whether to include enum options from referenced assemblies.</param>
     public EnumCollectionAttribute(
         string? collectionName = null,
         Type? returnType = null,
         bool generateFactoryMethods = true,
         StringComparison nameComparison = StringComparison.Ordinal,
         string? @namespace = null,
-        Type? defaultGenericReturnType = null)
+        Type? defaultGenericReturnType = null,
+        bool includeReferencedAssemblies = false)
     {
         CollectionName = collectionName;
         ReturnType = returnType;
@@ -77,5 +86,6 @@ public sealed class EnumCollectionAttribute : Attribute
         NameComparison = nameComparison;
         Namespace = @namespace;
         DefaultGenericReturnType = defaultGenericReturnType;
+        IncludeReferencedAssemblies = includeReferencedAssemblies;
     }
 }

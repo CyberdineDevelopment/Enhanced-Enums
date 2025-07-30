@@ -40,7 +40,7 @@ namespace FractalDataWorks.EnhancedEnums.Generators;
 /// IMPORTANT: The assemblies must be built and referenced for this to work.
 /// The generator reads compiled assembly metadata, not source code.
 /// </summary>
-[Generator]
+//[Generator]
 public class EnhancedEnumOptionGenerator : IncrementalGeneratorBase<EnumTypeInfo>
 {
     // Cache for assembly types to avoid re-scanning

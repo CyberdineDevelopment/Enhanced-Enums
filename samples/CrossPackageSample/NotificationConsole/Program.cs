@@ -13,15 +13,15 @@ class Program
         
         // Show all available notification services discovered across assemblies
         Console.WriteLine("Available notification services:");
-        foreach (var service in NotificationServiceBases.All)
+        foreach (var service in NotificationServices.All)
         {
             Console.WriteLine($"- {service.Name} (ID: {service.Id})");
         }
         Console.WriteLine();
         
         // Get specific services by name
-        var sms = NotificationServiceBases.GetByName("SMS");
-        var email = NotificationServiceBases.GetByName("Email");
+        var sms = NotificationServices.GetByName("SMS");
+        var email = NotificationServices.GetByName("Email");
         
         if (sms != null && email != null)
         {
@@ -38,7 +38,7 @@ class Program
         
         Console.WriteLine();
         Console.WriteLine("Demonstrating polymorphic usage:");
-        foreach (var service in NotificationServiceBases.All)
+        foreach (var service in NotificationServices.All)
         {
             Console.WriteLine($"  {service.Name}: {service.Send("test@example.com", "Test message")}");
         }
