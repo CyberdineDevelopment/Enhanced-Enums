@@ -2,8 +2,8 @@ using FractalDataWorks;
 
 namespace Services.Notification;
 
-[EnumCollection]
-public abstract class NotificationServiceBase : EnhancedEnumBase<NotificationServiceBase>
+[EnumCollection(CollectionName = "NotificationServiceBases")]
+public abstract class NotificationServiceBase : EnumOptionBase<NotificationServiceBase>
 {
     protected NotificationServiceBase(int id, string name) : base(id, name) { }
     

@@ -102,36 +102,34 @@ Both packages are required:
 ```csharp
 using FractalDataWorks;
 
-// TODO: Update all examples to follow new naming conventions
-// Base class should be named <EnumTypeName>OptionBase or <EnumTypeName>EnumOptionBase
-// CollectionName must be explicitly specified
 [EnumCollection(CollectionName = "OrderStatuses")]
 public abstract class OrderStatusOptionBase : EnumOptionBase<OrderStatusOptionBase>
 {
     public abstract bool CanCancel { get; }
     
-    protected OrderStatusOptionBase(int id, string name) : base(id, name) { }
+    // Constructor must include all abstract properties as parameters
+    protected OrderStatusOptionBase(int id, string name, bool canCancel) : base(id, name)
+    {
+        CanCancel = canCancel;
+    }
 }
 
 [EnumOption]
 public class Pending : OrderStatusOptionBase
 {
-    public Pending() : base(1, "Pending") { }
-    public override bool CanCancel => true;
+    public Pending() : base(1, "Pending", true) { }
 }
 
 [EnumOption]
 public class Processing : OrderStatusOptionBase
 {
-    public Processing() : base(2, "Processing") { }
-    public override bool CanCancel => true;
+    public Processing() : base(2, "Processing", true) { }
 }
 
 [EnumOption]
 public class Shipped : OrderStatusOptionBase
 {
-    public Shipped() : base(3, "Shipped") { }
-    public override bool CanCancel => false;
+    public Shipped() : base(3, "Shipped", false) { }
 }
 ```
 
@@ -180,12 +178,16 @@ public abstract class StatusOptionBase : EnumOptionBase<StatusOptionBase>
 }
 
 // You can add additional properties to your base class
-[EnumCollection]
-public abstract class CustomBase : EnumOptionBase<CustomBase>
+[EnumCollection(CollectionName = "CustomStatuses")]
+public abstract class CustomStatusOptionBase : EnumOptionBase<CustomStatusOptionBase>
 {
     public abstract string Code { get; }
     
-    protected CustomBase(int id, string name) : base(id, name) { }
+    // Constructor must include all abstract properties
+    protected CustomStatusOptionBase(int id, string name, string code) : base(id, name)
+    {
+        Code = code;
+    }
 }
 ```
 
@@ -207,12 +209,18 @@ Factory methods are disabled by default for best performance. Enable them when n
 
 ```csharp
 // Collection level - affects all options (default is false)
-[EnumCollection(GenerateFactoryMethods = true)]
-public abstract class Status : EnumOptionBase<Status> { }
+[EnumCollection(CollectionName = "Statuses", GenerateFactoryMethods = true)]
+public abstract class StatusOptionBase : EnumOptionBase<StatusOptionBase> 
+{
+    protected StatusOptionBase(int id, string name) : base(id, name) { }
+}
 
 // Option level - overrides collection setting
 [EnumOption(GenerateFactoryMethod = true)]
-public class SpecialStatus : Status { }
+public class SpecialStatus : StatusOptionBase 
+{
+    public SpecialStatus() : base(1, "Special") { }
+}
 ```
 
 When factory methods are disabled, use `GetByName()` for best performance.
@@ -223,34 +231,125 @@ Specify custom return types for better API design:
 
 ```csharp
 // For non-generic base types
-[EnumCollection(ReturnType = "IOrderStatus")]
-public abstract class OrderStatus : EnumOptionBase<OrderStatus>, IOrderStatus { }
+[EnumCollection(CollectionName = "OrderStatuses", ReturnType = typeof(IOrderStatus))]
+public abstract class OrderStatusOptionBase : EnumOptionBase<OrderStatusOptionBase>, IOrderStatus 
+{
+    protected OrderStatusOptionBase(int id, string name) : base(id, name) { }
+}
 
 // For generic base types
-[EnumCollection(DefaultGenericReturnType = "IMessage")]
-public abstract class Message<T> : EnumOptionBase<Message<T>>, IMessage { }
+[EnumCollection(CollectionName = "Messages", DefaultGenericReturnType = typeof(IMessage))]
+public abstract class MessageOptionBase<T> : EnumOptionBase<MessageOptionBase<T>>, IMessage 
+{
+    protected MessageOptionBase(int id, string name) : base(id, name) { }
+}
 ```
 
 ### Lookup Properties
 
-Generate custom lookup methods for any property:
+Generate custom lookup methods for any property using the `[EnumLookup]` attribute:
+
+**IMPORTANT:** All abstract properties must either:
+1. Be included as constructor parameters, OR
+2. Be nullable, OR  
+3. Use factory method generation with parameters mapped to the accessor method signature
 
 ```csharp
-[EnumCollection]
-public abstract class Country : EnumOptionBase<Country>
+using FractalDataWorks.Attributes;
+
+[EnumCollection(CollectionName = "Countries")]
+public abstract class CountryOptionBase : EnumOptionBase<CountryOptionBase>
+{
+    [EnumLookup] // Generates GetByIsoCode()
+    public abstract string IsoCode { get; }
+    
+    [EnumLookup(MethodName = "FindByCapital")] // Custom method name
+    public abstract string Capital { get; }
+    
+    [EnumLookup(AllowMultiple = true)] // Returns multiple matches
+    public abstract string Currency { get; }
+    
+    [EnumLookup(ReturnType = typeof(ICountry))] // Custom return type
+    public abstract string Region { get; }
+    
+    // Constructor must include ALL abstract properties as parameters
+    protected CountryOptionBase(int id, string name, string isoCode, string capital, string currency, string region) 
+        : base(id, name)
+    {
+        IsoCode = isoCode;
+        Capital = capital;
+        Currency = currency;
+        Region = region;
+    }
+    
+    // Alternative: Make properties nullable
+    // [EnumLookup]
+    // public abstract string? OptionalProperty { get; }
+}
+
+[EnumOption]
+public class USA : CountryOptionBase
+{
+    public USA() : base(1, "United States", "US", "Washington", "USD", "North America") { }
+}
+
+[EnumOption]
+public class Canada : CountryOptionBase
+{
+    public Canada() : base(2, "Canada", "CA", "Ottawa", "USD", "North America") { }
+}
+```
+
+#### Alternative: Factory Method Generation
+
+When using factory methods, parameters can be mapped to the factory method signature:
+
+```csharp
+[EnumCollection(CollectionName = "Countries", GenerateFactoryMethods = true)]
+public abstract class CountryOptionBase : EnumOptionBase<CountryOptionBase>
 {
     [EnumLookup]
     public abstract string IsoCode { get; }
     
-    [EnumLookup(MethodName = "FindByCapital")]
+    [EnumLookup] 
     public abstract string Capital { get; }
     
-    protected Country(int id, string name) : base(id, name) { }
+    protected CountryOptionBase(int id, string name) : base(id, name) { }
 }
 
-// Generated methods:
-var usa = Countries.GetByIsoCode("US");
-var france = Countries.FindByCapital("Paris");
+[EnumOption]
+public class USA : CountryOptionBase
+{
+    public USA() : base(1, "United States") { }
+    public USA(string customCapital) : base(1, "United States") 
+    { 
+        Capital = customCapital; 
+    }
+    
+    public override string IsoCode => "US";
+    public override string Capital { get; }
+}
+
+// Generated factory methods will include constructor parameters:
+// Countries.USA() -> USA with default capital
+// Countries.USA("Washington DC") -> USA with custom capital
+```
+
+**Generated lookup methods:**
+```csharp
+// Single value lookups (default behavior)
+var usa = Countries.GetByIsoCode("US");                    // CountryOptionBase?
+var france = Countries.FindByCapital("Paris");             // CountryOptionBase?
+var northAmerica = Countries.GetByRegion("North America"); // ICountry? (custom return type)
+
+// Multiple value lookup (AllowMultiple = true)
+var usdCountries = Countries.GetByCurrency("USD");         // ImmutableArray<CountryOptionBase>
+
+// All lookup methods have TryGet variants for safe access
+if (Countries.TryGetByIsoCode("UK", out var uk))
+{
+    Console.WriteLine($"Found: {uk.Name}");
+}
 ```
 
 ### Multiple Collections
@@ -260,19 +359,19 @@ Organize enum values into multiple collections:
 ```csharp
 [EnumCollection("ActiveStatuses")]
 [EnumCollection("InactiveStatuses")]
-public abstract class Status : EnumOptionBase<Status>
+public abstract class StatusOptionBase : EnumOptionBase<StatusOptionBase>
 {
-    protected Status(int id, string name) : base(id, name) { }
+    protected StatusOptionBase(int id, string name) : base(id, name) { }
 }
 
 [EnumOption(CollectionName = "ActiveStatuses")]
-public class Running : Status
+public class Running : StatusOptionBase
 {
     public Running() : base(1, "Running") { }
 }
 
 [EnumOption(CollectionName = "InactiveStatuses")]
-public class Stopped : Status
+public class Stopped : StatusOptionBase
 {
     public Stopped() : base(2, "Stopped") { }
 }
@@ -294,12 +393,13 @@ public interface IMessage
     string GetContent();
 }
 
-[EnumCollection(ReturnType = "IMessage")]
-public abstract class MessageType : EnumOptionBase<MessageType>, IMessage
+[EnumCollection(CollectionName = "MessageTypes", ReturnType = typeof(IMessage))]
+public abstract class MessageTypeOptionBase : EnumOptionBase<MessageTypeOptionBase>, IMessage
 {
     public abstract string GetContent();
     
-    protected MessageType(int id, string name) : base(id, name) { }
+    // Constructor includes all abstract properties/methods - but GetContent() is a method, so not needed
+    protected MessageTypeOptionBase(int id, string name) : base(id, name) { }
 }
 
 // Generated methods return IMessage:
@@ -311,27 +411,27 @@ IMessage welcome = MessageTypes.Welcome();
 Enhanced Enums support constructors for initialization:
 
 ```csharp
-[EnumCollection]
-public abstract class LogLevel : EnumOptionBase<LogLevel>
+[EnumCollection(CollectionName = "LogLevels")]
+public abstract class LogLevelOptionBase : EnumOptionBase<LogLevelOptionBase>
 {
-    protected LogLevel(int value, string name) : base(value, name)
+    public abstract int Value { get; }
+    
+    protected LogLevelOptionBase(int id, string name, int value) : base(id, name)
     {
         Value = value;
     }
-    
-    public int Value { get; }
 }
 
 [EnumOption]
-public class Error : LogLevel
+public class Error : LogLevelOptionBase
 {
-    public Error() : base(1, "ERROR") { }
+    public Error() : base(1, "ERROR", 1) { }
 }
 
 [EnumOption]
-public class Warning : LogLevel
+public class Warning : LogLevelOptionBase
 {
-    public Warning() : base(2, "WARN") { }
+    public Warning() : base(2, "WARN", 2) { }
 }
 ```
 
@@ -340,33 +440,33 @@ public class Warning : LogLevel
 Works seamlessly with primary constructors:
 
 ```csharp
-[EnumCollection]
-public abstract class Size : EnumOptionBase<Size>
+[EnumCollection(CollectionName = "Sizes")]
+public abstract class SizeOptionBase : EnumOptionBase<SizeOptionBase>
 {
-    public int Value { get; }
+    public abstract int Value { get; }
     
-    protected Size(int value, string label) : base(value, label)
+    protected SizeOptionBase(int id, string name, int value) : base(id, name)
     {
         Value = value;
     }
 }
 
 [EnumOption]
-public class Small : Size
+public class Small : SizeOptionBase
 {
-    public Small() : base(1, "Small") { }
+    public Small() : base(1, "Small", 1) { }
 }
 
 [EnumOption]
-public class Medium : Size
+public class Medium : SizeOptionBase
 {
-    public Medium() : base(2, "Medium") { }
+    public Medium() : base(2, "Medium", 2) { }
 }
 
 [EnumOption]
-public class Large : Size
+public class Large : SizeOptionBase
 {
-    public Large() : base(3, "Large") { }
+    public Large() : base(3, "Large", 3) { }
 }
 ```
 
@@ -377,29 +477,29 @@ public class Large : Size
 Full support for generic base types with type constraints:
 
 ```csharp
-// Single type parameter
-[EnumCollection]
-public abstract class Handler<T> : EnumOptionBase<Handler<T>>
+// Single type parameter - methods don't require constructor parameters
+[EnumCollection(CollectionName = "Handlers")]
+public abstract class HandlerOptionBase<T> : EnumOptionBase<HandlerOptionBase<T>>
 {
     public abstract void Handle(T item);
-    protected Handler(int id, string name) : base(id, name) { }
+    protected HandlerOptionBase(int id, string name) : base(id, name) { }
 }
 
 [EnumOption]
-public class StringHandler : Handler<string>
+public class StringHandler : HandlerOptionBase<string>
 {
     public StringHandler() : base(1, "String") { }
     public override void Handle(string item) => Console.WriteLine(item);
 }
 
-// Multiple type parameters with constraints
-[EnumCollection(DefaultGenericReturnType = "IConverter")]
-public abstract class Converter<TInput, TOutput> : EnumOptionBase<Converter<TInput, TOutput>>, IConverter
+// Multiple type parameters with constraints - methods don't require constructor parameters
+[EnumCollection(CollectionName = "Converters", DefaultGenericReturnType = typeof(IConverter))]
+public abstract class ConverterOptionBase<TInput, TOutput> : EnumOptionBase<ConverterOptionBase<TInput, TOutput>>, IConverter
     where TInput : class
     where TOutput : struct
 {
     public abstract TOutput Convert(TInput input);
-    protected Converter(int id, string name) : base(id, name) { }
+    protected ConverterOptionBase(int id, string name) : base(id, name) { }
 }
 ```
 
@@ -408,21 +508,22 @@ public abstract class Converter<TInput, TOutput> : EnumOptionBase<Converter<TInp
 Factory methods are disabled by default for best performance. When enabled, they create **new instances** (not singletons):
 
 ```csharp
-[EnumCollection(GenerateFactoryMethods = true)]
-public abstract class Status : EnumOptionBase<Status>
+[EnumCollection(CollectionName = "Statuses", GenerateFactoryMethods = true)]
+public abstract class StatusOptionBase : EnumOptionBase<StatusOptionBase>
 {
-    protected Status(int id, string name) : base(id, name) { }
+    public abstract string? Reason { get; }
+    
+    protected StatusOptionBase(int id, string name, string? reason) : base(id, name)
+    {
+        Reason = reason;
+    }
 }
 
 [EnumOption]
-public class Active : Status
+public class Active : StatusOptionBase
 {
-    public Active() : base(1, "Active") { }
-    public Active(string reason) : base(1, "Active") 
-    { 
-        Reason = reason; 
-    }
-    public string? Reason { get; }
+    public Active() : base(1, "Active", null) { }
+    public Active(string reason) : base(1, "Active", reason) { }
 }
 
 // Usage:
@@ -435,15 +536,15 @@ var singleton = Statuses.GetByName("Active"); // Returns cached singleton
 
 ```csharp
 // Disable at collection level
-[EnumCollection(GenerateFactoryMethods = false)]
-public abstract class ConfigOption : EnumOptionBase<ConfigOption>
+[EnumCollection(CollectionName = "ConfigOptions", GenerateFactoryMethods = false)]
+public abstract class ConfigOptionBase : EnumOptionBase<ConfigOptionBase>
 {
-    protected ConfigOption(int id, string name) : base(id, name) { }
+    protected ConfigOptionBase(int id, string name) : base(id, name) { }
 }
 
 // Disable for specific option
 [EnumOption(GenerateFactoryMethod = false)]
-public class SpecialConfig : ConfigOption
+public class SpecialConfig : ConfigOptionBase
 {
     public SpecialConfig() : base(99, "Special") { }
 }
@@ -454,10 +555,10 @@ When factory methods are disabled, enum options **must** have a public parameter
 ### Case-Sensitive Lookups
 
 ```csharp
-[EnumCollection(NameComparison = StringComparison.Ordinal)]
-public abstract class CaseSensitiveEnum : EnumOptionBase<CaseSensitiveEnum>
+[EnumCollection(CollectionName = "CaseSensitiveEnums", NameComparison = StringComparison.Ordinal)]
+public abstract class CaseSensitiveEnumOptionBase : EnumOptionBase<CaseSensitiveEnumOptionBase>
 {
-    protected CaseSensitiveEnum(int id, string name) : base(id, name) { }
+    protected CaseSensitiveEnumOptionBase(int id, string name) : base(id, name) { }
     // Name lookups will be case-sensitive
 }
 ```
@@ -491,7 +592,8 @@ Marks a type as an enhanced enum base. Applied to abstract classes that inherit 
 - `CollectionName` (string): **REQUIRED** - Name of the generated collection class. Must be explicitly specified.
 - `GenerateFactoryMethods` (bool): Generate static factory methods. Default: `false`
 - `NameComparison` (StringComparison): How to compare names. Default: `Ordinal`
-- `ReturnType` (string): Return type for generated methods. Default: Base type
+- `ReturnType` (Type): Return type for generated methods. Use `typeof(IMyInterface)`. Default: Base type
+- `DefaultGenericReturnType` (Type): Return type for generic enhanced enums. Use `typeof(IMyInterface)`. Default: Base type
 - `Namespace` (string): Namespace for the generated collection class. Default: Same as base type
 
 #### `[EnumOption]`
@@ -501,7 +603,9 @@ Marks a type as an enum option. Applied to concrete classes that inherit from an
 **Properties:**
 - `Name` (string): Override the display name. Default: Class name
 - `CollectionName` (string): Target collection for multiple collection scenarios
+- `ReturnType` (Type): Custom return type for this specific enum option. Use `typeof(IMyInterface)`. Default: Uses collection's return type
 - `GenerateFactoryMethod` (bool?): Override factory method generation for this option. Default: null (uses collection setting)
+- `MethodName` (string): Custom method name for the factory method. Default: Uses Name property or class name
 
 #### `[EnumLookup]`
 
@@ -510,6 +614,14 @@ Generates a lookup method for a property. Applied to properties in the base clas
 **Properties:**
 - `MethodName` (string): Name of generated method. Default: `GetBy{PropertyName}`
 - `AllowMultiple` (bool): Return multiple matches. Default: `false`
+- `ReturnType` (Type): Custom return type for this lookup method. Use `typeof(IMyInterface)`. Default: Uses collection's return type
+
+**Requirements:**
+- Property must be abstract or virtual
+- Property must be either:
+  - Included as constructor parameter, OR
+  - Nullable, OR
+  - Used with factory method generation
 
 ### Generated Methods
 
@@ -556,17 +668,17 @@ The base class MUST inherit from `EnumOptionBase<T>`:
 
 ```csharp
 // ❌ Wrong
-[EnumCollection]
-public abstract class Status
+[EnumCollection(CollectionName = "Statuses")]
+public abstract class StatusOptionBase
 {
     public abstract string Name { get; }
 }
 
 // ✅ Correct
-[EnumCollection]
-public abstract class Status : EnumOptionBase<Status>
+[EnumCollection(CollectionName = "Statuses")]
+public abstract class StatusOptionBase : EnumOptionBase<StatusOptionBase>
 {
-    protected Status(int id, string name) : base(id, name) { }
+    protected StatusOptionBase(int id, string name) : base(id, name) { }
 }
 ```
 
@@ -575,15 +687,19 @@ public abstract class Status : EnumOptionBase<Status>
 Ensure your base class has accessible abstract members:
 
 ```csharp
-[EnumCollection]
-public abstract class Status : EnumOptionBase<Status>
+[EnumCollection(CollectionName = "Statuses")]
+public abstract class StatusOptionBase : EnumOptionBase<StatusOptionBase>
 {
     // Id and Name come from base class
     public abstract string Code { get; }  // ✅ Will be implemented in Empty
     
     public string Description { get; set; }  // ❌ Not abstract, won't be in Empty
     
-    protected Status(int id, string name) : base(id, name) { }
+    // Constructor must include all abstract properties
+    protected StatusOptionBase(int id, string name, string code) : base(id, name)
+    {
+        Code = code;
+    }
 }
 ```
 

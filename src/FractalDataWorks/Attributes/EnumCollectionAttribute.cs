@@ -19,7 +19,7 @@ public sealed class EnumCollectionAttribute : Attribute
     /// Gets or sets the return type for factory methods and properties.
     /// Can be an interface or base type that all enum values implement.
     /// </summary>
-    public string? ReturnType { get; set; }
+    public Type? ReturnType { get; set; }
 
     /// <summary>
     /// Gets or sets whether to generate factory methods for enum values.
@@ -39,20 +39,11 @@ public sealed class EnumCollectionAttribute : Attribute
     /// </summary>
     public string? Namespace { get; set; }
 
-    /// <summary>
-    /// Gets or sets the namespace for the return type if it's not in the same namespace.
-    /// </summary>
-    public string? ReturnTypeNamespace { get; set; }
 
     /// <summary>
     /// Gets or sets the default return type for generic enum bases.
     /// </summary>
-    public string? DefaultGenericReturnType { get; set; }
-
-    /// <summary>
-    /// Gets or sets the namespace for the default generic return type.
-    /// </summary>
-    public string? DefaultGenericReturnTypeNamespace { get; set; }
+    public Type? DefaultGenericReturnType { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EnumCollectionAttribute"/> class.
@@ -71,26 +62,20 @@ public sealed class EnumCollectionAttribute : Attribute
     /// <param name="generateFactoryMethods">Whether to generate factory methods for enum values.</param>
     /// <param name="nameComparison">The string comparison type for name lookups.</param>
     /// <param name="namespace">The namespace for the generated collection.</param>
-    /// <param name="returnTypeNamespace">The namespace for the return type if it's not in the same namespace.</param>
     /// <param name="defaultGenericReturnType">The default return type for generic enum bases.</param>
-    /// <param name="defaultGenericReturnTypeNamespace">The namespace for the default generic return type.</param>
     public EnumCollectionAttribute(
         string? collectionName = null,
-        string? returnType = null,
+        Type? returnType = null,
         bool generateFactoryMethods = true,
         StringComparison nameComparison = StringComparison.Ordinal,
         string? @namespace = null,
-        string? returnTypeNamespace = null,
-        string? defaultGenericReturnType = null,
-        string? defaultGenericReturnTypeNamespace = null)
+        Type? defaultGenericReturnType = null)
     {
         CollectionName = collectionName;
         ReturnType = returnType;
         GenerateFactoryMethods = generateFactoryMethods;
         NameComparison = nameComparison;
         Namespace = @namespace;
-        ReturnTypeNamespace = returnTypeNamespace;
         DefaultGenericReturnType = defaultGenericReturnType;
-        DefaultGenericReturnTypeNamespace = defaultGenericReturnTypeNamespace;
     }
 }

@@ -19,7 +19,8 @@ internal static class EnumCollectionBuilder
         EnumTypeInfo definition, 
         List<EnumValueInfo> values, 
         string effectiveReturnType,
-        INamedTypeSymbol? baseTypeSymbol)
+        INamedTypeSymbol? baseTypeSymbol,
+        Compilation compilation)
     {
         // Create code builder for the entire file
         var codeBuilder = new CodeBuilder();
@@ -71,7 +72,7 @@ internal static class EnumCollectionBuilder
         namespaceBuilder.AddClass(classBuilder);
         
         // Add the empty class as a separate public class
-        var emptyClass = CreateEmptyClass(definition, effectiveReturnType, baseTypeSymbol);
+        var emptyClass = CreateEmptyClass(definition, effectiveReturnType, baseTypeSymbol, values, compilation);
         namespaceBuilder.AddClass(emptyClass);
         
         // Build the complete source
@@ -417,7 +418,7 @@ internal static class EnumCollectionBuilder
             .WithXmlDocSummary("Gets an empty/null enum value."));
     }
     
-    private static ClassBuilder CreateEmptyClass(EnumTypeInfo definition, string effectiveReturnType, INamedTypeSymbol? baseTypeSymbol)
+    private static ClassBuilder CreateEmptyClass(EnumTypeInfo definition, string effectiveReturnType, INamedTypeSymbol? baseTypeSymbol, List<EnumValueInfo> values, Compilation compilation)
     {
         var emptyClassName = GetEmptyClassName(definition.ClassName);
         
@@ -442,11 +443,8 @@ internal static class EnumCollectionBuilder
             .MakeStatic()
             .WithGetter($"return _instance ??= new {emptyClassName}();"));
         
-        // Implement abstract members
-        if (baseTypeSymbol != null)
-        {
-            ImplementAbstractMembers(emptyClass, baseTypeSymbol);
-        }
+        // Implement all public members from child classes
+        ImplementAllPublicMembers(emptyClass, values, compilation);
         
         return emptyClass;
     }
@@ -462,6 +460,84 @@ internal static class EnumCollectionBuilder
     }
 
     // Removed - no longer needed since we build the empty class inline
+
+    /// <summary>
+    /// Implements all public members from child classes in the Empty class.
+    /// </summary>
+    private static void ImplementAllPublicMembers(ClassBuilder emptyClass, List<EnumValueInfo> values, Compilation compilation)
+    {
+        var allMembers = GetAllPublicMembersFromChildren(values, compilation);
+        
+        foreach (var member in allMembers)
+        {
+            if (member is IPropertySymbol property)
+            {
+                var defaultValue = GetDefaultValue(property.Type);
+                
+                // Check if property is abstract (needs override) or virtual/regular (needs new)
+                var modifier = property.IsAbstract ? "override" : "new";
+                
+                if (modifier == "override")
+                {
+                    emptyClass.AddProperty(property.Type.ToDisplayString(), property.Name, prop => prop
+                        .MakePublic()
+                        .MakeOverride()
+                        .WithGetter($"return {defaultValue};")
+                        .WithXmlDocSummary($"Gets the default value for {property.Name}."));
+                }
+                else
+                {
+                    emptyClass.AddProperty(property.Type.ToDisplayString(), property.Name, prop => prop
+                        .MakePublic()
+                        .WithGetter($"return {defaultValue};")
+                        .WithXmlDocSummary($"Gets the default value for {property.Name}."));
+                }
+            }
+            else if (member is IMethodSymbol method && method.MethodKind == MethodKind.Ordinary)
+            {
+                var body = method.ReturnsVoid 
+                    ? "" 
+                    : $"return {GetDefaultValue(method.ReturnType)};";
+                
+                // Check if method is abstract (needs override) or virtual/regular (needs new)
+                var modifier = method.IsAbstract ? "override" : "new";
+                
+                if (modifier == "override")
+                {
+                    emptyClass.AddMethod(method.Name, method.ReturnType.ToDisplayString(), m => 
+                    {
+                        m.MakePublic()
+                         .MakeOverride()
+                         .WithBody(body)
+                         .WithXmlDocSummary(method.ReturnsVoid 
+                             ? $"Empty implementation of {method.Name}." 
+                             : $"Returns the default value for {method.Name}.");
+                        
+                        foreach (var param in method.Parameters)
+                        {
+                            m.AddParameter(param.Type.ToDisplayString(), param.Name);
+                        }
+                    });
+                }
+                else
+                {
+                    emptyClass.AddMethod(method.Name, method.ReturnType.ToDisplayString(), m => 
+                    {
+                        m.MakePublic()
+                         .WithBody(body)
+                         .WithXmlDocSummary(method.ReturnsVoid 
+                             ? $"Empty implementation of {method.Name}." 
+                             : $"Returns the default value for {method.Name}.");
+                        
+                        foreach (var param in method.Parameters)
+                        {
+                            m.AddParameter(param.Type.ToDisplayString(), param.Name);
+                        }
+                    });
+                }
+            }
+        }
+    }
 
     private static void ImplementAbstractMembers(ClassBuilder emptyClass, INamedTypeSymbol baseTypeSymbol)
     {
@@ -517,11 +593,74 @@ internal static class EnumCollectionBuilder
         return members;
     }
 
+    /// <summary>
+    /// Gets all public members from child EnumOption classes that need to be implemented in the Empty class.
+    /// </summary>
+    private static List<ISymbol> GetAllPublicMembersFromChildren(List<EnumValueInfo> values, Compilation compilation)
+    {
+        var allMembers = new HashSet<ISymbol>(SymbolEqualityComparer.Default);
+        
+        foreach (var value in values)
+        {
+            var childTypeSymbol = compilation.GetTypeByMetadataName(value.FullTypeName);
+            if (childTypeSymbol == null) continue;
+            
+            // Get all public properties and methods (non-static, non-constructor, non-inherited from base)
+            var publicMembers = childTypeSymbol.GetMembers()
+                .Where(m => m.DeclaredAccessibility == Accessibility.Public && 
+                           !m.IsStatic && 
+                           (m.Kind == SymbolKind.Property || 
+                            (m.Kind == SymbolKind.Method && m is IMethodSymbol method && method.MethodKind == MethodKind.Ordinary)) &&
+                           !IsInheritedFromEnumOptionBase(m, childTypeSymbol))
+                .ToList();
+                
+            foreach (var member in publicMembers)
+            {
+                allMembers.Add(member);
+            }
+        }
+        
+        return allMembers.ToList();
+    }
+
+    /// <summary>
+    /// Checks if a member is inherited from EnumOptionBase (Id, Name, etc.) and should be excluded.
+    /// </summary>
+    private static bool IsInheritedFromEnumOptionBase(ISymbol member, INamedTypeSymbol childType)
+    {
+        // Skip Id and Name as they come from EnumOptionBase
+        if (member.Name == "Id" || member.Name == "Name")
+            return true;
+            
+        // Skip if the member is declared in a base type that is EnumOptionBase<T>
+        var declaringType = member.ContainingType;
+        while (declaringType != null)
+        {
+            if (declaringType.IsGenericType && 
+                string.Equals(declaringType.OriginalDefinition.Name, "EnumOptionBase", StringComparison.Ordinal) &&
+                string.Equals(declaringType.OriginalDefinition.ContainingNamespace?.ToDisplayString(), "FractalDataWorks", StringComparison.Ordinal))
+            {
+                return true;
+            }
+            declaringType = declaringType.BaseType;
+        }
+        
+        return false;
+    }
+
     private static string GetDefaultValue(ITypeSymbol type)
     {
         // Handle nullable types
         if (type.NullableAnnotation == NullableAnnotation.Annotated)
             return "null";
+        
+        // Handle arrays
+        if (type.TypeKind == TypeKind.Array)
+        {
+            var arrayType = (IArrayTypeSymbol)type;
+            var elementType = arrayType.ElementType.ToDisplayString();
+            return $"new {elementType}[0]";
+        }
         
         // Handle reference types
         if (type.IsReferenceType)
@@ -529,6 +668,51 @@ internal static class EnumCollectionBuilder
             // Special handling for string to return empty string
             if (type.SpecialType == SpecialType.System_String)
                 return "string.Empty";
+            
+            // Handle common collection types
+            var typeName = type.ToDisplayString();
+            
+            // Handle generic collections
+            if (type is INamedTypeSymbol namedType && namedType.IsGenericType)
+            {
+                var genericTypeName = namedType.OriginalDefinition.ToDisplayString();
+                
+                // Handle common collection interfaces and classes
+                if (genericTypeName.StartsWith("System.Collections.Generic.IEnumerable<") ||
+                    genericTypeName.StartsWith("System.Collections.Generic.ICollection<") ||
+                    genericTypeName.StartsWith("System.Collections.Generic.IList<") ||
+                    genericTypeName.StartsWith("System.Collections.Generic.IReadOnlyCollection<") ||
+                    genericTypeName.StartsWith("System.Collections.Generic.IReadOnlyList<"))
+                {
+                    var elementType = namedType.TypeArguments[0].ToDisplayString();
+                    return $"System.Array.Empty<{elementType}>()";
+                }
+                
+                if (genericTypeName.StartsWith("System.Collections.Generic.List<"))
+                {
+                    var elementType = namedType.TypeArguments[0].ToDisplayString();
+                    return $"new System.Collections.Generic.List<{elementType}>()";
+                }
+                
+                if (genericTypeName.StartsWith("System.Collections.Generic.Dictionary<"))
+                {
+                    var keyType = namedType.TypeArguments[0].ToDisplayString();
+                    var valueType = namedType.TypeArguments[1].ToDisplayString();
+                    return $"new System.Collections.Generic.Dictionary<{keyType}, {valueType}>()";
+                }
+                
+                if (genericTypeName.StartsWith("System.Collections.Immutable.ImmutableArray<"))
+                {
+                    var elementType = namedType.TypeArguments[0].ToDisplayString();
+                    return $"System.Collections.Immutable.ImmutableArray<{elementType}>.Empty";
+                }
+                
+                if (genericTypeName.StartsWith("System.Collections.Immutable.ImmutableList<"))
+                {
+                    var elementType = namedType.TypeArguments[0].ToDisplayString();
+                    return $"System.Collections.Immutable.ImmutableList<{elementType}>.Empty";
+                }
+            }
             
             return "null";
         }

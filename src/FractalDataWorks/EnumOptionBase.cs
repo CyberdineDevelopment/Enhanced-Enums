@@ -7,7 +7,7 @@ namespace FractalDataWorks;
 /// This base class uses auto properties instead of abstract properties for cleaner code.
 /// </summary>
 /// <typeparam name="T">The derived enum type.</typeparam>
-public abstract class EnhancedEnumBase<T> : IEnhancedEnumOption where T : EnhancedEnumBase<T>
+public abstract class EnumOptionBase<T> : IEnumOption where T : EnumOptionBase<T>
 {
     /// <summary>
     /// Gets the unique identifier for this enum value.
@@ -20,12 +20,12 @@ public abstract class EnhancedEnumBase<T> : IEnhancedEnumOption where T : Enhanc
     public string Name { get; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="EnhancedEnumBase{T}"/> class.
+    /// Initializes a new instance of the <see cref="EnumOptionBase{T}"/> class.
     /// </summary>
     /// <param name="id">The unique identifier for this enum value.</param>
     /// <param name="name">The name of this enum value.</param>
     /// <exception cref="ArgumentNullException">Thrown when name is null.</exception>
-    protected EnhancedEnumBase(int id, string name)
+    protected EnumOptionBase(int id, string name)
     {
         Id = id;
         Name = name;

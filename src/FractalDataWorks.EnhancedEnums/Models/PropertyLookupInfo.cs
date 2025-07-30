@@ -65,6 +65,11 @@ public sealed class PropertyLookupInfo : IInputInfo, IEquatable<PropertyLookupIn
     public string? ReturnType { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether the property is abstract or virtual and needs to be overridden in the Empty class.
+    /// </summary>
+    public bool RequiresOverride { get; set; }
+
+    /// <summary>
     /// Gets a hash string representing the contents of this property lookup info for incremental generation.
     /// </summary>
     public string InputHash
@@ -126,6 +131,7 @@ public sealed class PropertyLookupInfo : IInputInfo, IEquatable<PropertyLookupIn
             writer.Write(Comparer ?? string.Empty);
             writer.Write(IsNullable);
             writer.Write(ReturnType ?? string.Empty);
+            writer.Write(RequiresOverride);
         }
         else
         {
@@ -166,7 +172,8 @@ string.Equals(LookupMethodName, other.LookupMethodName, StringComparison.Ordinal
                StringComparison == other.StringComparison &&
 string.Equals(Comparer, other.Comparer, StringComparison.Ordinal) &&
                IsNullable == other.IsNullable &&
-string.Equals(ReturnType, other.ReturnType, StringComparison.Ordinal);
+string.Equals(ReturnType, other.ReturnType, StringComparison.Ordinal) &&
+               RequiresOverride == other.RequiresOverride;
     }
 
     /// <summary>

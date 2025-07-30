@@ -6,6 +6,11 @@ using Xunit;
 
 namespace FractalDataWorks.Tests;
 
+// Test interfaces for type parameter tests
+public interface ITestType { }
+public interface IDefaultGeneric { }
+public interface ITestReturn { }
+
 public class AttributeTests
 {
     [Fact]
@@ -18,9 +23,7 @@ public class AttributeTests
         attribute.GenerateFactoryMethods.ShouldBeTrue();
         attribute.NameComparison.ShouldBe(StringComparison.Ordinal);
         attribute.Namespace.ShouldBeNull();
-        attribute.ReturnTypeNamespace.ShouldBeNull();
         attribute.DefaultGenericReturnType.ShouldBeNull();
-        attribute.DefaultGenericReturnTypeNamespace.ShouldBeNull();
     }
 
     [Fact]
@@ -28,22 +31,18 @@ public class AttributeTests
     {
         var attribute = new EnumCollectionAttribute(
             "TestCollection",
-            "ITestType",
+            typeof(ITestType),
             false,
             StringComparison.OrdinalIgnoreCase,
             "TestNamespace",
-            "ReturnTypeNamespace",
-            "DefaultGeneric",
-            "DefaultGenericNamespace");
+            typeof(IDefaultGeneric));
         
         attribute.CollectionName.ShouldBe("TestCollection");
-        attribute.ReturnType.ShouldBe("ITestType");
+        attribute.ReturnType.ShouldBe(typeof(ITestType));
         attribute.GenerateFactoryMethods.ShouldBeFalse();
         attribute.NameComparison.ShouldBe(StringComparison.OrdinalIgnoreCase);
         attribute.Namespace.ShouldBe("TestNamespace");
-        attribute.ReturnTypeNamespace.ShouldBe("ReturnTypeNamespace");
-        attribute.DefaultGenericReturnType.ShouldBe("DefaultGeneric");
-        attribute.DefaultGenericReturnTypeNamespace.ShouldBe("DefaultGenericNamespace");
+        attribute.DefaultGenericReturnType.ShouldBe(typeof(IDefaultGeneric));
     }
 
     [Fact]
@@ -55,7 +54,6 @@ public class AttributeTests
         attribute.Order.ShouldBe(0);
         attribute.CollectionName.ShouldBeNull();
         attribute.ReturnType.ShouldBeNull();
-        attribute.ReturnTypeNamespace.ShouldBeNull();
         attribute.GenerateFactoryMethod.ShouldBeNull();
         attribute.MethodName.ShouldBeNull();
     }
@@ -67,66 +65,27 @@ public class AttributeTests
             "TestName",
             5,
             "TestCollection",
-            "ITestReturn",
-            "TestReturnNamespace",
+            typeof(ITestReturn),
             true,
             "TestMethod");
         
         attribute.Name.ShouldBe("TestName");
         attribute.Order.ShouldBe(5);
         attribute.CollectionName.ShouldBe("TestCollection");
-        attribute.ReturnType.ShouldBe("ITestReturn");
-        attribute.ReturnTypeNamespace.ShouldBe("TestReturnNamespace");
+        attribute.ReturnType.ShouldBe(typeof(ITestReturn));
         attribute.GenerateFactoryMethod.ShouldBe(true);
         attribute.MethodName.ShouldBe("TestMethod");
     }
 
-    [Fact]
-    public void EnhancedEnumBaseAttributeDefaultConstructorSetsExpectedDefaults()
-    {
-        var attribute = new EnhancedEnumBaseAttribute();
-        
-        attribute.CollectionName.ShouldBe(string.Empty);
-        attribute.UseFactory.ShouldBeFalse();
-        attribute.NameComparison.ShouldBe(StringComparison.OrdinalIgnoreCase);
-        attribute.IncludeReferencedAssemblies.ShouldBeFalse();
-        attribute.ReturnType.ShouldBeNull();
-        attribute.ReturnTypeNamespace.ShouldBeNull();
-        attribute.DefaultGenericReturnType.ShouldBeNull();
-        attribute.DefaultGenericReturnTypeNamespace.ShouldBeNull();
-    }
-
-    [Fact]
-    public void EnhancedEnumBaseAttributeFullConstructorSetsAllProperties()
-    {
-        var attribute = new EnhancedEnumBaseAttribute(
-            "TestCollection",
-            true,
-            StringComparison.Ordinal,
-            true,
-            "IReturnType",
-            "ReturnNamespace",
-            "DefaultGeneric",
-            "DefaultNamespace");
-        
-        attribute.CollectionName.ShouldBe("TestCollection");
-        attribute.UseFactory.ShouldBeTrue();
-        attribute.NameComparison.ShouldBe(StringComparison.Ordinal);
-        attribute.IncludeReferencedAssemblies.ShouldBeTrue();
-        attribute.ReturnType.ShouldBe("IReturnType");
-        attribute.ReturnTypeNamespace.ShouldBe("ReturnNamespace");
-        attribute.DefaultGenericReturnType.ShouldBe("DefaultGeneric");
-        attribute.DefaultGenericReturnTypeNamespace.ShouldBe("DefaultNamespace");
-    }
 
     [Fact]
     public void EnumLookupAttributeConstructorSetsAllProperties()
     {
-        var attribute = new EnumLookupAttribute("ByTestName", true, "ITestReturn");
+        var attribute = new EnumLookupAttribute("ByTestName", true, typeof(ITestReturn));
         
         attribute.MethodName.ShouldBe("ByTestName");
         attribute.AllowMultiple.ShouldBeTrue();
-        attribute.ReturnType.ShouldBe("ITestReturn");
+        attribute.ReturnType.ShouldBe(typeof(ITestReturn));
     }
 
     [Fact]

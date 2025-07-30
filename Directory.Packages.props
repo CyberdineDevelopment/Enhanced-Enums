@@ -9,6 +9,10 @@
     <PackageVersion Include="FractalDataWorks.SmartGenerators.CodeBuilders" Version="0.1.5-alpha-g8cae162c25" />
     <PackageVersion Include="FractalDataWorks.SmartGenerators.TestUtilities" Version="0.1.5-alpha-g8cae162c25" />
     <PackageVersion Include="Humanizer" Version="3.0.0-beta.96" />
+    <PackageVersion Include="ILRepack.Lib.MSBuild.Task" Version="2.0.43">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageVersion>
     <PackageVersion Include="Microsoft.Bcl.HashCode" Version="6.0.0" />
     <!-- System packages -->
     <PackageVersion Include="System.Collections.Immutable" Version="9.0.7" />

@@ -98,13 +98,35 @@
 
   <ItemGroup>
     <PackageReference Include="FractalDataWorks" />
-    <PackageReference Include="Humanizer" />
+    <PackageReference Include="ILRepack.Lib.MSBuild.Task">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Bcl.HashCode" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FractalDataWorks.SmartGenerators\FractalDataWorks.SmartGenerators.csproj" />
+	  <PackageReference Include="FractalDataWorks.SmartGenerators">
+		  <PrivateAssets>all</PrivateAssets>
+	  </PackageReference>
   </ItemGroup>
+
+  <Target Name="MergeSourceGeneratorDependencies" AfterTargets="Build">
+    <ItemGroup>
+      <InputAssemblies Include="$(OutputPath)$(AssemblyName).dll" />
+      <InputAssemblies Include="$(NuGetPackageRoot)fractaldataworks.smartgenerators\0.1.5-alpha-g8cae162c25\lib\netstandard2.0\FractalDataWorks.SmartGenerators.dll" />
+      <InputAssemblies Include="$(NuGetPackageRoot)fractaldataworks.smartgenerators.codebuilders\0.1.5-alpha-g8cae162c25\lib\netstandard2.0\FractalDataWorks.SmartGenerators.CodeBuilders.dll" />
+      <SearchDirectories Include="$(OutputPath)" />
+      <SearchDirectories Include="$(NuGetPackageRoot)" />
+    </ItemGroup>
+    <Message Text="Merging source generator dependencies..." Importance="high" />
+    <ILRepack 
+      OutputFile="$(OutputPath)$(AssemblyName).dll"
+      InputAssemblies="@(InputAssemblies)"
+      TargetKind="SameAsPrimaryAssembly"
+      Internalize="true"
+      LibraryPath="@(SearchDirectories)" />
+  </Target>
 </Project>
 

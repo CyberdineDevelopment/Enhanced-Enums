@@ -17,7 +17,7 @@ public sealed class EnumLookupAttribute : Attribute
     public EnumLookupAttribute(
         string methodName = "",
         bool allowMultiple = false,
-        string? returnType = null)
+        Type? returnType = null)
     {
         MethodName = methodName;
         AllowMultiple = allowMultiple;
@@ -36,7 +36,7 @@ public sealed class EnumLookupAttribute : Attribute
 
     /// <summary>
     /// Gets the return type for this specific lookup method.
-    /// If not specified, inherits from the EnhancedEnumBaseAttribute.ReturnType or auto-detected type.
+    /// If not specified, inherits from the EnumCollection attribute ReturnType or auto-detected type.
     /// </summary>
-    public string? ReturnType { get; }
+    public Type? ReturnType { get; }
 }

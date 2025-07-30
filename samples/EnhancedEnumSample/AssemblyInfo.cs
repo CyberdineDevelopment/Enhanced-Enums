@@ -1,4 +1,2 @@
-using FractalDataWorks.SmartGenerators;
-
-// Enable assembly scanning for this assembly and referenced assemblies
-[assembly: EnableAssemblyScanner]
+// This file is not needed for basic Enhanced Enum usage
+// Assembly scanning is only required for cross-assembly scenarios

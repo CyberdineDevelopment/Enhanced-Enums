@@ -1,40 +1,41 @@
-using FractalDataWorks.EnhancedEnums.Attributes;
+using FractalDataWorks;
+using FractalDataWorks.Attributes;
 using System;
 
 namespace EnhancedEnumSample;
 
-[EnhancedEnumBase("ColorEnums", NameComparison = StringComparison.OrdinalIgnoreCase)]
-public abstract class ColorEnum
+[EnumCollection(CollectionName = "Colors", NameComparison = StringComparison.OrdinalIgnoreCase, GenerateFactoryMethods = true)]
+public abstract class ColorOptionBase : EnumOptionBase<ColorOptionBase>
 {
-    public abstract string Name { get; }
-    public abstract string Hex { get; }
+    public string Hex { get; }
     
     [EnumLookup]
-    public abstract int Value { get; }
+    public int Value { get; }
+    
+    // Constructor must include all abstract properties as parameters
+    protected ColorOptionBase(int id, string name, string hex, int value) : base(id, name)
+    {
+        Hex = hex;
+        Value = value;
+    }
 }
 
 [EnumOption]
-public class Red : ColorEnum
+public class Red : ColorOptionBase
 {
-    public override string Name => "Red";
-    public override string Hex => "#FF0000";
-    public override int Value => 1;
+    public Red() : base(1, "Red", "#FF0000", 1) { }
 }
 
 [EnumOption]
-public class Green : ColorEnum
+public class Green : ColorOptionBase
 {
-    public override string Name => "Green";
-    public override string Hex => "#00FF00";
-    public override int Value => 2;
+    public Green() : base(2, "Green", "#00FF00", 2) { }
 }
 
 [EnumOption]
-public class Blue : ColorEnum
+public class Blue : ColorOptionBase
 {
-    public override string Name => "Blue";
-    public override string Hex => "#0000FF";
-    public override int Value => 3;
+    public Blue() : base(3, "Blue", "#0000FF", 3) { }
 }
 
 class Program
@@ -45,28 +46,41 @@ class Program
         Console.WriteLine("===================");
         
         Console.WriteLine("\nAll Colors:");
-        foreach (var color in ColorEnums.All)
+        foreach (var color in Colors.All)
         {
             Console.WriteLine($"{color.Value}: {color.Name} ({color.Hex})");
         }
 
         Console.WriteLine("\nLookup by name (case insensitive):");
-        var green = ColorEnums.GetByName("green");
+        var green = Colors.GetByName("green");
         Console.WriteLine($"Found: {green?.Name} - {green?.Hex}");
 
         Console.WriteLine("\nLookup by value:");
-        var blue = ColorEnums.GetByValue(3);
+        var blue = Colors.GetByValue(3);
         Console.WriteLine($"Found: {blue?.Name} - {blue?.Hex}");
 
         Console.WriteLine("\nLookup not found:");
-        var purple = ColorEnums.GetByName("Purple");
+        var purple = Colors.GetByName("Purple");
         Console.WriteLine($"Purple: {purple?.Name ?? "Not found"}");
         
-        Console.WriteLine("\nStatic property accessors:");
-        Console.WriteLine($"Red: {ColorEnums.Red.Name} - {ColorEnums.Red.Hex}");
-        Console.WriteLine($"Green: {ColorEnums.Green.Name} - {ColorEnums.Green.Hex}");
-        Console.WriteLine($"Blue: {ColorEnums.Blue.Name} - {ColorEnums.Blue.Hex}");
+        Console.WriteLine("\nFactory methods:");
+        var redInstance = Colors.Red();
+        var greenInstance = Colors.Green();
+        var blueInstance = Colors.Blue();
+        Console.WriteLine($"Red: {redInstance.Name} - {redInstance.Hex}");
+        Console.WriteLine($"Green: {greenInstance.Name} - {greenInstance.Hex}");
+        Console.WriteLine($"Blue: {blueInstance.Name} - {blueInstance.Hex}");
         
-        Console.WriteLine("\nTotal colors: " + ColorEnums.All.Length);
+        Console.WriteLine("\nSingleton lookups:");
+        var redSingleton = Colors.GetByName("Red");
+        var greenSingleton = Colors.GetByName("Green");
+        Console.WriteLine($"Red singleton: {redSingleton?.Name} - {redSingleton?.Hex}");
+        Console.WriteLine($"Green singleton: {greenSingleton?.Name} - {greenSingleton?.Hex}");
+        
+        Console.WriteLine("\nEmpty value:");
+        var empty = Colors.Empty;
+        Console.WriteLine($"Empty: Id={empty.Id}, Name='{empty.Name}', Hex='{empty.Hex}', Value={empty.Value}");
+        
+        Console.WriteLine("\nTotal colors: " + Colors.All.Length);
     }
 }

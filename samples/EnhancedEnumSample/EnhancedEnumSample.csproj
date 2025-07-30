@@ -4,13 +4,22 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <LangVersion>preview</LangVersion>
+    
+    <!-- Emit generated files to disk for debugging -->
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>GeneratedFiles</CompilerGeneratedFilesOutputPath>
   </PropertyGroup>
 	<ItemGroup>
-		<!-- Single reference provides both runtime and analyzer -->
+		<!-- Enhanced Enums source generator -->
 		<ProjectReference Include="..\..\src\FractalDataWorks.EnhancedEnums\FractalDataWorks.EnhancedEnums.csproj" 
 						  OutputItemType="Analyzer" 
-						  ReferenceOutputAssembly="true" />
-		<PackageReference Include="FractalDataWorks.SmartGenerators" />
+						  ReferenceOutputAssembly="false" />
+		<!-- Base types and attributes -->
+		<ProjectReference Include="..\..\src\FractalDataWorks\FractalDataWorks.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<!-- Exclude generated files from compilation to prevent double compilation -->
+		<Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
 	</ItemGroup>
 </Project>
 

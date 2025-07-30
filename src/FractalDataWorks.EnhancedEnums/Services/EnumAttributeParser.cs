@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using FractalDataWorks.EnhancedEnums.Models;
-using Humanizer;
 using Microsoft.CodeAnalysis;
 
 namespace FractalDataWorks.EnhancedEnums.Services;
@@ -54,24 +53,21 @@ internal static class EnumAttributeParser
     /// </summary>
     public static string ExtractCollectionName(AttributeData attr, INamedTypeSymbol symbol)
     {
-        // Check constructor argument first
+        // Check named arguments first for CollectionName property
+        var named = attr.NamedArguments.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        if (named.TryGetValue("CollectionName", out var cn) && cn.Value is string cns && !string.IsNullOrEmpty(cns))
+        {
+            return cns;
+        }
+
+        // Check constructor argument
         if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is string collName && !string.IsNullOrEmpty(collName))
         {
             return collName;
         }
 
-        // Default to plural following convention: ColorEnumBase -> Colors
-        var baseName = symbol.Name;
-        if (baseName.EndsWith("EnumBase", StringComparison.Ordinal))
-        {
-            baseName = baseName.Substring(0, baseName.Length - 8); // Remove "EnumBase"
-        }
-        else if (baseName.EndsWith("Base", StringComparison.Ordinal))
-        {
-            baseName = baseName.Substring(0, baseName.Length - 4); // Remove "Base"
-        }
-        
-        return baseName.Pluralize();
+        // Return empty string to indicate missing collection name - analyzer should warn about this
+        return string.Empty;
     }
 
     /// <summary>
@@ -122,6 +118,7 @@ internal static class EnumAttributeParser
                 AllowMultiple = allowMultiple,
                 IsNullable = prop.Type.NullableAnnotation == NullableAnnotation.Annotated,
                 ReturnType = returnType,
+                RequiresOverride = prop.IsAbstract,
             });
         }
 

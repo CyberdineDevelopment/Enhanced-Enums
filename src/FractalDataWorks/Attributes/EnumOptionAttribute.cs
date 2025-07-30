@@ -17,7 +17,6 @@ public sealed class EnumOptionAttribute : Attribute
         Order = 0;
         CollectionName = null;
         ReturnType = null;
-        ReturnTypeNamespace = null;
         GenerateFactoryMethod = null;
         MethodName = null;
     }
@@ -29,15 +28,13 @@ public sealed class EnumOptionAttribute : Attribute
     /// <param name="order">Ordering within the collection.</param>
     /// <param name="collectionName">The collection name this option belongs to.</param>
     /// <param name="returnType">The return type for this specific enum option.</param>
-    /// <param name="returnTypeNamespace">The namespace for the return type if it's not in the same namespace.</param>
     /// <param name="generateFactoryMethod">Whether to generate a factory method for this specific option.</param>
     /// <param name="methodName">The custom method name for the factory method.</param>
     public EnumOptionAttribute(
         string? name = null,
         int order = 0,
         string? collectionName = null,
-        string? returnType = null,
-        string? returnTypeNamespace = null,
+        Type? returnType = null,
         bool? generateFactoryMethod = null,
         string? methodName = null)
     {
@@ -45,7 +42,6 @@ public sealed class EnumOptionAttribute : Attribute
         Order = order;
         CollectionName = collectionName;
         ReturnType = returnType;
-        ReturnTypeNamespace = returnTypeNamespace;
         GenerateFactoryMethod = generateFactoryMethod;
         MethodName = methodName;
     }
@@ -64,14 +60,9 @@ public sealed class EnumOptionAttribute : Attribute
     
     /// <summary>
     /// Gets the return type for this specific enum option.
-    /// This overrides the default return type specified in the EnumOptionBase attribute.
+    /// This overrides the default return type specified in the EnumCollection attribute.
     /// </summary>
-    public string? ReturnType { get; }
-    
-    /// <summary>
-    /// Gets the namespace for the return type if it's not in the same namespace.
-    /// </summary>
-    public string? ReturnTypeNamespace { get; }
+    public Type? ReturnType { get; }
 
     /// <summary>
     /// Gets whether to generate a factory method for this specific option.
