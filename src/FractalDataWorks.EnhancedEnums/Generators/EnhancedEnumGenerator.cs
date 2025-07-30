@@ -8,6 +8,7 @@ using FractalDataWorks.SmartGenerators;
 using FractalDataWorks.SmartGenerators.CodeBuilders;
 using FractalDataWorks.EnhancedEnums.Models;
 using FractalDataWorks.EnhancedEnums.Discovery;
+using FractalDataWorks.EnhancedEnums.Services;
 using FractalDataWorks.Attributes;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -44,9 +45,6 @@ public class EnhancedEnumOptionGenerator : IncrementalGeneratorBase<EnumTypeInfo
 {
     // Cache for assembly types to avoid re-scanning
     private static readonly ConcurrentDictionary<string, List<INamedTypeSymbol>> _assemblyTypeCache = new(StringComparer.Ordinal);
-    
-    // Cross-assembly discovery service
-    private static readonly CrossAssemblyTypeDiscoveryService _discoveryService = new CrossAssemblyTypeDiscoveryService();
     /// <summary>
     /// Generates the collection class for an enum definition with its values.
     /// </summary>
@@ -59,234 +57,53 @@ public class EnhancedEnumOptionGenerator : IncrementalGeneratorBase<EnumTypeInfo
         if (def == null)
             throw new ArgumentNullException(nameof(def));
 
-        // Determine the appropriate namespace for the generated class
-        // Use the namespace of the definition class (ScanOptionEnumBase)
-        string targetNamespace = def.Namespace;
+        var baseTypeSymbol = GetBaseTypeSymbol(def, compilation);
+        var effectiveReturnType = DetermineEffectiveReturnType(def, baseTypeSymbol, compilation);
+        var implementsEnhancedOption = CheckIfImplementsEnhancedOption(baseTypeSymbol);
 
-        // Get the base type symbol for various checks
-        var baseTypeSymbol = def.IsGenericType && !string.IsNullOrEmpty(def.UnboundTypeName)
+        var classBuilder = BuildCollectionClass(def, values, effectiveReturnType, implementsEnhancedOption, baseTypeSymbol);
+        var generatedCode = SourceCodeBuilder.BuildSourceCode(def, effectiveReturnType, classBuilder.Build());
+        
+        context.AddSource($"{def.CollectionName}.g.cs", generatedCode);
+    }
+
+    private INamedTypeSymbol? GetBaseTypeSymbol(EnumTypeInfo def, Compilation compilation)
+    {
+        return def.IsGenericType && !string.IsNullOrEmpty(def.UnboundTypeName)
             ? compilation.GetTypeByMetadataName(def.UnboundTypeName)
             : compilation.GetTypeByMetadataName(def.FullTypeName);
-        
-        // Determine the effective return type
-        string? effectiveReturnType;
-        if (!string.IsNullOrEmpty(def.ReturnType))
-        {
-            effectiveReturnType = def.ReturnType;
-        }
-        else if (def.IsGenericType && !string.IsNullOrEmpty(def.DefaultGenericReturnType))
-        {
-            effectiveReturnType = def.DefaultGenericReturnType;
-        }
-        else
-        {
-            effectiveReturnType = baseTypeSymbol != null ? DetectReturnType(baseTypeSymbol, compilation) : def.FullTypeName;
-        }
+    }
 
-        // Create a class builder for the collection class
+    private string DetermineEffectiveReturnType(EnumTypeInfo def, INamedTypeSymbol? baseTypeSymbol, Compilation compilation)
+    {
+        if (!string.IsNullOrEmpty(def.ReturnType))
+            return def.ReturnType;
+        
+        if (def.IsGenericType && !string.IsNullOrEmpty(def.DefaultGenericReturnType))
+            return def.DefaultGenericReturnType;
+        
+        return baseTypeSymbol != null ? DetectReturnType(baseTypeSymbol, compilation) : def.FullTypeName;
+    }
+
+    private bool CheckIfImplementsEnhancedOption(INamedTypeSymbol? baseTypeSymbol)
+    {
+        return baseTypeSymbol?.AllInterfaces.Any(i => 
+            string.Equals(i.ToDisplayString(), "FractalDataWorks.IEnumOption", StringComparison.Ordinal)) ?? false;
+    }
+
+    private ClassBuilder BuildCollectionClass(EnumTypeInfo def, EquatableArray<EnumValueInfo> values, string effectiveReturnType, bool implementsEnhancedOption, INamedTypeSymbol? baseTypeSymbol)
+    {
         var classBuilder = new ClassBuilder(def.CollectionName)
             .MakePublic()
             .MakeStatic()
-            .WithNamespace(targetNamespace)
+            .WithNamespace(def.Namespace)
             .WithSummary($"Collection of all {def.ClassName} values.");
 
+        // Add fields
+        CollectionFieldsBuilder.AddFields(classBuilder, def, effectiveReturnType, implementsEnhancedOption);
 
-        // Add private fields for storing instances
-        classBuilder.AddField($"List<{def.FullTypeName}>", "_all", field => field
-            .MakePrivate()
-            .MakeStatic()
-            .MakeReadOnly()
-            .WithInitializer($"new List<{def.FullTypeName}>()"));
-        
-        classBuilder.AddField($"ImmutableArray<{effectiveReturnType}>", "_cachedAll", field => field
-            .MakePrivate()
-            .MakeStatic()
-            .MakeReadOnly());
-
-        // Check if base type implements IEnumOption
-        var implementsEnhancedOption = baseTypeSymbol?.AllInterfaces.Any(i => 
-            string.Equals(i.ToDisplayString(), "FractalDataWorks.IEnumOption", StringComparison.Ordinal)) ?? false;
-            
-        // Add conditional compilation fields for dictionaries
-        classBuilder.AddCodeBlock($@"#if NET8_0_OR_GREATER
-private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDict;");
-        
-        // Add id dictionary if implementing IEnumOption
-        if (implementsEnhancedOption)
-        {
-            classBuilder.AddCodeBlock($"private static readonly FrozenDictionary<int, {effectiveReturnType}> _idDict;");
-        }
-        
-        foreach (var lookup in def.LookupProperties)
-        {
-            if (!lookup.AllowMultiple)
-            {
-                classBuilder.AddCodeBlock($"private static readonly FrozenDictionary<{lookup.PropertyType}, {effectiveReturnType}> _{ToCamelCase(lookup.PropertyName)}Dict;");
-            }
-        }
-        
-        classBuilder.AddCodeBlock("#else");
-        classBuilder.AddField($"Dictionary<string, {effectiveReturnType}>", "_nameDict", field => field
-            .MakePrivate()
-            .MakeStatic()
-            .MakeReadOnly()
-            .WithInitializer($"new Dictionary<string, {effectiveReturnType}>(StringComparer.{def.NameComparison})"));
-        
-        // Add id dictionary if implementing IEnumOption
-        if (implementsEnhancedOption)
-        {
-            classBuilder.AddField($"Dictionary<int, {effectiveReturnType}>", "_idDict", field => field
-                .MakePrivate()
-                .MakeStatic()
-                .MakeReadOnly()
-                .WithInitializer($"new Dictionary<int, {effectiveReturnType}>()"));
-        }
-        
-        foreach (var lookup in def.LookupProperties)
-        {
-            if (!lookup.AllowMultiple)
-            {
-                var comparerStr = string.Equals(lookup.PropertyType, "string", StringComparison.Ordinal) 
-                    ? $"(StringComparer.{def.NameComparison})" 
-                    : "()";
-                classBuilder.AddField($"Dictionary<{lookup.PropertyType}, {effectiveReturnType}>", $"_{ToCamelCase(lookup.PropertyName)}Dict", field => field
-                    .MakePrivate()
-                    .MakeStatic()
-                    .MakeReadOnly()
-                    .WithInitializer($"new Dictionary<{lookup.PropertyType}, {effectiveReturnType}>{comparerStr}"));
-            }
-        }
-        
-        classBuilder.AddCodeBlock("#endif");
-
-        // Add static constructor to initialize instances
-        var constructorBody = new StringBuilder();
-        
-        // Add each enum value to the collection
-#pragma warning disable S3267 // This is not a simple mapping - different code is generated based on UseFactory
-        foreach (var value in values)
-#pragma warning restore S3267
-        {
-            // Always use 'new' to create instances for the collection
-            constructorBody.AppendLine($"_all.Add(new {value.FullTypeName}());");
-        }
-        
-        constructorBody.AppendLine();
-        constructorBody.AppendLine("// Cache the immutable array to prevent repeated allocations");
-        constructorBody.AppendLine($"_cachedAll = _all.Cast<{effectiveReturnType}>().ToImmutableArray();");
-        
-        // Build the conditional compilation logic for dictionary initialization
-        constructorBody.AppendLine();
-        constructorBody.AppendLine("// Populate dictionaries for fast lookups");
-        constructorBody.AppendLine("#if NET8_0_OR_GREATER");
-        constructorBody.AppendLine("// Create temp dictionaries for FrozenDictionary initialization");
-        constructorBody.AppendLine($"var tempNameDict = new Dictionary<string, {effectiveReturnType}>(StringComparer.{def.NameComparison});");
-        
-        // Add temp id dictionary if implementing IEnumOption
-        if (implementsEnhancedOption)
-        {
-            constructorBody.AppendLine($"var tempIdDict = new Dictionary<int, {effectiveReturnType}>();");
-        }
-        
-        foreach (var lookup in def.LookupProperties)
-        {
-            if (!lookup.AllowMultiple)
-            {
-                var comparerStr = string.Equals(lookup.PropertyType, "string", StringComparison.Ordinal) 
-                    ? $"(StringComparer.{def.NameComparison})" 
-                    : "()";
-                constructorBody.AppendLine($"var temp{lookup.PropertyName}Dict = new Dictionary<{lookup.PropertyType}, {effectiveReturnType}>{comparerStr};");
-            }
-        }
-        
-        constructorBody.AppendLine();
-        constructorBody.AppendLine("foreach (var item in _all)");
-        constructorBody.AppendLine("{");
-        constructorBody.AppendLine("    if (!tempNameDict.ContainsKey(item.Name))");
-        constructorBody.AppendLine("    {");
-        constructorBody.AppendLine("        tempNameDict[item.Name] = item;");
-        constructorBody.AppendLine("    }");
-        
-        // Populate id dictionary if implementing IEnumOption
-        if (implementsEnhancedOption)
-        {
-            constructorBody.AppendLine();
-            constructorBody.AppendLine("    if (!tempIdDict.ContainsKey(item.Id))");
-            constructorBody.AppendLine("    {");
-            constructorBody.AppendLine("        tempIdDict[item.Id] = item;");
-            constructorBody.AppendLine("    }");
-        }
-        
-        foreach (var lookup in def.LookupProperties)
-        {
-            if (!lookup.AllowMultiple)
-            {
-                constructorBody.AppendLine();
-                constructorBody.AppendLine($"    if (!temp{lookup.PropertyName}Dict.ContainsKey(item.{lookup.PropertyName}))");
-                constructorBody.AppendLine("    {");
-                constructorBody.AppendLine($"        temp{lookup.PropertyName}Dict[item.{lookup.PropertyName}] = item;");
-                constructorBody.AppendLine("    }");
-            }
-        }
-        
-        constructorBody.AppendLine("}");
-        
-        constructorBody.AppendLine();
-        constructorBody.AppendLine("// Convert to FrozenDictionaries for better performance");
-        constructorBody.AppendLine($"_nameDict = tempNameDict.ToFrozenDictionary(StringComparer.{def.NameComparison});");
-        
-        // Convert id dictionary if implementing IEnumOption
-        if (implementsEnhancedOption)
-        {
-            constructorBody.AppendLine("_idDict = tempIdDict.ToFrozenDictionary();");
-        }
-        
-        foreach (var lookup in def.LookupProperties)
-        {
-            if (!lookup.AllowMultiple)
-            {
-                var comparerStr = string.Equals(lookup.PropertyType, "string", StringComparison.Ordinal) 
-                    ? $"(StringComparer.{def.NameComparison})" 
-                    : "()";
-                constructorBody.AppendLine($"_{ToCamelCase(lookup.PropertyName)}Dict = temp{lookup.PropertyName}Dict.ToFrozenDictionary{comparerStr};");
-            }
-        }
-        
-        constructorBody.AppendLine("#else");
-        constructorBody.AppendLine("foreach (var item in _all)");
-        constructorBody.AppendLine("{");
-        constructorBody.AppendLine("    if (!_nameDict.ContainsKey(item.Name))");
-        constructorBody.AppendLine("    {");
-        constructorBody.AppendLine("        _nameDict[item.Name] = item;");
-        constructorBody.AppendLine("    }");
-        
-        // Populate id dictionary if implementing IEnumOption
-        if (implementsEnhancedOption)
-        {
-            constructorBody.AppendLine();
-            constructorBody.AppendLine("    if (!_idDict.ContainsKey(item.Id))");
-            constructorBody.AppendLine("    {");
-            constructorBody.AppendLine("        _idDict[item.Id] = item;");
-            constructorBody.AppendLine("    }");
-        }
-        
-        foreach (var lookup in def.LookupProperties)
-        {
-            if (!lookup.AllowMultiple)
-            {
-                var dictName = $"_{ToCamelCase(lookup.PropertyName)}Dict";
-                constructorBody.AppendLine();
-                constructorBody.AppendLine($"    if (!{dictName}.ContainsKey(item.{lookup.PropertyName}))");
-                constructorBody.AppendLine("    {");
-                constructorBody.AppendLine($"        {dictName}[item.{lookup.PropertyName}] = item;");
-                constructorBody.AppendLine("    }");
-            }
-        }
-        
-        constructorBody.AppendLine("}");
-        constructorBody.AppendLine("#endif");
-        
-        // Add the static constructor to the class
+        // Add static constructor
+        var constructorBody = StaticConstructorBuilder.BuildConstructorBody(def, values, effectiveReturnType, implementsEnhancedOption);
         classBuilder.AddCodeBlock($"static {def.CollectionName}()\n{{\n{constructorBody}\n}}");
 
         // Add All property
@@ -296,142 +113,19 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
             .WithExpressionBody("_cachedAll")
             .WithXmlDocSummary($"Gets all available {def.ClassName} values."));
 
-        // Add GetByName method - always generate since Name property is required by design
-        var getByNameReturnType = effectiveReturnType?.EndsWith("?", StringComparison.Ordinal) == true ? effectiveReturnType : $"{effectiveReturnType}?";
-        classBuilder.AddMethod("GetByName", getByNameReturnType!, method => method
-            .MakePublic()
-            .MakeStatic()
-            .AddParameter("string", "name")
-            .WithXmlDocSummary($"Gets the {def.ClassName} with the specified name.")
-            .WithXmlDocParam("name", "The name to search for.")
-            .WithXmlDocReturns($"The {def.ClassName} with the specified name, or null if not found.")
-            .WithBody(@"
-                if (string.IsNullOrEmpty(name))
-                {
-                    return null;
-                }
-                
-                _nameDict.TryGetValue(name, out var result);
-                return result;
-            "));
-            
-        // Generate GetById method if implementing IEnumOption
-        if (implementsEnhancedOption)
+        // Add lookup methods
+        LookupMethodsBuilder.AddLookupMethods(classBuilder, def, effectiveReturnType, implementsEnhancedOption);
+
+        // Add factory methods if enabled
+        if (def.GenerateFactoryMethods)
         {
-            var getByIdReturnType = effectiveReturnType?.EndsWith("?", StringComparison.Ordinal) == true ? effectiveReturnType : $"{effectiveReturnType}?";
-            classBuilder.AddMethod("GetById", getByIdReturnType!, method => method
-                .MakePublic()
-                .MakeStatic()
-                .AddParameter("int", "id")
-                .WithXmlDocSummary($"Gets the {def.ClassName} with the specified id.")
-                .WithXmlDocParam("id", "The id to search for.")
-                .WithXmlDocReturns($"The {def.ClassName} with the specified id, or null if not found.")
-                .WithBody(@"
-                    _idDict.TryGetValue(id, out var result);
-                    return result;
-                "));
+            FactoryMethodsBuilder.AddFactoryMethods(classBuilder, def, values, effectiveReturnType);
         }
 
-        // Generate lookup methods for marked properties
-        foreach (var lookup in def.LookupProperties)
-        {
-            GenerateLookupMethod(classBuilder, def, lookup, effectiveReturnType);
-        }
+        // Add empty value
+        EmptyValueBuilder.AddEmptyValue(classBuilder, def, effectiveReturnType, baseTypeSymbol);
 
-        // Generate static factory methods for each enum value
-        if (!values.IsEmpty)
-        {
-            classBuilder.AddCodeBlock("// Static factory methods");
-            foreach (var value in values)
-            {
-                // Use the Name property which comes from EnumOptionAttribute.Name or falls back to class name
-                var methodName = MakeValidIdentifier(value.Name);
-                
-                classBuilder.AddMethod(methodName, effectiveReturnType ?? def.FullTypeName, method => method
-                    .MakePublic()
-                    .MakeStatic()
-                    .WithBody($"return new {value.FullTypeName}();")
-                    .WithXmlDocSummary($"Creates a new {value.Name} instance."));
-            }
-        }
-
-        // Generate Empty value
-        GenerateEmptyValue(classBuilder, def, effectiveReturnType, baseTypeSymbol);
-
-        // Build the complete source code with headers
-        var sourceCode = new StringBuilder();
-        
-        // Add headers and using statements
-        sourceCode.AppendLine("#nullable enable");
-        sourceCode.AppendLine();
-        sourceCode.AppendLine("using System;");
-        sourceCode.AppendLine("using System.Linq;");
-        sourceCode.AppendLine("using System.Collections.Generic;");
-        sourceCode.AppendLine("using System.Collections.Immutable;");
-        sourceCode.AppendLine("#if NET8_0_OR_GREATER");
-        sourceCode.AppendLine("using System.Collections.Frozen;");
-        sourceCode.AppendLine("#endif");
-        
-        // Add required namespaces from generic constraints
-        foreach (var ns in def.RequiredNamespaces.OrderBy(n => n, StringComparer.Ordinal))
-        {
-            // Skip the current namespace and the standard System namespaces we already added
-            if (!string.Equals(ns, targetNamespace, StringComparison.Ordinal) &&
-                !string.Equals(ns, "System", StringComparison.Ordinal) &&
-                !string.Equals(ns, "System.Linq", StringComparison.Ordinal) &&
-                !string.Equals(ns, "System.Collections.Generic", StringComparison.Ordinal) &&
-                !string.Equals(ns, "System.Collections.Immutable", StringComparison.Ordinal))
-            {
-                sourceCode.AppendLine($"using {ns};");
-            }
-        }
-
-        // Add default generic return type namespace if specified
-        if (!string.IsNullOrEmpty(def.DefaultGenericReturnTypeNamespace))
-        {
-            var ns = def.DefaultGenericReturnTypeNamespace!;
-            if (!ns.StartsWith("System", StringComparison.Ordinal) && 
-                !string.Equals(ns, targetNamespace, StringComparison.Ordinal))
-            {
-                sourceCode.AppendLine($"using {ns};");
-            }
-        }
-        
-        // Add namespace for ReturnType if specified
-        if (!string.IsNullOrEmpty(def.ReturnTypeNamespace))
-        {
-            // Use the explicitly provided namespace
-            if (!def.ReturnTypeNamespace!.StartsWith("System", StringComparison.Ordinal) && 
-                !string.Equals(def.ReturnTypeNamespace, targetNamespace, StringComparison.Ordinal))
-            {
-                sourceCode.AppendLine($"using {def.ReturnTypeNamespace};");
-            }
-        }
-        else if (!string.IsNullOrEmpty(effectiveReturnType))
-        {
-            // Extract namespace from ReturnType if not explicitly provided
-            var cleanReturnType = effectiveReturnType!.TrimEnd('?');
-            var lastDotIndex = cleanReturnType.LastIndexOf('.');
-            if (lastDotIndex > 0)
-            {
-                var returnTypeNamespace = cleanReturnType.Substring(0, lastDotIndex);
-                // Don't add System namespaces or the current namespace
-                if (!returnTypeNamespace.StartsWith("System", StringComparison.Ordinal) && 
-                    !string.Equals(returnTypeNamespace, targetNamespace, StringComparison.Ordinal))
-                {
-                    sourceCode.AppendLine($"using {returnTypeNamespace};");
-                }
-            }
-        }
-        
-        sourceCode.AppendLine();
-        
-        // Add the generated class
-        sourceCode.Append(classBuilder.Build());
-        
-        // Add the source
-        var generatedCode = sourceCode.ToString();
-        context.AddSource($"{def.CollectionName}.g.cs", generatedCode);
+        return classBuilder;
     }
 
     /// <summary>
@@ -495,10 +189,25 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
         if (compilation == null)
             throw new ArgumentNullException(nameof(compilation));
 
+        var baseTypeSymbol = FindBaseTypeSymbol(def, compilation, context);
+        if (baseTypeSymbol == null)
+            return;
 
-        var values = new List<EnumValueInfo>();
+        // Auto-detect return type if not specified
+        if (string.IsNullOrEmpty(def.ReturnType))
+        {
+            def.ReturnType = DetectReturnType(baseTypeSymbol, compilation);
+        }
 
-        // Find the base type symbol from the compilation
+        // Discover all enum values
+        var values = EnumValueDiscoveryService.DiscoverEnumValues(def, baseTypeSymbol, compilation, context);
+
+        // Generate the collection class
+        GenerateCollection(context, def, new EquatableArray<EnumValueInfo>(values), compilation);
+    }
+
+    private INamedTypeSymbol? FindBaseTypeSymbol(EnumTypeInfo def, Compilation compilation, SourceProductionContext context)
+    {
         INamedTypeSymbol? baseTypeSymbol = null;
         
         // For generic types, we need to find them differently
@@ -530,149 +239,11 @@ private static readonly FrozenDictionary<string, {effectiveReturnType}> _nameDic
                     isEnabledByDefault: true),
                 null,
                 def.FullTypeName));
-            return;
         }
 
-        // Determine the effective return type
-        if (string.IsNullOrEmpty(def.ReturnType))
-        {
-            // Auto-detect from implemented interfaces
-            def.ReturnType = DetectReturnType(baseTypeSymbol, compilation);
-        }
-
-        // Collect all types with EnumOption attribute
-        var allTypes = new List<INamedTypeSymbol>();
-
-        // Step 1: Scan current compilation
-        foreach (var tree in compilation.SyntaxTrees)
-        {
-            var root = tree.GetRoot();
-            var model = compilation.GetSemanticModel(tree);
-            
-            // Find all type declarations (classes, structs, records)
-            foreach (var typeDecl in root.DescendantNodes().OfType<TypeDeclarationSyntax>())
-            {
-                if (!HasEnumOptionAttribute(typeDecl))
-                {
-                    continue;
-                }
-
-                var symbol = model.GetDeclaredSymbol(typeDecl) as INamedTypeSymbol;
-                if (symbol != null)
-                {
-                    allTypes.Add(symbol);
-                }
-            }
-        }
-        
-
-        // Step 2: Scan referenced assemblies if enabled
-        // CROSS-ASSEMBLY DISCOVERY:
-        // This is where the "magic" happens for the Service Type Pattern.
-        // We scan compiled assemblies (DLLs) that are referenced by this project.
-        // Each assembly declares if it wants to be discovered via IncludeInEnhancedEnumAssemblies.
-        // We're reading assembly METADATA, not executing code, so this is safe and fast.
-        if (def.IncludeReferencedAssemblies)
-        {
-            // Use the discovery service to find types with EnumOption attribute by name
-            // This avoids having to resolve the attribute type by metadata name
-            var typesWithAttribute = _discoveryService.FindTypesWithAttributeName("EnumOptionAttribute", compilation);
-            
-            foreach (var type in typesWithAttribute)
-            {
-                allTypes.Add(type);
-            }
-            
-            // Report diagnostic about cross-assembly scanning
-            var typeCount = typesWithAttribute.Count();
-            context.ReportDiagnostic(Diagnostic.Create(
-                new DiagnosticDescriptor(
-                    "ENH_INFO_001",
-                    "Cross-assembly scan complete",
-                    $"Found {typeCount} types with EnumOption attribute from assemblies that opted in",
-                    "EnhancedEnumOptions",
-                    DiagnosticSeverity.Info,
-                    isEnabledByDefault: true),
-                null));
-        }
-
-        // Process all found types
-        foreach (var typeSymbol in allTypes)
-        {
-            var attrs = typeSymbol.GetAttributes()
-                .Where(ad => string.Equals(ad.AttributeClass?.Name, "EnumOptionAttribute", StringComparison.Ordinal) ||
-string.Equals(ad.AttributeClass?.Name, "EnumOption", StringComparison.Ordinal))
-                .ToList();
-
-            if (attrs.Count == 0)
-            {
-                continue;
-            }
-
-            // Process each EnumOption attribute separately (for multiple collections support)
-            foreach (var attr in attrs)
-            {
-                var named = attr.NamedArguments.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-                var name = named.TryGetValue(nameof(EnumOptionAttribute.Name), out var n) && n.Value is string ns
-                    ? ns : typeSymbol.Name;
-
-                // Check if this enum option specifies a collection name
-                var collectionName = named.TryGetValue(nameof(EnumOptionAttribute.CollectionName), out var cn) && cn.Value is string cns
-                    ? cns : null;
-
-                // If a collection name is specified, only include this option in matching collections
-                if (!string.IsNullOrEmpty(collectionName) && !string.Equals(collectionName, def.CollectionName, StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                if (MatchesDefinition(typeSymbol, baseTypeSymbol))
-                {
-                    var info = new EnumValueInfo
-                    {
-                        ShortTypeName = typeSymbol.Name,
-                        FullTypeName = typeSymbol.ToDisplayString(),
-                        Name = name,
-                    };
-                    values.Add(info);
-                    
-                    // Extract namespaces from the option type's base type arguments
-                    ExtractNamespacesFromOptionType(typeSymbol, baseTypeSymbol, def);
-                    
-                    break; // Only add once per type per collection, even if multiple matching attributes
-                }
-            }
-        }
-
-        // Generate the collection class
-        GenerateCollection(context, def, new EquatableArray<EnumValueInfo>(values), compilation);
+        return baseTypeSymbol;
     }
 
-    /// <summary>
-    /// Determines whether an enum value belongs to a given enum definition.
-    /// </summary>
-    /// <param name="valueSymbol">The symbol of the enum value to check.</param>
-    /// <param name="baseTypeSymbol">The symbol of the base type to match against.</param>
-    /// <returns>True if the value matches the definition; otherwise, false.</returns>
-    private static bool MatchesDefinition(INamedTypeSymbol valueSymbol, INamedTypeSymbol baseTypeSymbol)
-    {
-        // interface implementation
-        if (valueSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, baseTypeSymbol)))
-        {
-            return true;
-        }
-
-        // base type inheritance
-        for (var baseType = valueSymbol.BaseType; baseType != null; baseType = baseType.BaseType)
-        {
-            if (SymbolEqualityComparer.Default.Equals(baseType, baseTypeSymbol))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
 
 
     /// <summary>
@@ -747,7 +318,7 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
                 GenerateFactoryMethods = named.TryGetValue("GenerateFactoryMethods", out var uf) && uf.Value is bool b && b,
                 NameComparison = named.TryGetValue("NameComparison", out var nc) && nc.Value is int ic
                     ? (StringComparison)ic : StringComparison.OrdinalIgnoreCase,
-                IncludeReferencedAssemblies = false, // EnumCollectionAttribute doesn't have this property
+                IncludeReferencedAssemblies = named.TryGetValue("IncludeReferencedAssemblies", out var ira) && ira.Value is bool iraB && iraB,
                 ReturnType = named.TryGetValue("ReturnType", out var rt) && rt.Value is INamedTypeSymbol rts ? rts.ToDisplayString() : null,
                 LookupProperties = new EquatableArray<PropertyLookupInfo>(lookupProperties),
             };
@@ -766,201 +337,6 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
         return results;
     }
 
-    /// <summary>
-    /// Generates a lookup method for a specific property.
-    /// </summary>
-    private static void GenerateLookupMethod(ClassBuilder classBuilder, EnumTypeInfo def, PropertyLookupInfo lookup, string? effectiveReturnType)
-    {
-        var paramName = ToCamelCase(lookup.PropertyName);
-        
-        // Determine the return type for this specific lookup
-        var lookupReturnType = !string.IsNullOrEmpty(lookup.ReturnType) ? lookup.ReturnType : (effectiveReturnType ?? def.FullTypeName);
-        
-        if (lookup.AllowMultiple)
-        {
-            string methodBody;
-            // Handle collection types - when the property is a collection, check if it contains the search value
-            if (lookup.PropertyType.Contains("[]") || lookup.PropertyType.Contains("IEnumerable") || lookup.PropertyType.Contains("List"))
-            {
-                methodBody = $"return _all.Where(x => x.{lookup.PropertyName}?.Contains({paramName}) ?? false);";
-            }
-            else
-            {
-                // Handle simple types - search for all items that have the matching property value
-                methodBody = $"return _all.Where(x => Equals(x.{lookup.PropertyName}, {paramName}));";
-            }
-            
-            classBuilder.AddMethod(lookup.LookupMethodName, $"IEnumerable<{lookupReturnType}>", method => method
-                .MakePublic()
-                .MakeStatic()
-                .AddParameter(lookup.PropertyType, paramName)
-                .WithXmlDocSummary($"Gets the {def.ClassName} with the specified {lookup.PropertyName}.")
-                .WithXmlDocParam(paramName, $"The {lookup.PropertyName} to search for.")
-                .WithXmlDocReturns($"All {def.ClassName} instances with the specified {lookup.PropertyName}.")
-                .WithBody(methodBody));
-        }
-        else
-        {
-            var dictName = $"_{ToCamelCase(lookup.PropertyName)}Dict";
-            var methodBody = new StringBuilder();
-            
-            // Add null check for string types
-            if (string.Equals(lookup.PropertyType, "string", StringComparison.Ordinal))
-            {
-                methodBody.AppendLine($"if (string.IsNullOrEmpty({paramName}))");
-                methodBody.AppendLine("{");
-                methodBody.AppendLine("    return null;");
-                methodBody.AppendLine("}");
-                methodBody.AppendLine();
-            }
-            
-            // Use dictionary lookup
-            methodBody.AppendLine($"{dictName}.TryGetValue({paramName}, out var result);");
-            methodBody.AppendLine("return result;");
-            
-            classBuilder.AddMethod(lookup.LookupMethodName, $"{lookupReturnType}?", method => method
-                .MakePublic()
-                .MakeStatic()
-                .AddParameter(lookup.PropertyType, paramName)
-                .WithXmlDocSummary($"Gets the {def.ClassName} with the specified {lookup.PropertyName}.")
-                .WithXmlDocParam(paramName, $"The {lookup.PropertyName} to search for.")
-                .WithXmlDocReturns($"The {def.ClassName} with the specified {lookup.PropertyName}, or null if not found.")
-                .WithBody(methodBody.ToString().TrimEnd()));
-        }
-    }
-
-    /// <summary>
-    /// Generates the Empty value singleton for the enum collection.
-    /// </summary>
-    private static void GenerateEmptyValue(ClassBuilder classBuilder, EnumTypeInfo def, string? effectiveReturnType, INamedTypeSymbol? baseTypeSymbol)
-    {
-        // Add Empty property singleton field
-        classBuilder.AddField("EmptyValue", "_empty", field => field
-            .MakePrivate()
-            .MakeStatic()
-            .MakeReadOnly()
-            .WithInitializer("new EmptyValue()"));
-        
-        // Add Empty property
-        classBuilder.AddProperty("Empty", effectiveReturnType ?? def.FullTypeName, prop => prop
-            .MakePublic()
-            .MakeStatic()
-            .WithExpressionBody("_empty")
-            .WithXmlDocSummary("Gets an empty instance representing no selection."));
-        
-        // Generate nested EmptyValue class
-        classBuilder.AddNestedClass(builder => 
-        {
-            builder.WithName("EmptyValue")
-                .MakePrivate()
-                .MakeSealed()
-                .WithBaseType(def.FullTypeName);
-
-            // Find the most accessible constructor and generate appropriate call
-            if (baseTypeSymbol != null)
-            {
-                var constructors = baseTypeSymbol.Constructors
-                    .Where(c => !c.IsStatic && c.DeclaredAccessibility != Accessibility.Private)
-                    .OrderBy(c => c.Parameters.Length)
-                    .ThenBy(c => c.DeclaredAccessibility == Accessibility.Protected ? 0 : 1)
-                    .ToList();
-
-                if (constructors.Count > 0)
-                {
-                    var ctor = constructors.First();
-                    var args = string.Join(", ", ctor.Parameters.Select(p => GetDefaultValueForType(p.Type.ToDisplayString())));
-                    
-                    builder.AddConstructor(ctorBuilder => ctorBuilder
-                        .MakePublic()
-                        .WithBaseCall(args));
-                }
-            }
-
-            // Add lookup property overrides
-            builder.AddCodeBlock(BuildLookupPropertiesForEmpty(def));
-        });
-    }
-    
-    /// <summary>
-    /// Builds the lookup properties for the empty value class.
-    /// </summary>
-    private static string BuildLookupPropertiesForEmpty(EnumTypeInfo def)
-    {
-        var sb = new StringBuilder();
-        
-        // Generate default implementations only for abstract/virtual properties that require override
-        foreach (var lookup in def.LookupProperties.Where(l => l.RequiresOverride))
-        {
-            var defaultValue = GetDefaultValueForType(lookup.PropertyType);
-            sb.AppendLine($"public override {lookup.PropertyType} {lookup.PropertyName} => {defaultValue};");
-        }
-        
-        return sb.ToString().TrimEnd();
-    }
-
-    /// <summary>
-    /// Gets the default value string for a given type.
-    /// </summary>
-    private static string GetDefaultValueForType(string typeName)
-    {
-        // Remove nullable annotations for comparison
-        var cleanType = typeName.TrimEnd('?');
-        
-        return cleanType switch
-        {
-            "string" => "string.Empty",
-            "int" => "0",
-            "long" => "0L",
-            "short" => "0",
-            "byte" => "0",
-            "double" => "0.0",
-            "float" => "0.0f",
-            "decimal" => "0m",
-            "bool" => "false",
-            "System.Guid" or "Guid" => "Guid.Empty",
-            "System.DateTime" or "DateTime" => "DateTime.MinValue",
-            "System.DateTimeOffset" or "DateTimeOffset" => "DateTimeOffset.MinValue",
-            "System.TimeSpan" or "TimeSpan" => "TimeSpan.Zero",
-            _ => typeName.EndsWith("?", StringComparison.Ordinal) ? "null" : $"default({cleanType})"
-        };
-    }
-
-    /// <summary>
-    /// Converts a PascalCase string to camelCase.
-    /// </summary>
-    private static string ToCamelCase(string str)
-    {
-        if (string.IsNullOrEmpty(str) || char.IsLower(str[0]))
-            return str;
-
-        return char.ToLowerInvariant(str[0]) + str.Substring(1);
-    }
-
-    /// <summary>
-    /// Makes a valid C# identifier from a string.
-    /// </summary>
-    private static string MakeValidIdentifier(string name)
-    {
-        if (string.IsNullOrEmpty(name))
-            return "_";
-        #pragma warning disable MA0009 // Ignore regex warning for this simple case
-        // Replace spaces and special characters with underscores
-        var result = System.Text.RegularExpressions.Regex.Replace(name, @"[^\w]", "_");
-        #pragma warning restore MA0009          
-        // Ensure it doesn't start with a number
-        if (char.IsDigit(result[0]))
-            result = "_" + result;
-        
-        #pragma warning disable MA0009 // Ignore regex warning for this simple case
-        // Remove consecutive underscores
-        result = System.Text.RegularExpressions.Regex.Replace(result, @"_+", "_");
-        result = System.Text.RegularExpressions.Regex.Replace(result, @"_", string.Empty);
-        #pragma warning restore MA0009
-        // Trim underscores from ends
-        result = result.Trim('_');
-        
-        return string.IsNullOrEmpty(result) ? "_" : result;
-    }
     
     /// <summary>
     /// Detects the appropriate return type based on implemented interfaces.
@@ -1055,77 +431,6 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
         }
     }
     
-    /// <summary>
-    /// Extracts namespaces from an option type's inheritance hierarchy.
-    /// </summary>
-    private static void ExtractNamespacesFromOptionType(INamedTypeSymbol optionType, INamedTypeSymbol baseTypeSymbol, EnumTypeInfo def)
-    {
-        // Extract namespaces from the option type itself
-        ExtractNamespacesFromType(optionType, def.RequiredNamespaces);
-        
-        // Walk up the inheritance chain to find the base type
-        for (var current = optionType.BaseType; current != null; current = current.BaseType)
-        {
-            // If this is a generic type, extract namespaces from type arguments
-            if (current.IsGenericType)
-            {
-                foreach (var typeArg in current.TypeArguments)
-                {
-                    ExtractNamespacesFromType(typeArg, def.RequiredNamespaces);
-                }
-            }
-            
-            // If we've reached the base type, stop
-            // For generic types, we need to compare the unbound/original definition
-            var currentToCompare = current.IsGenericType ? current.OriginalDefinition : current;
-            var baseToCompare = baseTypeSymbol.IsGenericType ? baseTypeSymbol.OriginalDefinition : baseTypeSymbol;
-            
-            if (SymbolEqualityComparer.Default.Equals(currentToCompare, baseToCompare))
-            {
-                break;
-            }
-        }
-        
-        // Also extract from interfaces in case the base type is an interface
-        foreach (var iface in optionType.AllInterfaces)
-        {
-            if (iface.IsGenericType)
-            {
-                foreach (var typeArg in iface.TypeArguments)
-                {
-                    ExtractNamespacesFromType(typeArg, def.RequiredNamespaces);
-                }
-            }
-        }
-    }
-    
-    /// <summary>
-    /// Gets the full enum type name for StringComparison values.
-    /// </summary>
-    private static string GetStringComparisonName(StringComparison comparison)
-    {
-        return $"StringComparison.{comparison}";
-    }
-
-    /// <summary>
-    /// Checks if a type declaration has the EnumOption attribute.
-    /// </summary>
-    private static bool HasEnumOptionAttribute(TypeDeclarationSyntax syntax)
-    {
-        return syntax.AttributeLists
-            .SelectMany(al => al.Attributes)
-            .Any(attr => attr.Name.ToString().Contains("EnumOption"));
-    }
-
-    /// <summary>
-    /// Checks if a type symbol has the EnumOption attribute.
-    /// </summary>
-    private static bool HasEnumOptionAttribute(INamedTypeSymbol type)
-    {
-        return type.GetAttributes().Any(attr =>
-            string.Equals(attr.AttributeClass?.Name, "EnumOptionAttribute", StringComparison.Ordinal) ||
-            string.Equals(attr.AttributeClass?.Name, "EnumOption", StringComparison.Ordinal));
-    }
 
     /// <summary>
     /// Gets a namespace symbol from a compilation by its full name.
