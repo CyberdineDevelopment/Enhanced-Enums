@@ -10,7 +10,7 @@ namespace FractalDataWorks.EnhancedEnums.Services;
 /// <summary>
 /// Builds the generated collection class code for Enhanced Enums.
 /// </summary>
-internal static class EnumCollectionBuilder
+public static class EnumCollectionBuilder
 {
     /// <summary>
     /// Builds the complete collection class source code.
@@ -49,24 +49,30 @@ internal static class EnumCollectionBuilder
             namespaceBuilder.AddUsing(ns);
         }
         
+        // Determine the return type to use for method signatures
+        var methodReturnType = definition.Generic ? "T" : effectiveReturnType;
+        
         // Build the class
         var classBuilder = CreateClassBuilder(definition);
+        
+        // Determine if members should be static (static collections and non-generic collections)
+        var isStaticCollection = definition.GenerateStaticCollection && !definition.Generic;
         
         // Add members
         AddStaticFields(classBuilder, definition, effectiveReturnType);
         AddStaticConstructor(classBuilder, definition, values, effectiveReturnType);
-        AddAllProperty(classBuilder, effectiveReturnType);
-        AddGetByNameMethods(classBuilder, definition, effectiveReturnType);
-        AddLookupMethods(classBuilder, definition, effectiveReturnType);
+        AddAllProperty(classBuilder, methodReturnType, isStaticCollection);
+        AddGetByNameMethods(classBuilder, definition, methodReturnType, isStaticCollection);
+        AddLookupMethods(classBuilder, definition, methodReturnType, isStaticCollection);
         
         // Add factory methods if enabled
         if (definition.GenerateFactoryMethods)
         {
-            AddFactoryMethods(classBuilder, values, effectiveReturnType);
+            AddFactoryMethods(classBuilder, values, methodReturnType, isStaticCollection);
         }
         
         // Add Empty property (without the nested class)
-        AddEmptyProperty(classBuilder, definition, effectiveReturnType);
+        AddEmptyProperty(classBuilder, definition, methodReturnType, isStaticCollection);
         
         // Add the class to the namespace
         namespaceBuilder.AddClass(classBuilder);
@@ -118,10 +124,22 @@ internal static class EnumCollectionBuilder
 
     private static ClassBuilder CreateClassBuilder(EnumTypeInfo definition)
     {
-        return new ClassBuilder(definition.CollectionName)
+        var classBuilder = new ClassBuilder(definition.CollectionName)
             .MakePublic()
-            .MakeStatic()
             .WithXmlDocSummary($"Collection of all {definition.ClassName} values.");
+
+        if (definition.Generic)
+        {
+            classBuilder.AddGenericParameter("T")
+                       .AddGenericConstraint("T", $"{definition.FullTypeName}");
+            // Generic classes cannot be static, so we don't apply MakeStatic()
+        }
+        else if (definition.GenerateStaticCollection)
+        {
+            classBuilder.MakeStatic();
+        }
+
+        return classBuilder;
     }
 
     private static void AddStaticFields(ClassBuilder classBuilder, EnumTypeInfo definition, string effectiveReturnType)
@@ -230,16 +248,20 @@ internal static class EnumCollectionBuilder
         }
     }
 
-    private static void AddAllProperty(ClassBuilder classBuilder, string effectiveReturnType)
+    private static void AddAllProperty(ClassBuilder classBuilder, string methodReturnType, bool isStaticCollection)
     {
-        classBuilder.AddProperty($"ImmutableArray<{effectiveReturnType}>", "All", prop => prop
+        var propBuilder = classBuilder.AddProperty($"ImmutableArray<{methodReturnType}>", "All", prop => prop
             .MakePublic()
-            .MakeStatic()
             .WithGetter("return _all;")
             .WithXmlDocSummary("Gets all enum values."));
+            
+        if (isStaticCollection)
+        {
+            propBuilder.MakeStatic();
+        }
     }
 
-    private static void AddGetByNameMethods(ClassBuilder classBuilder, EnumTypeInfo definition, string effectiveReturnType)
+    private static void AddGetByNameMethods(ClassBuilder classBuilder, EnumTypeInfo definition, string methodReturnType, bool isStaticCollection)
     {
         // GetByName method
         var getByNameBody = new CodeBuilder(8);
@@ -251,14 +273,18 @@ internal static class EnumCollectionBuilder
         getByNameBody.AppendLine();
         getByNameBody.AppendLine("return Empty;");
         
-        classBuilder.AddMethod("GetByName", effectiveReturnType, method => method
+        var getByNameMethod = classBuilder.AddMethod("GetByName", methodReturnType, method => method
             .MakePublic()
-            .MakeStatic()
             .AddParameter("string", "name")
             .WithXmlDocSummary("Gets an enum value by its name.")
             .WithXmlDocParam("name", "The name of the enum value.")
             .WithXmlDocReturns("The enum value with the specified name, or Empty if not found.")
             .WithBody(getByNameBody.Build()));
+            
+        if (isStaticCollection)
+        {
+            getByNameMethod.MakeStatic();
+        }
 
         // TryGetByName method
         var tryGetByNameBody = new CodeBuilder(8);
@@ -270,36 +296,40 @@ internal static class EnumCollectionBuilder
         tryGetByNameBody.AppendLine();
         tryGetByNameBody.AppendLine("return _byName.TryGetValue(name, out value);");
         
-        classBuilder.AddMethod("TryGetByName", "bool", method => method
+        var tryGetByNameMethod = classBuilder.AddMethod("TryGetByName", "bool", method => method
             .MakePublic()
-            .MakeStatic()
             .AddParameter("string", "name")
-            .AddParameter($"out {effectiveReturnType}?", "value")
+            .AddParameter($"out {methodReturnType}?", "value")
             .WithXmlDocSummary("Tries to get an enum value by its name.")
             .WithXmlDocParam("name", "The name of the enum value.")
             .WithXmlDocParam("value", "When this method returns, contains the enum value if found; otherwise, null.")
             .WithXmlDocReturns("true if an enum value with the specified name was found; otherwise, false.")
             .WithBody(tryGetByNameBody.Build()));
+            
+        if (isStaticCollection)
+        {
+            tryGetByNameMethod.MakeStatic();
+        }
     }
 
-    private static void AddLookupMethods(ClassBuilder classBuilder, EnumTypeInfo definition, string effectiveReturnType)
+    private static void AddLookupMethods(ClassBuilder classBuilder, EnumTypeInfo definition, string methodReturnType, bool isStaticCollection)
     {
         foreach (var lookup in definition.LookupProperties)
         {
-            var lookupReturnType = !string.IsNullOrEmpty(lookup.ReturnType) ? lookup.ReturnType : effectiveReturnType;
+            var lookupReturnType = !string.IsNullOrEmpty(lookup.ReturnType) ? lookup.ReturnType : methodReturnType;
             
             if (lookup.AllowMultiple)
             {
-                AddMultiValueLookupMethod(classBuilder, lookup, lookupReturnType!);
+                AddMultiValueLookupMethod(classBuilder, lookup, lookupReturnType!, isStaticCollection);
             }
             else
             {
-                AddSingleValueLookupMethod(classBuilder, lookup, lookupReturnType!);
+                AddSingleValueLookupMethod(classBuilder, lookup, lookupReturnType!, isStaticCollection);
             }
         }
     }
 
-    private static void AddMultiValueLookupMethod(ClassBuilder classBuilder, PropertyLookupInfo lookup, string returnType)
+    private static void AddMultiValueLookupMethod(ClassBuilder classBuilder, PropertyLookupInfo lookup, string returnType, bool isStaticCollection)
     {
         var fieldName = $"_{ToCamelCase(lookup.PropertyName)}Lookup";
         var paramName = ToCamelCase(lookup.PropertyName);
@@ -310,17 +340,21 @@ internal static class EnumCollectionBuilder
         body.AppendLine();
         body.AppendLine($"return ImmutableArray<{returnType}>.Empty;");
         
-        classBuilder.AddMethod(lookup.LookupMethodName, $"ImmutableArray<{returnType}>", method => method
+        var method = classBuilder.AddMethod(lookup.LookupMethodName, $"ImmutableArray<{returnType}>", method => method
             .MakePublic()
-            .MakeStatic()
             .AddParameter(lookup.PropertyType, paramName)
             .WithXmlDocSummary($"Gets all enum values with the specified {lookup.PropertyName}.")
             .WithXmlDocParam(paramName, $"The {lookup.PropertyName} value to search for.")
             .WithXmlDocReturns($"All enum values with the specified {lookup.PropertyName}, or an empty array if none found.")
             .WithBody(body.Build()));
+            
+        if (isStaticCollection)
+        {
+            method.MakeStatic();
+        }
     }
 
-    private static void AddSingleValueLookupMethod(ClassBuilder classBuilder, PropertyLookupInfo lookup, string returnType)
+    private static void AddSingleValueLookupMethod(ClassBuilder classBuilder, PropertyLookupInfo lookup, string returnType, bool isStaticCollection)
     {
         var fieldName = $"_{ToCamelCase(lookup.PropertyName)}Lookup";
         var paramName = ToCamelCase(lookup.PropertyName);
@@ -329,17 +363,21 @@ internal static class EnumCollectionBuilder
         body.AppendLine($"{fieldName}.TryGetValue({paramName}, out var value);");
         body.AppendLine("return value;");
         
-        classBuilder.AddMethod(lookup.LookupMethodName, $"{returnType}?", method => method
+        var method = classBuilder.AddMethod(lookup.LookupMethodName, $"{returnType}?", method => method
             .MakePublic()
-            .MakeStatic()
             .AddParameter(lookup.PropertyType, paramName)
             .WithXmlDocSummary($"Gets the enum value with the specified {lookup.PropertyName}.")
             .WithXmlDocParam(paramName, $"The {lookup.PropertyName} value to search for.")
             .WithXmlDocReturns($"The enum value with the specified {lookup.PropertyName}, or null if not found.")
             .WithBody(body.Build()));
+            
+        if (isStaticCollection)
+        {
+            method.MakeStatic();
+        }
     }
 
-    private static void AddFactoryMethods(ClassBuilder classBuilder, List<EnumValueInfo> values, string effectiveReturnType)
+    private static void AddFactoryMethods(ClassBuilder classBuilder, List<EnumValueInfo> values, string methodReturnType, bool isStaticCollection)
     {
         foreach (var value in values)
         {
@@ -350,7 +388,7 @@ internal static class EnumCollectionBuilder
             }
             
             var methodName = value.Name;
-            var valueReturnType = !string.IsNullOrEmpty(value.ReturnType) ? value.ReturnType! : effectiveReturnType;
+            var valueReturnType = !string.IsNullOrEmpty(value.ReturnType) ? value.ReturnType! : methodReturnType;
             
             // Get public constructors for this type
             var publicConstructors = value.Constructors
@@ -369,20 +407,23 @@ internal static class EnumCollectionBuilder
                 if (ctor.Parameters.Count == 0)
                 {
                     // Parameterless constructor - simple factory method
-                    classBuilder.AddMethod(methodName, valueReturnType!, method => method
+                    var method = classBuilder.AddMethod(methodName, valueReturnType!, method => method
                         .MakePublic()
-                        .MakeStatic()
                         .WithXmlDocSummary($"Creates a new instance of {value.Name}.")
                         .WithXmlDocReturns($"A new {value.Name} instance.")
                         .WithExpressionBody($"new {value.FullTypeName}()"));
+                        
+                    if (isStaticCollection)
+                    {
+                        method.MakeStatic();
+                    }
                 }
                 else
                 {
                     // Constructor with parameters - generate overload
-                    classBuilder.AddMethod(methodName, valueReturnType, method => 
+                    var method = classBuilder.AddMethod(methodName, valueReturnType, method => 
                     {
                         method.MakePublic()
-                              .MakeStatic()
                               .WithXmlDocSummary($"Creates a new instance of {value.Name} with the specified parameters.");
                         
                         // Add parameters
@@ -400,22 +441,31 @@ internal static class EnumCollectionBuilder
                         var paramList = string.Join(", ", paramNames);
                         method.WithExpressionBody($"new {value.FullTypeName}({paramList})");
                     });
+                    
+                    if (isStaticCollection)
+                    {
+                        method.MakeStatic();
+                    }
                 }
             }
         }
     }
 
-    private static void AddEmptyProperty(ClassBuilder classBuilder, EnumTypeInfo definition, string effectiveReturnType)
+    private static void AddEmptyProperty(ClassBuilder classBuilder, EnumTypeInfo definition, string methodReturnType, bool isStaticCollection)
     {
         // Generate the empty class name (e.g., FooBase -> EmptyFooOption)
         var emptyClassName = GetEmptyClassName(definition.ClassName);
         
         // Add Empty property that references the separate empty class
-        classBuilder.AddProperty(effectiveReturnType, "Empty", prop => prop
+        var prop = classBuilder.AddProperty(methodReturnType, "Empty", prop => prop
             .MakePublic()
-            .MakeStatic()
             .WithGetter($"return {emptyClassName}.Instance;")
             .WithXmlDocSummary("Gets an empty/null enum value."));
+            
+        if (isStaticCollection)
+        {
+            prop.MakeStatic();
+        }
     }
     
     private static ClassBuilder CreateEmptyClass(EnumTypeInfo definition, string effectiveReturnType, INamedTypeSymbol? baseTypeSymbol, List<EnumValueInfo> values, Compilation compilation)

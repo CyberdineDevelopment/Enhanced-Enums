@@ -10,7 +10,7 @@ namespace FractalDataWorks.EnhancedEnums.Services;
 /// <summary>
 /// Service responsible for building the Empty value singleton for collection classes.
 /// </summary>
-internal static class EmptyValueBuilder
+public static class EmptyValueBuilder
 {
     /// <summary>
     /// Generates the Empty value singleton for the enum collection.

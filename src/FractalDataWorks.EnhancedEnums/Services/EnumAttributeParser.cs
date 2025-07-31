@@ -9,7 +9,7 @@ namespace FractalDataWorks.EnhancedEnums.Services;
 /// <summary>
 /// Parses attributes related to Enhanced Enums and extracts configuration.
 /// </summary>
-internal static class EnumAttributeParser
+public static class EnumAttributeParser
 {
     /// <summary>
     /// Parses EnumCollection attributes from a type symbol and returns EnumTypeInfo for each collection.

@@ -8,7 +8,7 @@ namespace FractalDataWorks.EnhancedEnums.Services;
 /// <summary>
 /// Service responsible for building the final source code with headers and using statements.
 /// </summary>
-internal static class SourceCodeBuilder
+public static class SourceCodeBuilder
 {
     /// <summary>
     /// Builds the complete source code with headers and using statements.

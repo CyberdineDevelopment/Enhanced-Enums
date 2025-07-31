@@ -8,7 +8,7 @@ namespace FractalDataWorks.EnhancedEnums.Services;
 /// <summary>
 /// Service responsible for building lookup methods in generated collection classes.
 /// </summary>
-internal static class LookupMethodsBuilder
+public static class LookupMethodsBuilder
 {
     /// <summary>
     /// Adds all necessary lookup methods to the collection class.
@@ -66,6 +66,7 @@ internal static class LookupMethodsBuilder
                 return result;
             "));
     }
+
 
     private static void AddCustomLookupMethod(ClassBuilder classBuilder, EnumTypeInfo def, PropertyLookupInfo lookup, string effectiveReturnType)
     {

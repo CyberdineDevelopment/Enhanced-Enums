@@ -47,6 +47,21 @@ public sealed class EnumTypeInfo : IInputInfo, IEquatable<EnumTypeInfo>
     public bool GenerateFactoryMethods { get; set; } = true;
 
     /// <summary>
+    /// Gets or sets a value indicating whether to generate the collection class as static.
+    /// When true, generates a static class. When false, generates an instance class.
+    /// Defaults to true for source generators, but can be set to false for manual usage scenarios.
+    /// </summary>
+    public bool GenerateStaticCollection { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to generate a generic collection class.
+    /// When true, generates Collections&lt;T&gt; where T : BaseType.
+    /// When false, generates non-generic Collections class.
+    /// Defaults to false.
+    /// </summary>
+    public bool Generic { get; set; } = false;
+
+    /// <summary>
     /// Gets or sets the generation strategy name to use.
     /// </summary>
     public string Strategy { get; set; } = "Default";
@@ -164,6 +179,8 @@ public sealed class EnumTypeInfo : IInputInfo, IEquatable<EnumTypeInfo>
         writer.Write(IsGenericType);
         writer.Write(CollectionName);
         writer.Write(GenerateFactoryMethods);
+        writer.Write(GenerateStaticCollection);
+        writer.Write(Generic);
         writer.Write(Strategy);
         writer.Write(NameComparison.ToString());
         writer.Write(IncludeReferencedAssemblies);

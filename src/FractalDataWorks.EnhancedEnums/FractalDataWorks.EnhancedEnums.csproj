@@ -14,18 +14,9 @@
     <!-- Code Analysis -->
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     
-    <!-- Source Generator Specific -->
+    <!-- Shared Library Configuration -->
     <IsPackable>true</IsPackable>
-    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-    <IsRoslynComponent>true</IsRoslynComponent>
-    <DevelopmentDependency>true</DevelopmentDependency>
-    <NoPackageAnalysis>true</NoPackageAnalysis>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    
-    <!-- Special for EnhancedEnums - includes runtime components -->
-    <IncludeBuildOutput>true</IncludeBuildOutput>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <EmbedAllSources>true</EmbedAllSources>
     
     <!-- Build Settings -->
     <Deterministic>true</Deterministic>
@@ -49,7 +40,7 @@
     <PackageTags>enhanced-enums;enumeration;source-generator;roslyn</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <PackageDescription>Enhanced enum functionality with source generation for FractalDataWorks</PackageDescription>
+    <PackageDescription>Core models, services, and builders for Enhanced Enums. Shared library used by FractalDataWorks.EnhancedEnums.SourceGenerator and FractalDataWorks.EnhancedEnums.CrossAssembly packages.</PackageDescription>
     
     <!-- Strong Naming -->
     <SignAssembly>true</SignAssembly>
@@ -76,57 +67,15 @@
     <RunAnalyzers>true</RunAnalyzers>
   </PropertyGroup>
   
-		<ItemGroup>
-			<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-			<!-- Include SmartGenerators dependency -->
-			<None Include="$(OutputPath)\FractalDataWorks.SmartGenerators.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-			<!-- Include SmartGenerators.CodeBuilders dependency -->
-			<None Include="$(OutputPath)\FractalDataWorks.SmartGenerators.CodeBuilders.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-			<!-- Include FractalDataWorks dependency for attributes -->
-			<None Include="$(OutputPath)\FractalDataWorks.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-			<!-- Include code fixes assembly if it exists -->
-			<None Include="$(OutputPath)\FractalDataWorks.EnhancedEnums.CodeFixes.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" Condition="Exists('$(OutputPath)\FractalDataWorks.EnhancedEnums.CodeFixes.dll')" />
-		</ItemGroup>
   
   
-  <ItemGroup>
-    <PackageReference Update="Microsoft.CodeAnalysis.Analyzers">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="FractalDataWorks" />
-    <PackageReference Include="ILRepack.Lib.MSBuild.Task">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="Microsoft.Bcl.HashCode" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
+    <PackageReference Include="FractalDataWorks.SmartGenerators" />
+    <PackageReference Include="FractalDataWorks.SmartGenerators.CodeBuilders" />
   </ItemGroup>
 
-  <ItemGroup>
-	  <PackageReference Include="FractalDataWorks.SmartGenerators">
-		  <PrivateAssets>all</PrivateAssets>
-	  </PackageReference>
-  </ItemGroup>
-
-  <Target Name="MergeSourceGeneratorDependencies" AfterTargets="Build">
-    <ItemGroup>
-      <InputAssemblies Include="$(OutputPath)$(AssemblyName).dll" />
-      <InputAssemblies Include="$(NuGetPackageRoot)fractaldataworks.smartgenerators\0.1.5-alpha-g8cae162c25\lib\netstandard2.0\FractalDataWorks.SmartGenerators.dll" />
-      <InputAssemblies Include="$(NuGetPackageRoot)fractaldataworks.smartgenerators.codebuilders\0.1.5-alpha-g8cae162c25\lib\netstandard2.0\FractalDataWorks.SmartGenerators.CodeBuilders.dll" />
-      <SearchDirectories Include="$(OutputPath)" />
-      <SearchDirectories Include="$(NuGetPackageRoot)" />
-    </ItemGroup>
-    <Message Text="Merging source generator dependencies..." Importance="high" />
-    <ILRepack 
-      OutputFile="$(OutputPath)$(AssemblyName).dll"
-      InputAssemblies="@(InputAssemblies)"
-      TargetKind="SameAsPrimaryAssembly"
-      Internalize="true"
-      LibraryPath="@(SearchDirectories)" />
-  </Target>
 </Project>
 

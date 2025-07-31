@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <!-- Conditional support for emitting generated files to disk when EmitGeneratorFiles is true -->
+  <PropertyGroup Condition="'$(EmitGeneratorFiles)' == 'true'">
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath Condition="'$(CompilerGeneratedFilesOutputPath)' == ''">GeneratedFiles</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
+  
+  <!-- Exclude generated files from compilation to prevent double compilation -->
+  <ItemGroup Condition="'$(EmitGeneratorFiles)' == 'true'">
+    <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+  </ItemGroup>
+  
+  <!-- Clean generated files before build -->
+  <Target Name="CleanGeneratedFiles" BeforeTargets="BeforeBuild" Condition="'$(EmitGeneratorFiles)' == 'true'">
+    <RemoveDir Directories="$(CompilerGeneratedFilesOutputPath)" Condition="Exists('$(CompilerGeneratedFilesOutputPath)')" />
+  </Target>
+</Project>

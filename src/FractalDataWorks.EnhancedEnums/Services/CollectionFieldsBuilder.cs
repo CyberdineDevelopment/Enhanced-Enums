@@ -9,7 +9,7 @@ namespace FractalDataWorks.EnhancedEnums.Services;
 /// <summary>
 /// Service responsible for building private fields in generated collection classes.
 /// </summary>
-internal static class CollectionFieldsBuilder
+public static class CollectionFieldsBuilder
 {
     /// <summary>
     /// Adds all necessary private fields to the collection class.
@@ -17,25 +17,33 @@ internal static class CollectionFieldsBuilder
     public static void AddFields(ClassBuilder classBuilder, EnumTypeInfo def, string effectiveReturnType, bool implementsEnhancedOption)
     {
         AddListField(classBuilder, def);
-        AddCachedAllField(classBuilder, effectiveReturnType);
+        AddCachedAllField(classBuilder, def, effectiveReturnType);
         AddDictionaryFields(classBuilder, def, effectiveReturnType, implementsEnhancedOption);
     }
 
     private static void AddListField(ClassBuilder classBuilder, EnumTypeInfo def)
     {
-        classBuilder.AddField($"List<{def.FullTypeName}>", "_all", field => field
+        var fieldBuilder = classBuilder.AddField($"List<{def.FullTypeName}>", "_all", field => field
             .MakePrivate()
-            .MakeStatic()
             .MakeReadOnly()
             .WithInitializer($"new List<{def.FullTypeName}>()"));
+
+        if (def.GenerateStaticCollection)
+        {
+            fieldBuilder.MakeStatic();
+        }
     }
 
-    private static void AddCachedAllField(ClassBuilder classBuilder, string effectiveReturnType)
+    private static void AddCachedAllField(ClassBuilder classBuilder, EnumTypeInfo def, string effectiveReturnType)
     {
-        classBuilder.AddField($"ImmutableArray<{effectiveReturnType}>", "_cachedAll", field => field
+        var fieldBuilder = classBuilder.AddField($"ImmutableArray<{effectiveReturnType}>", "_cachedAll", field => field
             .MakePrivate()
-            .MakeStatic()
             .MakeReadOnly());
+
+        if (def.GenerateStaticCollection)
+        {
+            fieldBuilder.MakeStatic();
+        }
     }
 
     private static void AddDictionaryFields(ClassBuilder classBuilder, EnumTypeInfo def, string effectiveReturnType, bool implementsEnhancedOption)

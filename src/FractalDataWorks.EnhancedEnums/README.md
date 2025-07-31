@@ -32,6 +32,23 @@ FractalDataWorks.EnhancedEnums is a source generator that creates type-safe, obj
 dotnet add package FractalDataWorks.EnhancedEnums
 ```
 
+## Debugging Generated Files
+
+To see the generated source files on disk for debugging purposes, add this to your project file:
+
+```xml
+<PropertyGroup>
+  <EmitGeneratorFiles>true</EmitGeneratorFiles>
+</PropertyGroup>
+```
+
+This will automatically:
+- Set `EmitCompilerGeneratedFiles` to true
+- Set `CompilerGeneratedFilesOutputPath` to "GeneratedFiles" (unless already specified)
+- Exclude the generated files from compilation to prevent double compilation
+
+The generated files will appear in the `GeneratedFiles` folder in your project directory.
+
 ## Basic Usage
 
 ### 1. Define an Enhanced Enum

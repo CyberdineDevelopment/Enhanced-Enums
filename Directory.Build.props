@@ -130,6 +130,8 @@
     <DevelopmentDependency>true</DevelopmentDependency>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <!-- Enable generator debugging -->
+    <IncludeBuildOutput>true</IncludeBuildOutput>
   </PropertyGroup>
 
   <!-- Test projects -->
@@ -138,6 +140,15 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <!-- Sample projects - exclude from CI builds but allow local development -->
+  <PropertyGroup Condition="$(MSBuildProjectDirectory.Contains('samples'))">
+    <IsPackable>false</IsPackable>
+    <IsTestProject>false</IsTestProject>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- Skip samples in CI builds -->
+    <ExcludeFromBuild Condition="'$(ContinuousIntegrationBuild)' == 'true'">true</ExcludeFromBuild>
   </PropertyGroup>
 
   <!-- Nerdbank.GitVersioning -->

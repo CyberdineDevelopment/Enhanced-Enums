@@ -8,7 +8,7 @@ namespace FractalDataWorks.EnhancedEnums.Services;
 /// <summary>
 /// Resolves the effective return type for enum collections.
 /// </summary>
-internal static class ReturnTypeResolver
+public static class ReturnTypeResolver
 {
     /// <summary>
     /// Resolves the effective return type for a collection based on various settings and constraints.

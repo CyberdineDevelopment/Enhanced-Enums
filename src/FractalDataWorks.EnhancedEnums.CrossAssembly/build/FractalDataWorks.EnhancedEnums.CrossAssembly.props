@@ -1,0 +1,16 @@
+<Project>
+  <PropertyGroup>
+    <!-- Enhanced Enums Cross-Assembly Source Generator Build Properties -->
+    <EnhancedEnumsCrossAssemblyGenerator>true</EnhancedEnumsCrossAssemblyGenerator>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <!-- Exclude any GeneratedFiles directories from compilation -->
+    <Compile Remove="GeneratedFiles/**/*.cs" />
+    <None Remove="GeneratedFiles/**/*" />
+    
+    <!-- Also exclude any custom GeneratorOutPutTo directories -->
+    <Compile Remove="$(GeneratorOutPutTo)/**/*.cs" Condition="'$(GeneratorOutPutTo)' != ''" />
+    <None Remove="$(GeneratorOutPutTo)/**/*" Condition="'$(GeneratorOutPutTo)' != ''" />
+  </ItemGroup>
+</Project>

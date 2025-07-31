@@ -8,7 +8,7 @@ namespace FractalDataWorks.EnhancedEnums.Services;
 /// <summary>
 /// Service responsible for building factory methods in generated collection classes.
 /// </summary>
-internal static class FactoryMethodsBuilder
+public static class FactoryMethodsBuilder
 {
     /// <summary>
     /// Adds factory methods for each enum value to the collection class.

@@ -9,7 +9,7 @@ namespace FractalDataWorks.EnhancedEnums.Services;
 /// <summary>
 /// Service responsible for building static constructor logic for collection classes.
 /// </summary>
-internal static class StaticConstructorBuilder
+public static class StaticConstructorBuilder
 {
     /// <summary>
     /// Builds the static constructor body for initializing enum collections.

@@ -11,7 +11,7 @@ namespace FractalDataWorks.EnhancedEnums.Services;
 /// Discovers enum option types by finding classes that inherit from enhanced enum base classes.
 /// EnumOption attributes are used for configuration but inheritance determines inclusion.
 /// </summary>
-internal static class TypeDiscoveryService
+public static class TypeDiscoveryService
 {
     /// <summary>
     /// Discovers all enum option types for the given enum definition by finding classes that inherit from the base class.

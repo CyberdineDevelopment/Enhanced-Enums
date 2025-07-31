@@ -324,3 +324,9 @@ Help/
 
 # GitVersion
 GitVersion.yml.bak
+
+# Enhanced Enums Generated Files
+samples/*/ConsoleApp/GeneratedFiles/
+# Exclude any generated files directories from git
+**/GeneratedFiles/
+**/Generated/

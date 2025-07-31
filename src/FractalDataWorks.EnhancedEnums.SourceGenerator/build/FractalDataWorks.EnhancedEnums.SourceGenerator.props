@@ -1,0 +1,16 @@
+<Project>
+  <PropertyGroup>
+    <!-- Enhanced Enums Source Generator Build Properties -->
+    <EnhancedEnumsSourceGenerator>true</EnhancedEnumsSourceGenerator>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <!-- Exclude any GeneratedFiles directories from compilation -->
+    <Compile Remove="GeneratedFiles/**/*.cs" />
+    <None Remove="GeneratedFiles/**/*" />
+    
+    <!-- Also exclude any custom GeneratorOutPutTo directories -->
+    <Compile Remove="$(GeneratorOutPutTo)/**/*.cs" Condition="'$(GeneratorOutPutTo)' != ''" />
+    <None Remove="$(GeneratorOutPutTo)/**/*" Condition="'$(GeneratorOutPutTo)' != ''" />
+  </ItemGroup>
+</Project>

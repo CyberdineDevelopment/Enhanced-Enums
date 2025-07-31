@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\FractalDataWorks\FractalDataWorks.csproj" />
+    <ProjectReference Include="..\ColorOption.Library\ColorOption.Library.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>preview</LangVersion>
+    
+    <!-- Allow any assembly to discover enum options in this assembly -->
+    <IncludeInEnhancedEnumAssemblies>*</IncludeInEnhancedEnumAssemblies>
+  </PropertyGroup>
+
+  <!-- Convert MSBuild property to AssemblyMetadata attribute -->
+  <ItemGroup Condition="'$(IncludeInEnhancedEnumAssemblies)' != ''">
+    <AssemblyMetadata Include="IncludeInEnhancedEnumAssemblies" Value="$(IncludeInEnhancedEnumAssemblies)" />
+  </ItemGroup>
+
+</Project>

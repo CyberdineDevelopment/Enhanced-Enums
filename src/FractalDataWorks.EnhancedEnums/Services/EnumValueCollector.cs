@@ -10,7 +10,7 @@ namespace FractalDataWorks.EnhancedEnums.Services;
 /// <summary>
 /// Collects and validates enum values from discovered types.
 /// </summary>
-internal static class EnumValueCollector
+public static class EnumValueCollector
 {
     /// <summary>
     /// Collects enum values from discovered types that match the definition.

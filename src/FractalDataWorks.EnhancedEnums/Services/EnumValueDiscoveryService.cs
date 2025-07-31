@@ -12,7 +12,7 @@ namespace FractalDataWorks.EnhancedEnums.Services;
 /// <summary>
 /// Service responsible for discovering enum values from current compilation and referenced assemblies.
 /// </summary>
-internal static class EnumValueDiscoveryService
+public static class EnumValueDiscoveryService
 {
     private static readonly CrossAssemblyTypeDiscoveryService _discoveryService = new();
 
