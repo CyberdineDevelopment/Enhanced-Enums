@@ -1265,95 +1265,80 @@ Use this checklist to validate your setup:
 
 ---
 
+## Running Samples
+
+Enhanced Enums includes several samples demonstrating different usage patterns. Each sample has its own setup script for easy testing.
+
+### Quick Start - Run All Samples
+```powershell
+# Build solution and set up all samples
+.\BuildAndSetupSamples.ps1
+```
+
+### Individual Sample Setup
+
+Each sample includes a `SetUpSample.ps1` script that handles all dependencies and setup:
+
+#### CrossAssemblyScanner Sample
+Demonstrates cross-package enum discovery across multiple NuGet packages.
+
+```powershell
+.\samples\CrossAssemblyScanner\SetUpSample.ps1
+```
+
+Features demonstrated:
+- ✅ Cross-assembly enum discovery
+- ✅ NuGet package-based enum options  
+- ✅ Generated collection with all discovered options
+- ✅ Custom `GeneratorOutPutTo` for cleaner debugging
+
+#### CrossPackageSample Sample  
+Shows service-based enum patterns across multiple projects.
+
+```powershell
+.\samples\CrossPackageSample\SetUpSample.ps1
+```
+
+Features demonstrated:
+- ✅ Single-assembly enum generation
+- ✅ Service-based enum patterns
+- ✅ Project reference-based discovery
+- ✅ Generated collections within the same project
+
+#### EnhancedEnumSample Sample
+Basic single-project functionality demonstration.
+
+```powershell
+.\samples\EnhancedEnumSample\SetUpSample.ps1
+```  
+
+Features demonstrated:
+- ✅ Basic Enhanced Enum functionality
+- ✅ Single-project enum generation
+- ✅ Generated collection classes
+- ✅ Factory methods and lookup functionality
+- ✅ File generation for debugging
+
+### Sample Script Options
+
+All sample setup scripts support these options:
+
+```powershell
+# Clean before setup
+.\SetUpSample.ps1 -Clean
+
+# Skip rebuilding Enhanced Enums packages  
+.\SetUpSample.ps1 -SkipBuild
+
+# Verbose output
+.\SetUpSample.ps1 -Verbose
+```
+
 ## Development & Contribution
 
 ### Building from Source
 
-This section is for developers working on the Enhanced Enums library itself or running the cross-assembly samples locally.
-
-> **Note**: End users don't need these build scripts - just install the published NuGet packages. This is only for Enhanced Enums development, testing, and local sample execution.
-
-#### Development Build Script
-
-Create this script to build and pack all Enhanced Enums packages for local development:
-
-```powershell
-# BuildAndPackEnhancedEnums.ps1
-param(
-    [string]$OutputPath = "LocalPackages",
-    [string]$Configuration = "Release"
-)
-
-Write-Host "Building and Packing Enhanced Enums packages..." -ForegroundColor Green
-
-# Create output directory
-if (!(Test-Path $OutputPath)) {
-    New-Item -ItemType Directory -Path $OutputPath -Force
-}
-
-# Core packages (required for all scenarios)
-$corePackages = @(
-    "src/FractalDataWorks/FractalDataWorks.csproj",
-    "src/FractalDataWorks.EnhancedEnums/FractalDataWorks.EnhancedEnums.csproj"
-)
-
-# Generator packages
-$generatorPackages = @(
-    "src/FractalDataWorks.EnhancedEnums.SourceGenerator/FractalDataWorks.EnhancedEnums.SourceGenerator.csproj",
-    "src/FractalDataWorks.EnhancedEnums.CrossAssembly/FractalDataWorks.EnhancedEnums.CrossAssembly.csproj"
-)
-
-# Sample packages for cross-assembly demos
-$samplePackages = @(
-    "samples/CrossAssemblyScanner/ColorOption.Library/ColorOption.Library.csproj",
-    "samples/CrossAssemblyScanner/Red.Library/Red.Library.csproj", 
-    "samples/CrossAssemblyScanner/Blue.Library/Blue.Library.csproj"
-)
-
-Write-Host "Packing core packages..." -ForegroundColor Cyan
-foreach ($project in $corePackages) {
-    Write-Host "  Packing $project..." -ForegroundColor Yellow
-    dotnet pack $project --configuration $Configuration --output $OutputPath --force --no-build
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "Failed to pack $project"
-        exit 1
-    }
-}
-
-Write-Host "Packing generator packages..." -ForegroundColor Cyan
-foreach ($project in $generatorPackages) {
-    Write-Host "  Packing $project..." -ForegroundColor Yellow
-    dotnet pack $project --configuration $Configuration --output $OutputPath --force --no-build
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "Failed to pack $project"
-        exit 1
-    }
-}
-
-Write-Host "Packing sample packages for cross-assembly demo..." -ForegroundColor Cyan
-foreach ($project in $samplePackages) {
-    Write-Host "  Packing $project..." -ForegroundColor Yellow
-    dotnet pack $project --configuration $Configuration --output $OutputPath --force
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "Failed to pack $project"
-        exit 1
-    }
-}
-
-Write-Host "All packages built successfully!" -ForegroundColor Green
-Write-Host "Output directory: $OutputPath" -ForegroundColor Cyan
-
-# List generated packages
-Get-ChildItem $OutputPath -Filter "*.nupkg" | ForEach-Object {
-    Write-Host "  - $($_.Name)" -ForegroundColor White
-}
-```
-
-**Usage:**
-```powershell
-# Build and pack all packages for local development
-./BuildAndPackEnhancedEnums.ps1 -OutputPath "LocalPackages" -Configuration "Release"
-```
+For developers working on Enhanced Enums itself:
 
 #### Package Architecture for Development
 
