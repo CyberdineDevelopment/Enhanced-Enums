@@ -17,6 +17,8 @@ A powerful source generator suite for creating type-safe, object-oriented enumer
 - [Decision Trees](#decision-trees)
 - [Complete Examples](#complete-examples)
 - [API Reference](#api-reference)
+- [Debugging & Development](#debugging--development)
+- [Smart Generators Framework](#smart-generators-framework)
 - [Troubleshooting](#troubleshooting)
 
 ## Overview
@@ -1333,6 +1335,469 @@ All sample setup scripts support these options:
 # Verbose output
 .\SetUpSample.ps1 -Verbose
 ```
+
+## Smart Generators Framework
+
+Enhanced Enums is built on top of the **FractalDataWorks Smart Generators** framework - a comprehensive toolkit for building, testing, and deploying Roslyn source generators with a fluent code generation API.
+
+### Overview
+
+The Smart Generators framework provides:
+
+- **Fluent Code Building API** - Generate C# code with an intuitive builder pattern
+- **Incremental Generator Base Classes** - Simplified development with best practices built-in
+- **Comprehensive Testing Framework** - Test generators with expectations and assertions
+- **Documentation Support** - Extract and format XML documentation
+
+### Core Components
+
+#### FractalDataWorks.SmartGenerators
+Core framework for building incremental source generators with utilities for diagnostics, compilation helpers, and base classes.
+
+#### FractalDataWorks.SmartGenerators.CodeBuilders  
+Fluent API for generating C# code including classes, interfaces, methods, properties, and more with proper formatting and documentation.
+
+#### FractalDataWorks.SmartGenerators.TestUtilities
+Testing framework for source generators with compilation builders, assertion helpers, and expectations API.
+
+### Code Builder Examples
+
+#### Basic Class Generation
+```csharp
+var classCode = new ClassBuilder("PersonDto")
+    .MakePublic()
+    .MakePartial()
+    .WithNamespace("MyApp.Models")
+    .AddProperty("int", "Id", p => p.MakePublic().WithGetterAndSetter())
+    .AddProperty("string", "Name", p => p.MakePublic().WithGetterAndSetter())
+    .Build();
+```
+
+#### Generic Type Support
+```csharp
+var genericClass = new ClassBuilder("Repository")
+    .WithTypeParameter("T")
+    .WithTypeConstraint("where T : class, IEntity")
+    .MakePublic()
+    .AddMethod("Task<T>", "GetByIdAsync", m => m
+        .MakePublic()
+        .AddParameter("int", "id")
+        .WithBody("return await _context.Set<T>().FindAsync(id);"))
+    .Build();
+```
+
+#### Method and Property Building
+```csharp
+var methodCode = new MethodBuilder("CalculateTotal", "decimal")
+    .MakePublic()
+    .MakeStatic()
+    .AddParameter("IEnumerable<decimal>", "values")
+    .WithXmlDocSummary("Calculates the total sum of values.")
+    .WithXmlDocParam("values", "The values to sum.")
+    .WithXmlDocReturns("The total sum.")
+    .WithBody("return values.Sum();")
+    .Build();
+```
+
+### Generator Base Classes
+
+Enhanced Enums generators inherit from `IncrementalGeneratorBase<T>`:
+
+```csharp
+[Generator]
+public class MyGenerator : IncrementalGeneratorBase<MyModel>
+{
+    protected override bool IsRelevantSyntax(SyntaxNode node)
+    {
+        // Determine if syntax node is relevant for processing
+        return node is ClassDeclarationSyntax cds && 
+               HasMyAttribute(cds);
+    }
+
+    protected override MyModel? TransformSyntax(GeneratorSyntaxContext context)
+    {
+        // Transform syntax into your model
+        var classDecl = (ClassDeclarationSyntax)context.Node;
+        return ExtractModel(classDecl, context.SemanticModel);
+    }
+
+    protected override void Execute(SourceProductionContext context, MyModel model)
+    {
+        // Generate code from your model
+        var code = new ClassBuilder(model.Name)
+            .MakePublic()
+            .Build();
+            
+        context.AddSource($"{model.Name}.g.cs", code);
+    }
+}
+```
+
+### Testing Support
+
+The framework includes comprehensive testing utilities:
+
+```csharp
+[Fact]
+public void Generator_CreatesExpectedOutput()
+{
+    var source = @"
+        [MyAttribute]
+        public class TestClass
+        {
+            public int Id { get; set; }
+        }";
+
+    var result = SourceGeneratorTestHelper.RunGenerator<MyGenerator>(source);
+    
+    result.ShouldContain("public class TestClass");
+    result.ShouldContain("public int Id { get; set; }");
+}
+```
+
+### Architecture
+
+The Smart Generators framework uses a layered architecture:
+
+```mermaid
+graph TD
+    A[Enhanced Enums Generators] -->|inherits| B[IncrementalGeneratorBase]
+    A -->|uses| C[Code Builders]
+    B -->|part of| D[SmartGenerators Core]
+    C -->|part of| E[CodeBuilders Package]
+    F[Generator Tests] -->|uses| G[Test Utilities]
+    G -->|references| D
+    G -->|references| E
+```
+
+### Generation Flow
+
+```mermaid
+sequenceDiagram
+    participant Source as Source Code
+    participant Gen as Enhanced Enum Generator
+    participant Base as IncrementalGeneratorBase
+    participant Builder as Code Builder
+    participant Output as Generated Code
+    
+    Source->>Gen: Syntax Node
+    Gen->>Base: IsRelevantSyntax()
+    Base-->>Gen: true/false
+    Gen->>Base: TransformSyntax()
+    Base-->>Gen: EnumTypeInfo
+    Gen->>Builder: Create ClassBuilder
+    Builder->>Builder: Build collection code
+    Builder-->>Gen: Generated string
+    Gen->>Output: AddSource()
+```
+
+### Detailed CodeBuilder Reference
+
+The Smart Generators CodeBuilders package provides a comprehensive fluent API for generating C# code. Here's a detailed reference:
+
+#### ClassBuilder
+
+```csharp
+var classCode = new ClassBuilder("MyClass")
+    // Accessibility
+    .MakePublic()          // public class
+    .MakeInternal()        // internal class  
+    .MakePrivate()         // private class
+    .MakeProtected()       // protected class
+    
+    // Modifiers
+    .MakeStatic()          // static class
+    .MakeSealed()          // sealed class
+    .MakeAbstract()        // abstract class
+    .MakePartial()         // partial class
+    
+    // Generics
+    .AddGenericParameter("T")                    // <T>
+    .AddGenericConstraint("T", "class")          // where T : class
+    .WithTypeParameter("T")                      // Alternative syntax
+    .WithTypeConstraint("where T : IDisposable") // Alternative syntax
+    
+    // Inheritance
+    .WithBaseType("BaseClass")
+    .WithInterface("IInterface")
+    
+    // Namespace
+    .WithNamespace("MyNamespace")
+    
+    // Documentation
+    .WithXmlDocSummary("This is my class")
+    .WithXmlDocRemarks("Additional details")
+    
+    // Members
+    .AddField("string", "_name", f => f.MakePrivate().MakeReadOnly())
+    .AddProperty("string", "Name", p => p.MakePublic().WithGetterAndSetter())
+    .AddMethod("void", "DoSomething", m => m.MakePublic().WithBody("// Implementation"))
+    .AddConstructor(c => c.MakePublic().AddParameter("string", "name"))
+    
+    .Build();
+```
+
+#### PropertyBuilder
+
+```csharp
+var propertyCode = new PropertyBuilder("MyProperty", "string")
+    // Accessibility
+    .MakePublic()
+    .MakePrivate()
+    .MakeProtected()
+    .MakeInternal()
+    
+    // Modifiers
+    .MakeStatic()
+    .MakeVirtual()
+    .MakeOverride()
+    .MakeAbstract()
+    
+    // Accessors
+    .WithGetter("return _value;")              // Custom getter
+    .WithSetter("_value = value;")             // Custom setter
+    .WithGetterAndSetter()                     // Auto-properties
+    .WithExpressionGetter("_value")            // Expression-bodied getter
+    .WithPrivateSetter()                       // Public get, private set
+    .WithInitOnlySetter()                      // init accessor
+    
+    // Documentation
+    .WithXmlDocSummary("Gets or sets the value")
+    .WithXmlDocValue("The property value")
+    
+    // Attributes
+    .WithAttribute("JsonProperty", "\"myProperty\"")
+    
+    .Build();
+```
+
+#### MethodBuilder
+
+```csharp
+var methodCode = new MethodBuilder("CalculateSum", "decimal")
+    // Accessibility and modifiers
+    .MakePublic()
+    .MakeStatic()
+    .MakeAsync()           // async method
+    .MakeVirtual()
+    .MakeOverride()
+    .MakeAbstract()
+    
+    // Parameters
+    .AddParameter("IEnumerable<decimal>", "values")
+    .AddParameter("bool", "includeNegative", "true")  // With default value
+    
+    // Generic parameters
+    .AddGenericParameter("T")
+    .AddGenericConstraint("T", "struct")
+    
+    // Body
+    .WithBody(@"
+        var sum = 0m;
+        foreach (var value in values)
+        {
+            if (includeNegative || value >= 0)
+                sum += value;
+        }
+        return sum;")
+    
+    // Expression-bodied
+    .WithExpressionBody("values.Where(v => includeNegative || v >= 0).Sum()")
+    
+    // Documentation
+    .WithXmlDocSummary("Calculates the sum of values")
+    .WithXmlDocParam("values", "The values to sum")
+    .WithXmlDocParam("includeNegative", "Whether to include negative values")
+    .WithXmlDocReturns("The calculated sum")
+    
+    // Attributes
+    .WithAttribute("Pure")
+    .WithAttribute("MethodImpl", "MethodImplOptions.AggressiveInlining")
+    
+    .Build();
+```
+
+#### FieldBuilder
+
+```csharp
+var fieldCode = new FieldBuilder("_items", "List<string>")
+    // Accessibility
+    .MakePrivate()
+    .MakeProtected()
+    .MakePublic()
+    
+    // Modifiers  
+    .MakeStatic()
+    .MakeReadOnly()
+    .MakeConst()
+    
+    // Initialization
+    .WithInitializer("new List<string>()")
+    .WithConstValue("\"DefaultValue\"")
+    
+    // Documentation
+    .WithXmlDocSummary("Stores the list of items")
+    
+    .Build();
+```
+
+#### InterfaceBuilder
+
+```csharp
+var interfaceCode = new InterfaceBuilder("IRepository")
+    .MakePublic()
+    .AddGenericParameter("T")
+    .AddGenericConstraint("T", "class")
+    .WithNamespace("MyApp.Interfaces")
+    
+    // Interface members (no implementation)
+    .AddProperty("IQueryable<T>", "Items", p => p.MakePublic())
+    .AddMethod("Task<T>", "GetByIdAsync", m => m
+        .MakePublic()
+        .AddParameter("int", "id"))
+    .AddMethod("Task", "SaveAsync", m => m
+        .MakePublic()
+        .AddParameter("T", "entity"))
+    
+    .WithXmlDocSummary("Repository interface for entity access")
+    .Build();
+```
+
+#### ConstructorBuilder
+
+```csharp
+var constructorCode = new ConstructorBuilder("MyClass")
+    .MakePublic()
+    .AddParameter("string", "name")
+    .AddParameter("int", "age", "0")  // With default value
+    
+    // Base constructor call
+    .WithBaseCall("baseName", "baseAge")
+    
+    // This constructor call  
+    .WithThisCall("name")
+    
+    // Body
+    .WithBody(@"
+        _name = name ?? throw new ArgumentNullException(nameof(name));
+        _age = age;")
+    
+    .WithXmlDocSummary("Initializes a new instance")
+    .WithXmlDocParam("name", "The name value")
+    .WithXmlDocParam("age", "The age value")
+    
+    .Build();
+```
+
+#### Advanced Examples
+
+##### Building Complex Generic Classes
+
+```csharp
+var repositoryClass = new ClassBuilder("Repository")
+    .AddGenericParameter("TEntity")
+    .AddGenericParameter("TKey") 
+    .AddGenericConstraint("TEntity", "class, IEntity<TKey>")
+    .AddGenericConstraint("TKey", "struct")
+    .MakePublic()
+    .WithInterface("IRepository<TEntity, TKey>")
+    
+    .AddField("DbContext", "_context", f => f.MakePrivate().MakeReadOnly())
+    
+    .AddConstructor(c => c
+        .MakePublic()
+        .AddParameter("DbContext", "context")
+        .WithBody("_context = context ?? throw new ArgumentNullException(nameof(context));"))
+    
+    .AddMethod("async Task<TEntity?>", "GetByIdAsync", m => m
+        .MakePublic()
+        .AddParameter("TKey", "id")
+        .WithBody("return await _context.Set<TEntity>().FindAsync(id);"))
+    
+    .Build();
+```
+
+##### Building Enums with Complex Logic
+
+```csharp
+var enumClass = new ClassBuilder("OrderStatus")
+    .MakePublic()
+    .MakeSealed()
+    .WithBaseType("EnumOptionBase<OrderStatus>")
+    
+    .AddField("bool", "_canCancel", f => f.MakePrivate().MakeReadOnly())
+    .AddProperty("bool", "CanCancel", p => p
+        .MakePublic()
+        .WithGetter("return _canCancel;"))
+    
+    .AddConstructor(c => c
+        .MakePublic()
+        .AddParameter("int", "id")
+        .AddParameter("string", "name") 
+        .AddParameter("bool", "canCancel")
+        .WithBaseCall("id", "name")
+        .WithBody("_canCancel = canCancel;"))
+    
+    .AddMethod("bool", "CanTransitionTo", m => m
+        .MakePublic()
+        .AddParameter("OrderStatus", "newStatus")
+        .WithBody(@"
+            return newStatus switch
+            {
+                var s when s == Cancelled => CanCancel,
+                var s when s == Completed => this == Shipped,
+                _ => false
+            };"))
+    
+    .Build();
+```
+
+##### Building Collection Classes
+
+```csharp
+var collectionClass = new ClassBuilder("OrderStatuses")
+    .MakePublic()
+    .MakeStatic()
+    
+    .AddField("ImmutableArray<OrderStatus>", "_all", f => f
+        .MakePrivate()
+        .MakeStatic()
+        .MakeReadOnly())
+    
+    .AddProperty("ImmutableArray<OrderStatus>", "All", p => p
+        .MakePublic()
+        .MakeStatic()
+        .WithGetter("return _all;"))
+    
+    .AddMethod("OrderStatus", "GetByName", m => m
+        .MakePublic()
+        .MakeStatic()
+        .AddParameter("string", "name")
+        .WithBody(@"
+            foreach (var status in _all)
+            {
+                if (string.Equals(status.Name, name, StringComparison.OrdinalIgnoreCase))
+                    return status;
+            }
+            return Empty;"))
+    
+    .AddProperty("OrderStatus", "Empty", p => p
+        .MakePublic()
+        .MakeStatic()
+        .WithGetter("return new EmptyOrderStatus();"))
+    
+    .Build();
+```
+
+### Integration Benefits
+
+Using Smart Generators provides Enhanced Enums with:
+
+1. **Consistent API** - All code generation follows the same fluent patterns
+2. **Robust Testing** - Comprehensive test utilities ensure reliability
+3. **Performance** - Incremental generation with proper caching
+4. **Maintainability** - Clean separation between syntax analysis and code generation
+5. **Extensibility** - Easy to add new builders and generators
 
 ## Development & Contribution
 
