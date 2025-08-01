@@ -1132,6 +1132,268 @@ GeneratedFiles/
     └── UserRoles.g.cs        # User role collection
 ```
 
+## Testing Enhanced Enums
+
+### Required Testing Setup
+
+Enhanced Enums includes comprehensive testing utilities for verifying source generator output. **Always use the ExpectationsFactory API instead of string assertions.**
+
+#### Test Project Dependencies
+```xml
+<PackageReference Include="xunit" Version="3.0.0-pre.1" />
+<PackageReference Include="Shouldly" Version="4.2.1" />
+<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
+<ProjectReference Include="../FractalDataWorks.SmartGenerators.TestUtilities/FractalDataWorks.SmartGenerators.TestUtilities.csproj" />
+```
+
+### ✅ Correct Testing Approach
+
+**Use ExpectationsFactory for structured verification:**
+
+```csharp
+[Fact]
+public void EnhancedEnumGenerator_GeneratesCorrectCollectionStructure()
+{
+    // Arrange
+    var source = @"
+        [EnumCollection(CollectionName = ""OrderStatuses"")]
+        public abstract class OrderStatusBase : EnumOptionBase<OrderStatusBase>
+        {
+            protected OrderStatusBase(int id, string name) : base(id, name) { }
+        }
+        
+        [EnumOption]
+        public class Pending : OrderStatusBase
+        {
+            public Pending() : base(1, ""Pending"") { }
+        }";
+
+    // Act
+    var output = SourceGeneratorTestHelper.RunGenerator<EnhancedEnumGenerator>(source);
+    
+    // Assert - USE EXPECTATIONS FACTORY
+    ExpectationsFactory.ExpectCode(output)
+        .HasNamespace("YourNamespace", ns => ns
+            .HasClass("OrderStatuses", c => c
+                .IsPublic()
+                .IsStatic()
+                .HasProperty("All", p => p
+                    .IsPublic()
+                    .IsStatic()
+                    .HasType("ImmutableArray<OrderStatusBase>"))
+                .HasMethod("GetByName", m => m
+                    .IsPublic()
+                    .IsStatic()
+                    .HasReturnType("OrderStatusBase")
+                    .HasParameter("name", "string"))
+                .HasMethod("Pending", m => m
+                    .IsPublic()
+                    .IsStatic()
+                    .HasReturnType("OrderStatusBase")
+                    .HasNoParameters())))
+        .Verify();
+}
+```
+
+### ❌ Incorrect Testing Approach
+
+**Don't use string assertions - brittle and unmaintainable:**
+
+```csharp
+// BAD - Don't do this!
+[Fact]
+public void BadExample_DoNotUseStringAssertions()
+{
+    var output = SourceGeneratorTestHelper.RunGenerator<EnhancedEnumGenerator>(source);
+    
+    // This is fragile and hard to maintain
+    output.ShouldContain("public static class OrderStatuses");
+    output.ShouldContain("public static ImmutableArray<OrderStatusBase> All");
+    output.ShouldContain("public static OrderStatusBase GetByName(string name)");
+}
+```
+
+### Available TestUtilities API
+
+#### ExpectationsFactory Methods
+- `ExpectationsFactory.Expect(SyntaxTree)` - Create expectations from syntax tree
+- `ExpectationsFactory.ExpectCode(string)` - Create expectations from generated code string
+- `CompilationUnit.HasNamespace(name, callback)` - Find and verify namespace
+- `CompilationUnit.HasClass(name, callback)` - Find and verify class
+
+#### SyntaxTreeExpectations Methods
+```csharp
+var expectations = ExpectationsFactory.ExpectCode(generatedCode);
+expectations.HasNamespace("MyNamespace", ns => { ... });
+expectations.HasClass("MyClass", c => { ... });
+expectations.Verify(); // Always call this at the end
+```
+
+#### ClassExpectations Methods
+```csharp
+.HasClass("ClassName", c => c
+    .IsPublic()           // Verify public modifier
+    .IsStatic()           // Verify static modifier
+    .IsSealed()           // Verify sealed modifier
+    .IsAbstract()         // Verify abstract modifier
+    .IsPartial()          // Verify partial modifier
+    .HasMethod("MethodName", m => { ... })
+    .HasProperty("PropertyName", p => { ... })
+    .HasField("FieldName", f => { ... })
+    .HasConstructor("string, int", ctor => { ... })
+    .HasParameterlessConstructor()
+    .HasGenericParameter("T")
+    .HasBaseType("BaseTypeName")
+    .HasInterface("IInterfaceName"))
+```
+
+#### MethodExpectations Methods
+```csharp
+.HasMethod("MethodName", m => m
+    .IsPublic()           // Verify access modifier
+    .IsPrivate()
+    .IsProtected()
+    .IsInternal()
+    .IsStatic()           // Verify static modifier
+    .IsVirtual()          // Verify virtual modifier
+    .IsOverride()         // Verify override modifier
+    .IsAbstract()         // Verify abstract modifier
+    .HasReturnType("string")
+    .HasParameter("paramName", "string")
+    .HasParameter("paramName", p => p.HasType("int"))
+    .HasNoParameters()
+    .HasGenericParameter("T")
+    .HasConstraint("T", "where T : class"))
+```
+
+#### PropertyExpectations Methods
+```csharp
+.HasProperty("PropertyName", p => p
+    .IsPublic()           // Verify access modifier
+    .IsStatic()           // Verify static modifier
+    .IsReadOnly()         // Verify only getter
+    .IsWriteOnly()        // Verify only setter
+    .HasType("string")    // Verify property type
+    .HasGetter()          // Verify has getter
+    .HasSetter()          // Verify has setter
+    .HasPrivateSetter()   // Verify private setter
+    .HasInitOnlySetter()) // Verify init-only setter
+```
+
+#### FieldExpectations Methods
+```csharp
+.HasField("_fieldName", f => f
+    .IsPrivate()          // Verify access modifier
+    .IsStatic()           // Verify static modifier
+    .IsReadOnly()         // Verify readonly modifier
+    .IsConst()            // Verify const modifier
+    .HasType("string"))   // Verify field type
+```
+
+#### ConstructorExpectations Methods
+```csharp
+.HasConstructor("string, int", ctor => ctor
+    .IsPublic()           // Verify access modifier
+    .IsPrivate()
+    .IsProtected()
+    .HasParameter("name", "string")
+    .HasBaseCall("base(id, name)")
+    .CallsThisConstructor("this()"))
+```
+
+### Testing Generator Pipeline
+
+```csharp
+[Fact]
+public void Generator_WorksWithComplexScenarios()
+{
+    var result = GeneratorPipelineBuilder.Create()
+        .WithSource(@"
+            [EnumCollection(CollectionName = ""Colors"", Generic = true)]
+            public abstract class ColorBase : EnumOptionBase<ColorBase>
+            {
+                protected ColorBase(int id, string name) : base(id, name) { }
+            }")
+        .AddGenerator<EnhancedEnumGenerator>()
+        .AddReference<object>()
+        .WithAssemblyName("TestAssembly")
+        .Build()
+        .Run();
+    
+    // Verify no compilation errors
+    result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error)
+        .ShouldBeEmpty();
+    
+    // Verify generated source structure
+    result.GeneratedSources.ShouldHaveSingleItem();
+    
+    var generatedCode = result.GeneratedSources.First().Value;
+    ExpectationsFactory.ExpectCode(generatedCode)
+        .HasClass("Colors", c => c
+            .IsPublic()
+            .HasGenericParameter("T")
+            .HasConstraint("T", "ColorBase"))
+        .Verify();
+}
+```
+
+### Testing Cross-Assembly Scenarios
+
+```csharp
+[Fact]
+public void CrossAssemblyGenerator_ScansReferencedAssemblies()
+{
+    var compilation = AssemblyCompilationBuilder.Create()
+        .WithAssemblyName("TestAssembly")
+        .AddSource(baseClassSource)
+        .AddReference<object>()
+        .AddAssemblyReference(externalAssemblyWithOptions)
+        .Build();
+    
+    var result = SourceGeneratorTestHelper.RunGenerator<GlobalEnhancedEnumGenerator>(compilation);
+    
+    ExpectationsFactory.ExpectCode(result)
+        .HasClass("Colors", c => c
+            .HasMethod("Red", m => m.IsStatic().HasReturnType("ColorBase"))
+            .HasMethod("Blue", m => m.IsStatic().HasReturnType("ColorBase")))
+        .Verify();
+}
+```
+
+### Best Testing Practices
+
+1. **Always use ExpectationsFactory** - Never use string `.ShouldContain()` assertions
+2. **Structure tests by feature** - One test per generated feature (properties, methods, etc.)
+3. **Test both positive and negative cases** - Include error scenarios
+4. **Verify compilation success** - Check that generated code compiles without errors
+5. **Use meaningful test names** - Describe what the test verifies
+6. **Test incremental generation** - Verify generators work with multiple runs
+
+### Example Test Structure
+
+```csharp
+public class EnhancedEnumGeneratorTests
+{
+    [Fact]
+    public void GeneratesStaticCollectionClass() { ... }
+    
+    [Fact]
+    public void GeneratesGenericCollectionClass() { ... }
+    
+    [Fact]
+    public void GeneratesFactoryMethods() { ... }
+    
+    [Fact]
+    public void GeneratesLookupMethods() { ... }
+    
+    [Fact] 
+    public void HandlesErrorScenarios() { ... }
+    
+    [Fact]
+    public void SupportsIncrementalGeneration() { ... }
+}
+```
+
 ## Troubleshooting
 
 ### Common Issues Flow Chart

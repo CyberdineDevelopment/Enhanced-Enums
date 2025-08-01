@@ -7,7 +7,7 @@ namespace FractalDataWorks.SmartGenerators.CodeBuilder.Tests.UnitTests;
 public class CodeBuilderFactoryTests
 {
     [Fact]
-    public void CreateCodeBuilder_DefaultIndentSize_CreatesCodeBuilder()
+    public void CreateCodeBuilderDefaultIndentSizeCreatesCodeBuilder()
     {
         // Act
         var builder = CodeBuilderFactory.CreateCodeBuilder();
@@ -18,7 +18,7 @@ public class CodeBuilderFactoryTests
     }
 
     [Fact]
-    public void CreateCodeBuilder_CustomIndentSize_CreatesCodeBuilder()
+    public void CreateCodeBuilderCustomIndentSizeCreatesCodeBuilder()
     {
         // Act
         var builder = CodeBuilderFactory.CreateCodeBuilder(2);
@@ -36,7 +36,7 @@ public class CodeBuilderFactoryTests
     }
 
     [Fact]
-    public void CreateClass_WithValidName_CreatesClassBuilder()
+    public void CreateClassWithValidNameCreatesClassBuilder()
     {
         // Arrange
         var className = "TestClass";
@@ -52,7 +52,7 @@ public class CodeBuilderFactoryTests
     }
 
     [Fact]
-    public void CreateMethod_WithValidParameters_CreatesMethodBuilder()
+    public void CreateMethodWithValidParametersCreatesMethodBuilder()
     {
         // Arrange
         var methodName = "GetValue";
@@ -69,7 +69,7 @@ public class CodeBuilderFactoryTests
     }
 
     [Fact]
-    public void CreateProperty_WithValidParameters_CreatesPropertyBuilder()
+    public void CreatePropertyWithValidParametersCreatesPropertyBuilder()
     {
         // Arrange
         var propertyName = "Name";
@@ -86,7 +86,7 @@ public class CodeBuilderFactoryTests
     }
 
     [Fact]
-    public void CreateInterface_WithValidName_CreatesInterfaceBuilder()
+    public void CreateInterfaceWithValidNameCreatesInterfaceBuilder()
     {
         // Arrange
         var interfaceName = "ITestInterface";
@@ -102,7 +102,7 @@ public class CodeBuilderFactoryTests
     }
 
     [Fact]
-    public void CreateNamespace_WithValidName_CreatesNamespaceBuilder()
+    public void CreateNamespaceWithValidNameCreatesNamespaceBuilder()
     {
         // Arrange
         var namespaceName = "Test.Namespace";
@@ -118,7 +118,7 @@ public class CodeBuilderFactoryTests
     }
 
     [Fact]
-    public void CreateField_WithValidParameters_CreatesFieldBuilder()
+    public void CreateFieldWithValidParametersCreatesFieldBuilder()
     {
         // Arrange
         var fieldName = "_count";
@@ -135,7 +135,7 @@ public class CodeBuilderFactoryTests
     }
 
     [Fact]
-    public void CreateConstructor_WithValidClassName_CreatesConstructorBuilder()
+    public void CreateConstructorWithValidClassNameCreatesConstructorBuilder()
     {
         // Arrange
         var className = "TestClass";
@@ -151,7 +151,7 @@ public class CodeBuilderFactoryTests
     }
 
     [Fact]
-    public void CreateAttribute_WithValidName_CreatesAttributeBuilder()
+    public void CreateAttributeWithValidNameCreatesAttributeBuilder()
     {
         // Arrange
         var attributeName = "Serializable";
@@ -167,7 +167,7 @@ public class CodeBuilderFactoryTests
     }
 
     [Fact]
-    public void CreateEnum_WithValidName_CreatesEnumBuilder()
+    public void CreateEnumWithValidNameCreatesEnumBuilder()
     {
         // Arrange
         var enumName = "TestEnum";
@@ -183,7 +183,7 @@ public class CodeBuilderFactoryTests
     }
 
     [Fact]
-    public void FactoryMethods_CreateDistinctInstances()
+    public void FactoryMethodsCreateDistinctInstances()
     {
         // Act
         var builder1 = CodeBuilderFactory.CreateClass("Class1");
@@ -194,7 +194,7 @@ public class CodeBuilderFactoryTests
     }
 
     [Fact]
-    public void CreateMethod_WithVoidReturnType_CreatesValidMethod()
+    public void CreateMethodWithVoidReturnTypeCreatesValidMethod()
     {
         // Act
         var builder = CodeBuilderFactory.CreateMethod("DoWork", "void");
@@ -205,7 +205,7 @@ public class CodeBuilderFactoryTests
     }
 
     [Fact]
-    public void ComplexScenario_CombiningFactoryBuilders_GeneratesCorrectCode()
+    public void ComplexScenarioCombiningFactoryBuildersGeneratesCorrectCode()
     {
         // Arrange & Act
         var namespaceBuilder = CodeBuilderFactory.CreateNamespace("MyApp.Models");

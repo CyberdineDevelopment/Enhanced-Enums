@@ -22,6 +22,16 @@ public static class EnumCollectionBuilder
         INamedTypeSymbol? baseTypeSymbol,
         Compilation compilation)
     {
+        // Validate arguments
+        if (definition == null)
+            throw new ArgumentNullException(nameof(definition));
+        if (values == null)
+            throw new ArgumentNullException(nameof(values));
+        if (string.IsNullOrEmpty(effectiveReturnType))
+            throw new ArgumentNullException(nameof(effectiveReturnType));
+        if (compilation == null)
+            throw new ArgumentNullException(nameof(compilation));
+            
         // Create code builder for the entire file
         var codeBuilder = new CodeBuilder();
         
@@ -130,8 +140,8 @@ public static class EnumCollectionBuilder
 
         if (definition.Generic)
         {
-            classBuilder.AddGenericParameter("T")
-                       .AddGenericConstraint("T", $"{definition.FullTypeName}");
+            classBuilder.WithTypeParameter("T")
+                       .WithTypeConstraint($"where T : {definition.FullTypeName}");
             // Generic classes cannot be static, so we don't apply MakeStatic()
         }
         else if (definition.GenerateStaticCollection)
@@ -250,15 +260,17 @@ public static class EnumCollectionBuilder
 
     private static void AddAllProperty(ClassBuilder classBuilder, string methodReturnType, bool isStaticCollection)
     {
-        var propBuilder = classBuilder.AddProperty($"ImmutableArray<{methodReturnType}>", "All", prop => prop
-            .MakePublic()
-            .WithGetter("return _all;")
-            .WithXmlDocSummary("Gets all enum values."));
-            
-        if (isStaticCollection)
+        classBuilder.AddProperty("All", $"ImmutableArray<{methodReturnType}>", prop =>
         {
-            propBuilder.MakeStatic();
-        }
+            prop.MakePublic()
+                .WithGetter("return _all;")
+                .WithXmlDocSummary("Gets all enum values.");
+                
+            if (isStaticCollection)
+            {
+                prop.MakeStatic();
+            }
+        });
     }
 
     private static void AddGetByNameMethods(ClassBuilder classBuilder, EnumTypeInfo definition, string methodReturnType, bool isStaticCollection)
@@ -273,18 +285,20 @@ public static class EnumCollectionBuilder
         getByNameBody.AppendLine();
         getByNameBody.AppendLine("return Empty;");
         
-        var getByNameMethod = classBuilder.AddMethod("GetByName", methodReturnType, method => method
-            .MakePublic()
-            .AddParameter("string", "name")
-            .WithXmlDocSummary("Gets an enum value by its name.")
-            .WithXmlDocParam("name", "The name of the enum value.")
-            .WithXmlDocReturns("The enum value with the specified name, or Empty if not found.")
-            .WithBody(getByNameBody.Build()));
-            
-        if (isStaticCollection)
+        classBuilder.AddMethod("GetByName", methodReturnType, method =>
         {
-            getByNameMethod.MakeStatic();
-        }
+            method.MakePublic()
+                .AddParameter("string", "name")
+                .WithXmlDocSummary("Gets an enum value by its name.")
+                .WithXmlDocParam("name", "The name of the enum value.")
+                .WithXmlDocReturns("The enum value with the specified name, or Empty if not found.")
+                .WithBody(getByNameBody.Build());
+                
+            if (isStaticCollection)
+            {
+                method.MakeStatic();
+            }
+        });
 
         // TryGetByName method
         var tryGetByNameBody = new CodeBuilder(8);
@@ -296,20 +310,22 @@ public static class EnumCollectionBuilder
         tryGetByNameBody.AppendLine();
         tryGetByNameBody.AppendLine("return _byName.TryGetValue(name, out value);");
         
-        var tryGetByNameMethod = classBuilder.AddMethod("TryGetByName", "bool", method => method
-            .MakePublic()
-            .AddParameter("string", "name")
-            .AddParameter($"out {methodReturnType}?", "value")
-            .WithXmlDocSummary("Tries to get an enum value by its name.")
-            .WithXmlDocParam("name", "The name of the enum value.")
-            .WithXmlDocParam("value", "When this method returns, contains the enum value if found; otherwise, null.")
-            .WithXmlDocReturns("true if an enum value with the specified name was found; otherwise, false.")
-            .WithBody(tryGetByNameBody.Build()));
-            
-        if (isStaticCollection)
+        classBuilder.AddMethod("TryGetByName", "bool", method =>
         {
-            tryGetByNameMethod.MakeStatic();
-        }
+            method.MakePublic()
+                .AddParameter("string", "name")
+                .AddParameter($"out {methodReturnType}?", "value")
+                .WithXmlDocSummary("Tries to get an enum value by its name.")
+                .WithXmlDocParam("name", "The name of the enum value.")
+                .WithXmlDocParam("value", "When this method returns, contains the enum value if found; otherwise, null.")
+                .WithXmlDocReturns("true if an enum value with the specified name was found; otherwise, false.")
+                .WithBody(tryGetByNameBody.Build());
+                
+            if (isStaticCollection)
+            {
+                method.MakeStatic();
+            }
+        });
     }
 
     private static void AddLookupMethods(ClassBuilder classBuilder, EnumTypeInfo definition, string methodReturnType, bool isStaticCollection)
@@ -340,18 +356,20 @@ public static class EnumCollectionBuilder
         body.AppendLine();
         body.AppendLine($"return ImmutableArray<{returnType}>.Empty;");
         
-        var method = classBuilder.AddMethod(lookup.LookupMethodName, $"ImmutableArray<{returnType}>", method => method
-            .MakePublic()
-            .AddParameter(lookup.PropertyType, paramName)
-            .WithXmlDocSummary($"Gets all enum values with the specified {lookup.PropertyName}.")
-            .WithXmlDocParam(paramName, $"The {lookup.PropertyName} value to search for.")
-            .WithXmlDocReturns($"All enum values with the specified {lookup.PropertyName}, or an empty array if none found.")
-            .WithBody(body.Build()));
-            
-        if (isStaticCollection)
+        classBuilder.AddMethod(lookup.LookupMethodName, $"ImmutableArray<{returnType}>", method =>
         {
-            method.MakeStatic();
-        }
+            method.MakePublic()
+                .AddParameter(lookup.PropertyType, paramName)
+                .WithXmlDocSummary($"Gets all enum values with the specified {lookup.PropertyName}.")
+                .WithXmlDocParam(paramName, $"The {lookup.PropertyName} value to search for.")
+                .WithXmlDocReturns($"All enum values with the specified {lookup.PropertyName}, or an empty array if none found.")
+                .WithBody(body.Build());
+                
+            if (isStaticCollection)
+            {
+                method.MakeStatic();
+            }
+        });
     }
 
     private static void AddSingleValueLookupMethod(ClassBuilder classBuilder, PropertyLookupInfo lookup, string returnType, bool isStaticCollection)
@@ -363,18 +381,20 @@ public static class EnumCollectionBuilder
         body.AppendLine($"{fieldName}.TryGetValue({paramName}, out var value);");
         body.AppendLine("return value;");
         
-        var method = classBuilder.AddMethod(lookup.LookupMethodName, $"{returnType}?", method => method
-            .MakePublic()
-            .AddParameter(lookup.PropertyType, paramName)
-            .WithXmlDocSummary($"Gets the enum value with the specified {lookup.PropertyName}.")
-            .WithXmlDocParam(paramName, $"The {lookup.PropertyName} value to search for.")
-            .WithXmlDocReturns($"The enum value with the specified {lookup.PropertyName}, or null if not found.")
-            .WithBody(body.Build()));
-            
-        if (isStaticCollection)
+        classBuilder.AddMethod(lookup.LookupMethodName, $"{returnType}?", method =>
         {
-            method.MakeStatic();
-        }
+            method.MakePublic()
+                .AddParameter(lookup.PropertyType, paramName)
+                .WithXmlDocSummary($"Gets the enum value with the specified {lookup.PropertyName}.")
+                .WithXmlDocParam(paramName, $"The {lookup.PropertyName} value to search for.")
+                .WithXmlDocReturns($"The enum value with the specified {lookup.PropertyName}, or null if not found.")
+                .WithBody(body.Build());
+                
+            if (isStaticCollection)
+            {
+                method.MakeStatic();
+            }
+        });
     }
 
     private static void AddFactoryMethods(ClassBuilder classBuilder, List<EnumValueInfo> values, string methodReturnType, bool isStaticCollection)
@@ -407,21 +427,23 @@ public static class EnumCollectionBuilder
                 if (ctor.Parameters.Count == 0)
                 {
                     // Parameterless constructor - simple factory method
-                    var method = classBuilder.AddMethod(methodName, valueReturnType!, method => method
-                        .MakePublic()
-                        .WithXmlDocSummary($"Creates a new instance of {value.Name}.")
-                        .WithXmlDocReturns($"A new {value.Name} instance.")
-                        .WithExpressionBody($"new {value.FullTypeName}()"));
-                        
-                    if (isStaticCollection)
+                    classBuilder.AddMethod(methodName, valueReturnType!, method =>
                     {
-                        method.MakeStatic();
-                    }
+                        method.MakePublic()
+                            .WithXmlDocSummary($"Creates a new instance of {value.Name}.")
+                            .WithXmlDocReturns($"A new {value.Name} instance.")
+                            .WithExpressionBody($"new {value.FullTypeName}()");
+                            
+                        if (isStaticCollection)
+                        {
+                            method.MakeStatic();
+                        }
+                    });
                 }
                 else
                 {
                     // Constructor with parameters - generate overload
-                    var method = classBuilder.AddMethod(methodName, valueReturnType, method => 
+                    classBuilder.AddMethod(methodName, valueReturnType, method => 
                     {
                         method.MakePublic()
                               .WithXmlDocSummary($"Creates a new instance of {value.Name} with the specified parameters.");
@@ -440,12 +462,12 @@ public static class EnumCollectionBuilder
                         // Generate the constructor call
                         var paramList = string.Join(", ", paramNames);
                         method.WithExpressionBody($"new {value.FullTypeName}({paramList})");
+                        
+                        if (isStaticCollection)
+                        {
+                            method.MakeStatic();
+                        }
                     });
-                    
-                    if (isStaticCollection)
-                    {
-                        method.MakeStatic();
-                    }
                 }
             }
         }
@@ -457,15 +479,17 @@ public static class EnumCollectionBuilder
         var emptyClassName = GetEmptyClassName(definition.ClassName);
         
         // Add Empty property that references the separate empty class
-        var prop = classBuilder.AddProperty(methodReturnType, "Empty", prop => prop
-            .MakePublic()
-            .WithGetter($"return {emptyClassName}.Instance;")
-            .WithXmlDocSummary("Gets an empty/null enum value."));
-            
-        if (isStaticCollection)
+        classBuilder.AddProperty("Empty", methodReturnType, prop =>
         {
-            prop.MakeStatic();
-        }
+            prop.MakePublic()
+                .WithGetter($"return {emptyClassName}.Instance;")
+                .WithXmlDocSummary("Gets an empty/null enum value.");
+                
+            if (isStaticCollection)
+            {
+                prop.MakeStatic();
+            }
+        });
     }
     
     private static ClassBuilder CreateEmptyClass(EnumTypeInfo definition, string effectiveReturnType, INamedTypeSymbol? baseTypeSymbol, List<EnumValueInfo> values, Compilation compilation)
@@ -488,7 +512,7 @@ public static class EnumCollectionBuilder
             .MakePrivate()
             .MakeStatic());
         
-        emptyClass.AddProperty(effectiveReturnType, "Instance", prop => prop
+        emptyClass.AddProperty("Instance", effectiveReturnType, prop => prop
             .MakePublic()
             .MakeStatic()
             .WithGetter($"return _instance ??= new {emptyClassName}();"));
@@ -527,9 +551,9 @@ public static class EnumCollectionBuilder
                 // Check if property is abstract (needs override) or virtual/regular (needs new)
                 var modifier = property.IsAbstract ? "override" : "new";
                 
-                if (modifier == "override")
+                if (string.Equals(modifier, "override", StringComparison.Ordinal))
                 {
-                    emptyClass.AddProperty(property.Type.ToDisplayString(), property.Name, prop => prop
+                    emptyClass.AddProperty(property.Name, property.Type.ToDisplayString(), prop => prop
                         .MakePublic()
                         .MakeOverride()
                         .WithGetter($"return {defaultValue};")
@@ -537,7 +561,7 @@ public static class EnumCollectionBuilder
                 }
                 else
                 {
-                    emptyClass.AddProperty(property.Type.ToDisplayString(), property.Name, prop => prop
+                    emptyClass.AddProperty(property.Name, property.Type.ToDisplayString(), prop => prop
                         .MakePublic()
                         .WithGetter($"return {defaultValue};")
                         .WithXmlDocSummary($"Gets the default value for {property.Name}."));
@@ -552,7 +576,7 @@ public static class EnumCollectionBuilder
                 // Check if method is abstract (needs override) or virtual/regular (needs new)
                 var modifier = method.IsAbstract ? "override" : "new";
                 
-                if (modifier == "override")
+                if (string.Equals(modifier, "override", StringComparison.Ordinal))
                 {
                     emptyClass.AddMethod(method.Name, method.ReturnType.ToDisplayString(), m => 
                     {
@@ -679,7 +703,7 @@ public static class EnumCollectionBuilder
     private static bool IsInheritedFromEnumOptionBase(ISymbol member, INamedTypeSymbol childType)
     {
         // Skip Id and Name as they come from EnumOptionBase
-        if (member.Name == "Id" || member.Name == "Name")
+        if (string.Equals(member.Name, "Id", StringComparison.Ordinal) || string.Equals(member.Name, "Name", StringComparison.Ordinal))
             return true;
             
         // Skip if the member is declared in a base type that is EnumOptionBase<T>
@@ -728,36 +752,36 @@ public static class EnumCollectionBuilder
                 var genericTypeName = namedType.OriginalDefinition.ToDisplayString();
                 
                 // Handle common collection interfaces and classes
-                if (genericTypeName.StartsWith("System.Collections.Generic.IEnumerable<") ||
-                    genericTypeName.StartsWith("System.Collections.Generic.ICollection<") ||
-                    genericTypeName.StartsWith("System.Collections.Generic.IList<") ||
-                    genericTypeName.StartsWith("System.Collections.Generic.IReadOnlyCollection<") ||
-                    genericTypeName.StartsWith("System.Collections.Generic.IReadOnlyList<"))
+                if (genericTypeName.StartsWith("System.Collections.Generic.IEnumerable<", StringComparison.Ordinal) ||
+                    genericTypeName.StartsWith("System.Collections.Generic.ICollection<", StringComparison.Ordinal) ||
+                    genericTypeName.StartsWith("System.Collections.Generic.IList<", StringComparison.Ordinal) ||
+                    genericTypeName.StartsWith("System.Collections.Generic.IReadOnlyCollection<", StringComparison.Ordinal) ||
+                    genericTypeName.StartsWith("System.Collections.Generic.IReadOnlyList<", StringComparison.Ordinal))
                 {
                     var elementType = namedType.TypeArguments[0].ToDisplayString();
                     return $"System.Array.Empty<{elementType}>()";
                 }
                 
-                if (genericTypeName.StartsWith("System.Collections.Generic.List<"))
+                if (genericTypeName.StartsWith("System.Collections.Generic.List<", StringComparison.Ordinal))
                 {
                     var elementType = namedType.TypeArguments[0].ToDisplayString();
                     return $"new System.Collections.Generic.List<{elementType}>()";
                 }
                 
-                if (genericTypeName.StartsWith("System.Collections.Generic.Dictionary<"))
+                if (genericTypeName.StartsWith("System.Collections.Generic.Dictionary<", StringComparison.Ordinal))
                 {
                     var keyType = namedType.TypeArguments[0].ToDisplayString();
                     var valueType = namedType.TypeArguments[1].ToDisplayString();
                     return $"new System.Collections.Generic.Dictionary<{keyType}, {valueType}>()";
                 }
                 
-                if (genericTypeName.StartsWith("System.Collections.Immutable.ImmutableArray<"))
+                if (genericTypeName.StartsWith("System.Collections.Immutable.ImmutableArray<", StringComparison.Ordinal))
                 {
                     var elementType = namedType.TypeArguments[0].ToDisplayString();
                     return $"System.Collections.Immutable.ImmutableArray<{elementType}>.Empty";
                 }
                 
-                if (genericTypeName.StartsWith("System.Collections.Immutable.ImmutableList<"))
+                if (genericTypeName.StartsWith("System.Collections.Immutable.ImmutableList<", StringComparison.Ordinal))
                 {
                     var elementType = namedType.TypeArguments[0].ToDisplayString();
                     return $"System.Collections.Immutable.ImmutableList<{elementType}>.Empty";

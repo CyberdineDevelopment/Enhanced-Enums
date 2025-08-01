@@ -464,13 +464,6 @@ public class ClassBuilder : CodeBuilderBase<ClassBuilder>
     }
 
     /// <summary>
-    /// Sets the XML documentation summary for this class.
-    /// </summary>
-    /// <param name="summary">The summary text.</param>
-    /// <returns>The builder instance for chaining.</returns>
-    public ClassBuilder WithSummary(string summary) => WithXmlDocSummary(summary);
-
-    /// <summary>
     /// Gets the XML documentation for this class.
     /// </summary>
     /// <returns>The XML documentation.</returns>
@@ -515,12 +508,12 @@ public class ClassBuilder : CodeBuilderBase<ClassBuilder>
     {
         var sb = new StringBuilder();
 
-        // Build namespace if specified
+        // Build namespace if specified (file-scoped)
         var hasNamespace = !string.IsNullOrEmpty(_namespace);
         if (hasNamespace)
         {
-            sb.AppendLine($"namespace {_namespace}");
-            sb.AppendLine("{");
+            sb.AppendLine($"namespace {_namespace};");
+            sb.AppendLine();
         }
 
         // Build XML documentation
@@ -601,11 +594,7 @@ public class ClassBuilder : CodeBuilderBase<ClassBuilder>
         sb.Append(memberBuilder.ToString());
         sb.AppendLine("}");
 
-        // Close namespace if specified
-        if (!string.IsNullOrEmpty(_namespace))
-        {
-            sb.AppendLine("}");
-        }
+        // File-scoped namespaces don't need closing braces
 
         return sb.ToString();
     }

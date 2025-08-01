@@ -24,7 +24,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void Constructor_DefaultConstructor_UsesDefaultClassName()
+    public void ConstructorDefaultConstructorUsesDefaultClassName()
     {
         // Act
         var builder = new ConstructorBuilder();
@@ -35,7 +35,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void Constructor_WithClassName_UsesProvidedName()
+    public void ConstructorWithClassNameUsesProvidedName()
     {
         // Arrange
         var className = "TestClass";
@@ -49,7 +49,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void AddParameter_WithValidInputs_AddsParameter()
+    public void AddParameterWithValidInputsAddsParameter()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -64,7 +64,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void AddParameter_MultipleParameters_AddsInOrder()
+    public void AddParameterMultipleParametersAddsInOrder()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -81,7 +81,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void AddParameter_WithDefaultValue_AddsParameter()
+    public void AddParameterWithDefaultValueAddsParameter()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -97,7 +97,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void AddParameter_Generic_AddsParameterWithTypeName()
+    public void AddParameterGenericAddsParameterWithTypeName()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -113,7 +113,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void AddParameter_NullTypeName_ThrowsArgumentException()
+    public void AddParameterNullTypeNameThrowsArgumentException()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -123,7 +123,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void AddParameter_EmptyTypeName_ThrowsArgumentException()
+    public void AddParameterEmptyTypeNameThrowsArgumentException()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -133,7 +133,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void AddParameter_WhitespaceTypeName_ThrowsArgumentException()
+    public void AddParameterWhitespaceTypeNameThrowsArgumentException()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -143,7 +143,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void AddParameter_NullParameterName_ThrowsArgumentException()
+    public void AddParameterNullParameterNameThrowsArgumentException()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -153,7 +153,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void AddParameter_DuplicateName_ThrowsArgumentException()
+    public void AddParameterDuplicateNameThrowsArgumentException()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -166,7 +166,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void MakePublic_SetsPublicAccessModifier()
+    public void MakePublicSetsPublicAccessModifier()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -181,7 +181,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void MakePrivate_SetsPrivateAccessModifier()
+    public void MakePrivateSetsPrivateAccessModifier()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -196,7 +196,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void MakeProtected_SetsProtectedAccessModifier()
+    public void MakeProtectedSetsProtectedAccessModifier()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -211,7 +211,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void MakeInternal_SetsInternalAccessModifier()
+    public void MakeInternalSetsInternalAccessModifier()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -226,7 +226,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void MakeStatic_SetsStaticModifier()
+    public void MakeStaticSetsStaticModifier()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -241,7 +241,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void WithBody_String_AddsBodyContent()
+    public void WithBodyStringAddsBodyContent()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -258,7 +258,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void WithBody_NullString_ThrowsArgumentNullException()
+    public void WithBodyNullStringThrowsArgumentNullException()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -268,7 +268,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void WithBody_Action_AddsBodyContent()
+    public void WithBodyActionAddsBodyContent()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -283,7 +283,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void WithBody_NullAction_ThrowsArgumentNullException()
+    public void WithBodyNullActionThrowsArgumentNullException()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -293,7 +293,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void AddBody_String_AddsMultipleStatements()
+    public void AddBodyStringAddsMultipleStatements()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -310,7 +310,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void AddBody_NullString_ThrowsArgumentNullException()
+    public void AddBodyNullStringThrowsArgumentNullException()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -320,7 +320,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void AddBody_Action_AddsBodyContent()
+    public void AddBodyActionAddsBodyContent()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -335,7 +335,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void AddBody_NullAction_ThrowsArgumentNullException()
+    public void AddBodyNullActionThrowsArgumentNullException()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -345,7 +345,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void WithBaseCall_AddsBaseConstructorCall()
+    public void WithBaseCallAddsBaseConstructorCall()
     {
         // Arrange
         var builder = new ConstructorBuilder("DerivedClass");
@@ -361,7 +361,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void WithBaseCall_MultipleArguments_AddsAllArguments()
+    public void WithBaseCallMultipleArgumentsAddsAllArguments()
     {
         // Arrange
         var builder = new ConstructorBuilder("DerivedClass");
@@ -376,7 +376,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void WithBaseCall_NullArgs_ThrowsArgumentNullException()
+    public void WithBaseCallNullArgsThrowsArgumentNullException()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -386,7 +386,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void WithThisCall_AddsThisConstructorCall()
+    public void WithThisCallAddsThisConstructorCall()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -402,7 +402,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void WithThisCall_NullArgs_ThrowsArgumentNullException()
+    public void WithThisCallNullArgsThrowsArgumentNullException()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -412,7 +412,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void WithBaseCall_AfterThisCall_ThrowsInvalidOperationException()
+    public void WithBaseCallAfterThisCallThrowsInvalidOperationException()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -425,7 +425,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void WithThisCall_AfterBaseCall_ThrowsInvalidOperationException()
+    public void WithThisCallAfterBaseCallThrowsInvalidOperationException()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -438,7 +438,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void AddBodyForDirective_AddsConditionalBody()
+    public void AddBodyForDirectiveAddsConditionalBody()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -455,7 +455,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void AddBodyForDirective_MultipleConditions_AddsElseIf()
+    public void AddBodyForDirectiveMultipleConditionsAddsElseIf()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -473,7 +473,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void AddBodyForDirective_NullCondition_ThrowsArgumentException()
+    public void AddBodyForDirectiveNullConditionThrowsArgumentException()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -483,7 +483,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void AddBodyForDirective_EmptyCondition_ThrowsArgumentException()
+    public void AddBodyForDirectiveEmptyConditionThrowsArgumentException()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -493,7 +493,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void AddBodyForDirective_NullBlockBuilder_ThrowsArgumentNullException()
+    public void AddBodyForDirectiveNullBlockBuilderThrowsArgumentNullException()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -503,7 +503,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void AddElseBody_AfterDirective_AddsElseBlock()
+    public void AddElseBodyAfterDirectiveAddsElseBlock()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -522,7 +522,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void AddElseBody_WithoutDirective_ThrowsInvalidOperationException()
+    public void AddElseBodyWithoutDirectiveThrowsInvalidOperationException()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -532,7 +532,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void AddElseBody_NullBlockBuilder_ThrowsArgumentNullException()
+    public void AddElseBodyNullBlockBuilderThrowsArgumentNullException()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -543,7 +543,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void WithXmlDocSummary_AddsDocumentation()
+    public void WithXmlDocSummaryAddsDocumentation()
     {
         // Arrange
         var builder = new ConstructorBuilder("TestClass");
@@ -560,7 +560,7 @@ public class ConstructorBuilderTests
     }
 
     [Fact]
-    public void Build_ComplexConstructor_GeneratesCorrectCode()
+    public void BuildComplexConstructorGeneratesCorrectCode()
     {
         // Arrange
         var builder = new ConstructorBuilder("Person");

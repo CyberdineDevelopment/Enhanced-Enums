@@ -247,8 +247,8 @@ public class GlobalEnhancedEnumGenerator : IIncrementalGenerator
         {
             // Check for [EnumCollection] attribute AND verify it inherits from EnumOptionBase
             if (type.GetAttributes().Any(attr => 
-                attr.AttributeClass?.Name == "EnumCollectionAttribute" || 
-                attr.AttributeClass?.Name == "EnumCollection"))
+                string.Equals(attr.AttributeClass?.Name, "EnumCollectionAttribute", StringComparison.Ordinal) || 
+                string.Equals(attr.AttributeClass?.Name, "EnumCollection", StringComparison.Ordinal)))
             {
                 // Verify this type inherits from EnumOptionBase
                 if (InheritsFromEnumOptionBase(type))
@@ -281,8 +281,8 @@ public class GlobalEnhancedEnumGenerator : IIncrementalGenerator
         {
             // Check for [EnumOption] attribute AND verify it derives from the specific base type
             if (type.GetAttributes().Any(attr => 
-                attr.AttributeClass?.Name == "EnumOptionAttribute" || 
-                attr.AttributeClass?.Name == "EnumOption"))
+                string.Equals(attr.AttributeClass?.Name, "EnumOptionAttribute", StringComparison.Ordinal) || 
+                string.Equals(attr.AttributeClass?.Name, "EnumOption", StringComparison.Ordinal)))
             {
                 if (!type.IsAbstract && DerivesFromBaseType(type, baseType))
                 {
@@ -312,8 +312,8 @@ public class GlobalEnhancedEnumGenerator : IIncrementalGenerator
         {
             // Check for [EnumCollection] attribute AND verify it inherits from EnumOptionBase
             if (nestedType.GetAttributes().Any(attr => 
-                attr.AttributeClass?.Name == "EnumCollectionAttribute" || 
-                attr.AttributeClass?.Name == "EnumCollection"))
+                string.Equals(attr.AttributeClass?.Name, "EnumCollectionAttribute", StringComparison.Ordinal) || 
+                string.Equals(attr.AttributeClass?.Name, "EnumCollection", StringComparison.Ordinal)))
             {
                 // Verify this type inherits from EnumOptionBase
                 if (InheritsFromEnumOptionBase(nestedType))
@@ -339,8 +339,8 @@ public class GlobalEnhancedEnumGenerator : IIncrementalGenerator
         {
             // Check for [EnumOption] attribute AND verify it derives from the specific base type
             if (nestedType.GetAttributes().Any(attr => 
-                attr.AttributeClass?.Name == "EnumOptionAttribute" || 
-                attr.AttributeClass?.Name == "EnumOption"))
+                string.Equals(attr.AttributeClass?.Name, "EnumOptionAttribute", StringComparison.Ordinal) || 
+                string.Equals(attr.AttributeClass?.Name, "EnumOption", StringComparison.Ordinal)))
             {
                 if (!nestedType.IsAbstract && DerivesFromBaseType(nestedType, baseType))
                 {
@@ -543,7 +543,7 @@ public class GlobalEnhancedEnumGenerator : IIncrementalGenerator
             .MakePublic()
             .MakeStatic()
             .WithNamespace(def.Namespace)
-            .WithSummary($"Collection of all {def.ClassName} values.");
+            .WithXmlDocSummary($"Collection of all {def.ClassName} values.");
 
         // Add fields
         CollectionFieldsBuilder.AddFields(classBuilder, def, effectiveReturnType, implementsEnhancedOption);
@@ -623,9 +623,9 @@ public class GlobalEnhancedEnumGenerator : IIncrementalGenerator
         while (baseType != null)
         {
             // Check if this base type is EnumOptionBase or generic EnumOptionBase<T>
-            if (baseType.Name == "EnumOptionBase" && 
-                (baseType.ContainingNamespace?.ToDisplayString() == "FractalDataWorks" ||
-                 baseType.ContainingNamespace?.ToDisplayString() == "FractalDataWorks.EnhancedEnums"))
+            if (string.Equals(baseType.Name, "EnumOptionBase", StringComparison.Ordinal) && 
+                (string.Equals(baseType.ContainingNamespace?.ToDisplayString(), "FractalDataWorks", StringComparison.Ordinal) ||
+                 string.Equals(baseType.ContainingNamespace?.ToDisplayString(), "FractalDataWorks.EnhancedEnums", StringComparison.Ordinal)))
             {
                 return true;
             }
@@ -664,14 +664,14 @@ public class GlobalEnhancedEnumGenerator : IIncrementalGenerator
         // Get collection name from [EnumCollection] attribute
         var enumCollectionAttr = baseType.GetAttributes()
             .FirstOrDefault(attr => 
-                attr.AttributeClass?.Name == "EnumCollectionAttribute" ||
-                attr.AttributeClass?.Name == "EnumCollection");
+                string.Equals(attr.AttributeClass?.Name, "EnumCollectionAttribute", StringComparison.Ordinal) ||
+                string.Equals(attr.AttributeClass?.Name, "EnumCollection", StringComparison.Ordinal));
 
         if (enumCollectionAttr != null)
         {
             // Look for CollectionName named argument
             var collectionNameArg = enumCollectionAttr.NamedArguments
-                .FirstOrDefault(arg => arg.Key == "CollectionName");
+                .FirstOrDefault(arg => string.Equals(arg.Key, "CollectionName", StringComparison.Ordinal));
             
             if (collectionNameArg.Value.Value is string collectionName && !string.IsNullOrEmpty(collectionName))
             {
@@ -771,19 +771,15 @@ public class GlobalEnhancedEnumGenerator : IIncrementalGenerator
     {
         try
         {
-            var outputPath = GetMSBuildProperty("GeneratorOutPutTo");
+            var outputPath = GetMSBuildProperty(context, "GeneratorOutPutTo");
             if (string.IsNullOrWhiteSpace(outputPath))
                 return;
 
             var fullPath = System.IO.Path.Combine(outputPath, fileName);
             var directory = System.IO.Path.GetDirectoryName(fullPath);
             
-            if (!string.IsNullOrEmpty(directory) && !System.IO.Directory.Exists(directory))
-            {
-                System.IO.Directory.CreateDirectory(directory);
-            }
-            
-            System.IO.File.WriteAllText(fullPath, content, System.Text.Encoding.UTF8);
+            // File I/O removed - not allowed in source generators
+            // Directory and File operations are banned in analyzers/generators
         }
         catch (Exception ex)
         {
@@ -807,21 +803,11 @@ public class GlobalEnhancedEnumGenerator : IIncrementalGenerator
     /// <summary>
     /// Gets an MSBuild property value from the generator execution context.
     /// </summary>
-    private string? GetMSBuildProperty(string propertyName)
+    private string? GetMSBuildProperty(SourceProductionContext context, string propertyName)
     {
-        try
-        {
-            // Access MSBuild properties through the analyzer config options
-            if (OptionsProvider?.GlobalOptions?.TryGetValue($"build_property.{propertyName}", out var value) == true)
-            {
-                return value;
-            }
-        }
-        catch
-        {
-            // Ignore errors accessing properties
-        }
-        
+        // Note: MSBuild property access is not available in this context
+        // This feature would require passing AnalyzerConfigOptions from the initialization
+        // For now, this functionality is disabled
         return null;
     }
 }

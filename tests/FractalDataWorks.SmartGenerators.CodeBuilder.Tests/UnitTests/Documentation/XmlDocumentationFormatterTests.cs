@@ -7,7 +7,7 @@ namespace FractalDataWorks.SmartGenerators.CodeBuilder.Tests.UnitTests.Documenta
 public class XmlDocumentationFormatterTests
 {
     [Fact]
-    public void FormatSummary_WithValidText_ReturnsFormattedSummary()
+    public void FormatSummaryWithValidTextReturnsFormattedSummary()
     {
         // Arrange
         var summary = "This is a test summary";
@@ -21,7 +21,7 @@ public class XmlDocumentationFormatterTests
     }
 
     [Fact]
-    public void FormatSummary_WithEmptyString_ReturnsFormattedWithEmptySummary()
+    public void FormatSummaryWithEmptyStringReturnsFormattedWithEmptySummary()
     {
         // Arrange
         var summary = "";
@@ -35,7 +35,7 @@ public class XmlDocumentationFormatterTests
     }
 
     [Fact]
-    public void FormatParam_WithValidInputs_ReturnsFormattedParam()
+    public void FormatParamWithValidInputsReturnsFormattedParam()
     {
         // Arrange
         var paramName = "value";
@@ -49,7 +49,7 @@ public class XmlDocumentationFormatterTests
     }
 
     [Fact]
-    public void FormatParam_WithSpecialCharacters_HandlesCorrectly()
+    public void FormatParamWithSpecialCharactersHandlesCorrectly()
     {
         // Arrange
         var paramName = "test&param";
@@ -63,7 +63,7 @@ public class XmlDocumentationFormatterTests
     }
 
     [Fact]
-    public void FormatReturns_WithValidDescription_ReturnsFormattedReturns()
+    public void FormatReturnsWithValidDescriptionReturnsFormattedReturns()
     {
         // Arrange
         var description = "The processed result";
@@ -76,7 +76,7 @@ public class XmlDocumentationFormatterTests
     }
 
     [Fact]
-    public void FormatReturns_WithEmptyDescription_ReturnsFormattedWithEmptyContent()
+    public void FormatReturnsWithEmptyDescriptionReturnsFormattedWithEmptyContent()
     {
         // Arrange
         var description = "";
@@ -89,7 +89,7 @@ public class XmlDocumentationFormatterTests
     }
 
     [Fact]
-    public void FormatException_WithValidInputs_ReturnsFormattedException()
+    public void FormatExceptionWithValidInputsReturnsFormattedException()
     {
         // Arrange
         var exceptionType = "ArgumentNullException";
@@ -103,7 +103,7 @@ public class XmlDocumentationFormatterTests
     }
 
     [Fact]
-    public void FormatException_WithFullyQualifiedType_HandlesCorrectly()
+    public void FormatExceptionWithFullyQualifiedTypeHandlesCorrectly()
     {
         // Arrange
         var exceptionType = "System.ArgumentNullException";
@@ -117,7 +117,7 @@ public class XmlDocumentationFormatterTests
     }
 
     [Fact]
-    public void SplitPascalCase_WithPascalCase_SplitsCorrectly()
+    public void SplitPascalCaseWithPascalCaseSplitsCorrectly()
     {
         // Arrange
         var text = "PascalCaseString";
@@ -130,7 +130,7 @@ public class XmlDocumentationFormatterTests
     }
 
     [Fact]
-    public void SplitPascalCase_WithCamelCase_SplitsCorrectly()
+    public void SplitPascalCaseWithCamelCaseSplitsCorrectly()
     {
         // Arrange
         var text = "camelCaseString";
@@ -143,7 +143,7 @@ public class XmlDocumentationFormatterTests
     }
 
     [Fact]
-    public void SplitPascalCase_WithConsecutiveCapitals_HandlesCorrectly()
+    public void SplitPascalCaseWithConsecutiveCapitalsHandlesCorrectly()
     {
         // Arrange
         var text = "XMLHttpRequest";
@@ -156,7 +156,7 @@ public class XmlDocumentationFormatterTests
     }
 
     [Fact]
-    public void SplitPascalCase_WithEmptyString_ReturnsEmptyString()
+    public void SplitPascalCaseWithEmptyStringReturnsEmptyString()
     {
         // Arrange
         var text = "";
@@ -169,7 +169,7 @@ public class XmlDocumentationFormatterTests
     }
 
     [Fact]
-    public void SplitPascalCase_WithNull_ReturnsEmptyString()
+    public void SplitPascalCaseWithNullReturnsEmptyString()
     {
         // Arrange
         string? text = null;
@@ -182,7 +182,7 @@ public class XmlDocumentationFormatterTests
     }
 
     [Fact]
-    public void ToLowerCaseFirst_WithUpperCaseFirst_ConvertsCorrectly()
+    public void ToLowerCaseFirstWithUpperCaseFirstConvertsCorrectly()
     {
         // Arrange
         var text = "HelloWorld";
@@ -195,7 +195,7 @@ public class XmlDocumentationFormatterTests
     }
 
     [Fact]
-    public void ToLowerCaseFirst_WithLowerCaseFirst_RemainsUnchanged()
+    public void ToLowerCaseFirstWithLowerCaseFirstRemainsUnchanged()
     {
         // Arrange
         var text = "helloWorld";
@@ -208,7 +208,7 @@ public class XmlDocumentationFormatterTests
     }
 
     [Fact]
-    public void ToLowerCaseFirst_WithSingleCharacter_ConvertsCorrectly()
+    public void ToLowerCaseFirstWithSingleCharacterConvertsCorrectly()
     {
         // Arrange
         var text = "A";
@@ -221,7 +221,7 @@ public class XmlDocumentationFormatterTests
     }
 
     [Fact]
-    public void ToLowerCaseFirst_WithEmptyString_ReturnsEmptyString()
+    public void ToLowerCaseFirstWithEmptyStringReturnsEmptyString()
     {
         // Arrange
         var text = "";
@@ -234,7 +234,7 @@ public class XmlDocumentationFormatterTests
     }
 
     [Fact]
-    public void ToLowerCaseFirst_WithNull_ReturnsEmptyString()
+    public void ToLowerCaseFirstWithNullReturnsEmptyString()
     {
         // Arrange
         string? text = null;
@@ -247,7 +247,7 @@ public class XmlDocumentationFormatterTests
     }
 
     [Fact]
-    public void CapitalizeFirst_WithLowerCaseFirst_ConvertsCorrectly()
+    public void CapitalizeFirstWithLowerCaseFirstConvertsCorrectly()
     {
         // Arrange
         var text = "helloWorld";
@@ -260,7 +260,7 @@ public class XmlDocumentationFormatterTests
     }
 
     [Fact]
-    public void CapitalizeFirst_WithUpperCaseFirst_RemainsUnchanged()
+    public void CapitalizeFirstWithUpperCaseFirstRemainsUnchanged()
     {
         // Arrange
         var text = "HelloWorld";
@@ -273,7 +273,7 @@ public class XmlDocumentationFormatterTests
     }
 
     [Fact]
-    public void CapitalizeFirst_WithSingleCharacter_ConvertsCorrectly()
+    public void CapitalizeFirstWithSingleCharacterConvertsCorrectly()
     {
         // Arrange
         var text = "a";
@@ -286,7 +286,7 @@ public class XmlDocumentationFormatterTests
     }
 
     [Fact]
-    public void CapitalizeFirst_WithEmptyString_ReturnsEmptyString()
+    public void CapitalizeFirstWithEmptyStringReturnsEmptyString()
     {
         // Arrange
         var text = "";
@@ -299,7 +299,7 @@ public class XmlDocumentationFormatterTests
     }
 
     [Fact]
-    public void CapitalizeFirst_WithNull_ReturnsEmptyString()
+    public void CapitalizeFirstWithNullReturnsEmptyString()
     {
         // Arrange
         string? text = null;

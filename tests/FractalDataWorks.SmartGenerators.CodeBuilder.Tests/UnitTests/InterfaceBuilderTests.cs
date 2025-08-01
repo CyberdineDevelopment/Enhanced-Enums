@@ -9,7 +9,7 @@ namespace FractalDataWorks.SmartGenerators.CodeBuilder.Tests.UnitTests;
 public class InterfaceBuilderTests
 {
     [Fact]
-    public void DefaultConstructor_CreatesInterfaceWithDefaultName()
+    public void DefaultConstructorCreatesInterfaceWithDefaultName()
     {
         // Arrange & Act
         var builder = new InterfaceBuilder();
@@ -24,7 +24,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void Constructor_WithValidName_CreatesInterface()
+    public void ConstructorWithValidNameCreatesInterface()
     {
         // Arrange & Act
         var builder = new InterfaceBuilder("ITestInterface");
@@ -38,28 +38,28 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void Constructor_WithNullName_ThrowsArgumentException()
+    public void ConstructorWithNullNameThrowsArgumentException()
     {
         // Act & Assert
         Assert.Throws<ArgumentException>(() => new InterfaceBuilder(null!));
     }
 
     [Fact]
-    public void Constructor_WithEmptyName_ThrowsArgumentException()
+    public void ConstructorWithEmptyNameThrowsArgumentException()
     {
         // Act & Assert
         Assert.Throws<ArgumentException>(() => new InterfaceBuilder(""));
     }
 
     [Fact]
-    public void Constructor_WithWhitespaceName_ThrowsArgumentException()
+    public void ConstructorWithWhitespaceNameThrowsArgumentException()
     {
         // Act & Assert
         Assert.Throws<ArgumentException>(() => new InterfaceBuilder("   "));
     }
 
     [Fact]
-    public void WithName_SetsInterfaceName()
+    public void WithNameSetsInterfaceName()
     {
         // Arrange
         var builder = new InterfaceBuilder();
@@ -75,7 +75,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void WithName_NullName_ThrowsArgumentException()
+    public void WithNameNullNameThrowsArgumentException()
     {
         // Arrange
         var builder = new InterfaceBuilder();
@@ -85,7 +85,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void WithTypeParameter_AddsGenericParameter()
+    public void WithTypeParameterAddsGenericParameter()
     {
         // Arrange
         var builder = new InterfaceBuilder("IRepository");
@@ -101,7 +101,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void WithTypeParameter_MultipleParameters()
+    public void WithTypeParameterMultipleParameters()
     {
         // Arrange
         var builder = new InterfaceBuilder("IConverter");
@@ -122,7 +122,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void WithTypeParameter_NullParameter_ThrowsArgumentException()
+    public void WithTypeParameterNullParameterThrowsArgumentException()
     {
         // Arrange
         var builder = new InterfaceBuilder();
@@ -132,7 +132,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void WithBaseInterface_AddsBaseInterface()
+    public void WithBaseInterfaceAddsBaseInterface()
     {
         // Arrange
         var builder = new InterfaceBuilder("IChildInterface");
@@ -148,7 +148,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void WithBaseInterface_NullInterface_ThrowsArgumentException()
+    public void WithBaseInterfaceNullInterfaceThrowsArgumentException()
     {
         // Arrange
         var builder = new InterfaceBuilder();
@@ -158,7 +158,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void WithBaseInterface_DuplicateInterface_ThrowsArgumentException()
+    public void WithBaseInterfaceDuplicateInterfaceThrowsArgumentException()
     {
         // Arrange
         var builder = new InterfaceBuilder()
@@ -169,7 +169,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void AddMethod_AddsMethodToInterface()
+    public void AddMethodAddsMethodToInterface()
     {
         // Arrange
         var builder = new InterfaceBuilder("IService");
@@ -192,7 +192,7 @@ public class InterfaceBuilderTests
     // Additional comprehensive tests using Shouldly
 
     [Fact]
-    public void WithName_UpdatesInterfaceName()
+    public void WithNameUpdatesInterfaceName()
     {
         // Arrange
         var builder = new InterfaceBuilder("ITestInterface");
@@ -207,7 +207,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void WithName_EmptyName_ThrowsArgumentException()
+    public void WithNameEmptyNameThrowsArgumentException()
     {
         // Arrange
         var builder = new InterfaceBuilder();
@@ -217,7 +217,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void WithName_WhitespaceName_ThrowsArgumentException()
+    public void WithNameWhitespaceNameThrowsArgumentException()
     {
         // Arrange
         var builder = new InterfaceBuilder();
@@ -227,7 +227,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void WithBaseInterface_EmptyInterface_ThrowsArgumentException()
+    public void WithBaseInterfaceEmptyInterfaceThrowsArgumentException()
     {
         // Arrange
         var builder = new InterfaceBuilder();
@@ -237,7 +237,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void WithBaseInterface_WhitespaceInterface_ThrowsArgumentException()
+    public void WithBaseInterfaceWhitespaceInterfaceThrowsArgumentException()
     {
         // Arrange
         var builder = new InterfaceBuilder();
@@ -247,7 +247,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void WithBaseInterface_MultipleInterfaces_AddsAllInterfaces()
+    public void WithBaseInterfaceMultipleInterfacesAddsAllInterfaces()
     {
         // Arrange
         var builder = new InterfaceBuilder("IService");
@@ -264,7 +264,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void WithTypeParameter_EmptyParameter_ThrowsArgumentException()
+    public void WithTypeParameterEmptyParameterThrowsArgumentException()
     {
         // Arrange
         var builder = new InterfaceBuilder();
@@ -274,7 +274,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void WithTypeParameter_WhitespaceParameter_ThrowsArgumentException()
+    public void WithTypeParameterWhitespaceParameterThrowsArgumentException()
     {
         // Arrange
         var builder = new InterfaceBuilder();
@@ -284,7 +284,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void WithTypeParameter_AddsParameterWithoutConstraint()
+    public void WithTypeParameterAddsParameterWithoutConstraint()
     {
         // Arrange
         var builder = new InterfaceBuilder("IRepository");
@@ -299,7 +299,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void WithTypeParameter_MultipleParameters_AddsAllParameters()
+    public void WithTypeParameterMultipleParametersAddsAllParameters()
     {
         // Arrange
         var builder = new InterfaceBuilder("IMapper");
@@ -315,7 +315,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void AddMethod_CreatesMethodAndReturnsBuilder()
+    public void AddMethodCreatesMethodAndReturnsBuilder()
     {
         // Arrange
         var builder = new InterfaceBuilder("ICalculator");
@@ -332,17 +332,17 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void AddMethod_WithNullConfigure_ThrowsNullReferenceException()
+    public void AddMethodWithNullConfigureThrowsArgumentNullException()
     {
         // Arrange
         var builder = new InterfaceBuilder("IService");
 
         // Act & Assert - using Shouldly
-        Should.Throw<NullReferenceException>(() => builder.AddMethod("Method", "void", null!));
+        Should.Throw<ArgumentNullException>(() => builder.AddMethod("Method", "void", null!));
     }
 
     [Fact]
-    public void AddProperty_CreatesPropertyAndReturnsBuilder()
+    public void AddPropertyCreatesPropertyAndReturnsBuilder()
     {
         // Arrange
         var builder = new InterfaceBuilder("IEntity");
@@ -358,7 +358,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void AddProperty_WithConfigure_ConfiguresProperty()
+    public void AddPropertyWithConfigureConfiguresProperty()
     {
         // Arrange
         var builder = new InterfaceBuilder("IReadOnlyEntity");
@@ -373,17 +373,17 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void AddProperty_WithNullConfigure_ThrowsNullReferenceException()
+    public void AddPropertyWithNullConfigureThrowsArgumentNullException()
     {
         // Arrange
         var builder = new InterfaceBuilder("IEntity");
 
         // Act & Assert - using Shouldly
-        Should.Throw<NullReferenceException>(() => builder.AddProperty("Prop", "int", null!));
+        Should.Throw<ArgumentNullException>(() => builder.AddProperty("Prop", "int", null!));
     }
 
     [Fact]
-    public void MakePublic_SetsPublicAccessModifier()
+    public void MakePublicSetsPublicAccessModifier()
     {
         // Arrange
         var builder = new InterfaceBuilder("IPublicInterface");
@@ -398,7 +398,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void MakeInternal_SetsInternalAccessModifier()
+    public void MakeInternalSetsInternalAccessModifier()
     {
         // Arrange
         var builder = new InterfaceBuilder("IInternalInterface");
@@ -413,7 +413,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void MakePrivate_SetsPrivateAccessModifier()
+    public void MakePrivateSetsPrivateAccessModifier()
     {
         // Arrange
         var builder = new InterfaceBuilder("IPrivateInterface");
@@ -430,7 +430,7 @@ public class InterfaceBuilderTests
     // WithNamespace tests removed - not supported by InterfaceBuilder
 
     [Fact]
-    public void WithSummary_AddsXmlDocumentation()
+    public void WithXmlDocSummaryAddsXmlDocumentation()
     {
         // Arrange
         var builder = new InterfaceBuilder("IService");
@@ -447,7 +447,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void WithXmlDocSummary_AddsXmlDocumentation()
+    public void WithXmlDocSummaryAddsXmlDocumentationAlternative()
     {
         // Arrange
         var builder = new InterfaceBuilder("IRepository");
@@ -464,7 +464,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void AddAttribute_StringAttribute_AddsAttribute()
+    public void AddAttributeStringAttributeAddsAttribute()
     {
         // Arrange
         var builder = new InterfaceBuilder("IService");
@@ -482,7 +482,7 @@ public class InterfaceBuilderTests
     // AddAttribute(AttributeBuilder) tests removed - not supported by InterfaceBuilder
 
     [Fact]
-    public void AddAttribute_MultipleAttributes_AddsAllAttributes()
+    public void AddAttributeMultipleAttributesAddsAllAttributes()
     {
         // Arrange
         var builder = new InterfaceBuilder("IService");
@@ -499,7 +499,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void Build_EmptyInterface_GeneratesMinimalInterface()
+    public void BuildEmptyInterfaceGeneratesMinimalInterface()
     {
         // Arrange
         var builder = new InterfaceBuilder("IEmpty");
@@ -514,7 +514,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void Build_ComplexInterface_GeneratesCorrectCode()
+    public void BuildComplexInterfaceGeneratesCorrectCode()
     {
         // Arrange
         var builder = new InterfaceBuilder("IRepository");
@@ -560,7 +560,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void Build_InterfaceWithMultipleGenericTypes_GeneratesCorrectCode()
+    public void BuildInterfaceWithMultipleGenericTypesGeneratesCorrectCode()
     {
         // Arrange
         var builder = new InterfaceBuilder("IConverter");
@@ -587,7 +587,7 @@ public class InterfaceBuilderTests
     }
 
     [Fact]
-    public void FluentInterface_ChainsCorrectly()
+    public void FluentInterfaceChainsCorrectly()
     {
         // Arrange & Act
         var builder = new InterfaceBuilder()

@@ -1,5 +1,6 @@
 using FractalDataWorks.SmartGenerators.CodeBuilders;
 using FractalDataWorks.SmartGenerators.TestUtilities;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using Xunit;
 
@@ -8,7 +9,7 @@ namespace FractalDataWorks.SmartGenerators.CodeBuilder.Tests.UnitTests;
 public class EnumBuilderTests
 {
     [Fact]
-    public void DefaultConstructor_CreatesEnumWithDefaultName()
+    public void DefaultConstructorCreatesEnumWithDefaultName()
     {
         // Arrange & Act
         var builder = new EnumBuilder();
@@ -23,7 +24,7 @@ public class EnumBuilderTests
     }
 
     [Fact]
-    public void Constructor_WithValidName_CreatesEnum()
+    public void ConstructorWithValidNameCreatesEnum()
     {
         // Arrange & Act
         var builder = new EnumBuilder("TestEnum");
@@ -38,28 +39,28 @@ public class EnumBuilderTests
     }
 
     [Fact]
-    public void Constructor_WithNullName_ThrowsArgumentException()
+    public void ConstructorWithNullNameThrowsArgumentException()
     {
         // Act & Assert
         Assert.Throws<ArgumentException>(() => new EnumBuilder(null!));
     }
 
     [Fact]
-    public void Constructor_WithEmptyName_ThrowsArgumentException()
+    public void ConstructorWithEmptyNameThrowsArgumentException()
     {
         // Act & Assert
         Assert.Throws<ArgumentException>(() => new EnumBuilder(""));
     }
 
     [Fact]
-    public void Constructor_WithWhitespaceName_ThrowsArgumentException()
+    public void ConstructorWithWhitespaceNameThrowsArgumentException()
     {
         // Act & Assert
         Assert.Throws<ArgumentException>(() => new EnumBuilder("   "));
     }
 
     [Fact]
-    public void WithName_SetsEnumName()
+    public void WithNameSetsEnumName()
     {
         // Arrange
         var builder = new EnumBuilder();
@@ -75,7 +76,7 @@ public class EnumBuilderTests
     }
 
     [Fact]
-    public void WithName_NullName_ThrowsArgumentException()
+    public void WithNameNullNameThrowsArgumentException()
     {
         // Arrange
         var builder = new EnumBuilder();
@@ -85,7 +86,7 @@ public class EnumBuilderTests
     }
 
     [Fact]
-    public void WithBaseType_SetsEnumBaseType()
+    public void WithBaseTypeSetsEnumBaseType()
     {
         // Arrange
         var builder = new EnumBuilder("Status");
@@ -101,7 +102,7 @@ public class EnumBuilderTests
     }
 
     [Fact]
-    public void WithBaseType_NullBaseType_ThrowsArgumentException()
+    public void WithBaseTypeNullBaseTypeThrowsArgumentException()
     {
         // Arrange
         var builder = new EnumBuilder();
@@ -111,7 +112,7 @@ public class EnumBuilderTests
     }
 
     [Fact]
-    public void AddMember_AddsEnumMember()
+    public void AddMemberAddsEnumMember()
     {
         // Arrange
         var builder = new EnumBuilder("Color");
@@ -134,7 +135,7 @@ public class EnumBuilderTests
     }
 
     [Fact]
-    public void AddMember_NullMember_ThrowsArgumentException()
+    public void AddMemberNullMemberThrowsArgumentException()
     {
         // Arrange
         var builder = new EnumBuilder();
@@ -144,7 +145,7 @@ public class EnumBuilderTests
     }
 
     [Fact]
-    public void AddValue_AddsEnumMemberWithValue()
+    public void AddValueAddsEnumMemberWithValue()
     {
         // Arrange
         var builder = new EnumBuilder("ErrorCode");
@@ -167,7 +168,7 @@ public class EnumBuilderTests
     }
 
     [Fact]
-    public void AddValue_NullMember_ThrowsArgumentException()
+    public void AddValueNullMemberThrowsArgumentException()
     {
         // Arrange
         var builder = new EnumBuilder();
@@ -177,14 +178,14 @@ public class EnumBuilderTests
     }
 
     [Fact]
-    public void WithAttribute_AddsAttributeToEnum()
+    public void AddAttributeAddsAttributeToEnum()
     {
         // Arrange
         var builder = new EnumBuilder("LogLevel");
 
         // Act
         var code = builder
-            .WithAttribute("Flags")
+            .AddAttribute("Flags")
             .AddValue("None", 0)
             .AddValue("Info", 1)
             .AddValue("Warning", 2)
@@ -198,8 +199,8 @@ public class EnumBuilderTests
             .Assert();
     }
 
-    [Fact(Skip = "TODO: EnumExpectations doesn't have HasModifier method")]
-    public void MakePublic_SetsEnumAsPublic()
+    [Fact]
+    public void MakePublicSetsEnumAsPublic()
     {
         // Arrange
         var builder = new EnumBuilder("PublicEnum");
@@ -209,7 +210,8 @@ public class EnumBuilderTests
         var complete = $"namespace Test {{ {code} }}";
 
         // Assert
-        // TODO: Fix when EnumExpectations supports HasModifier
-        Assert.NotNull(code);
+        ExpectationsFactory.ExpectCode(complete)
+            .HasEnum("PublicEnum", e => e.HasModifier(SyntaxKind.PublicKeyword))
+            .Assert();
     }
 }

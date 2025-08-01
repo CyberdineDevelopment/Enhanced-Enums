@@ -62,4 +62,9 @@ public enum Modifiers
     /// The required modifier for properties.
     /// </summary>
     Required = 1 << 9,
+
+    /// <summary>
+    /// The extern modifier for methods.
+    /// </summary>
+    Extern = 1 << 10,
 }

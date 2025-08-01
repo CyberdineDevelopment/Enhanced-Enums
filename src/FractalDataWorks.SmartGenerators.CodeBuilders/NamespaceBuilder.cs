@@ -20,8 +20,15 @@ public class NamespaceBuilder : ICodeBuilder
     /// Initializes a new instance of the <see cref="NamespaceBuilder"/> class.
     /// </summary>
     /// <param name="namespaceName">The namespace name.</param>
+    /// <exception cref="ArgumentNullException">Thrown when namespaceName is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when namespaceName is empty or whitespace.</exception>
     public NamespaceBuilder(string namespaceName)
     {
+        if (namespaceName is null)
+            throw new ArgumentNullException(nameof(namespaceName));
+        if (string.IsNullOrWhiteSpace(namespaceName))
+            throw new ArgumentException("Namespace name cannot be empty or whitespace.", nameof(namespaceName));
+        
         _namespaceName = namespaceName;
     }
 
@@ -30,8 +37,15 @@ public class NamespaceBuilder : ICodeBuilder
     /// </summary>
     /// <param name="usingStatement">The using statement to add.</param>
     /// <returns>The namespace builder for method chaining.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when usingStatement is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when usingStatement is empty or whitespace.</exception>
     public NamespaceBuilder AddUsing(string usingStatement)
     {
+        if (usingStatement is null)
+            throw new ArgumentNullException(nameof(usingStatement));
+        if (string.IsNullOrWhiteSpace(usingStatement))
+            throw new ArgumentException("Using statement cannot be empty or whitespace.", nameof(usingStatement));
+            
         if (!_usingStatements.Contains(usingStatement))
         {
             _usingStatements.Add(usingStatement);
@@ -40,20 +54,18 @@ public class NamespaceBuilder : ICodeBuilder
         return this;
     }
 
-    /// <summary>
-    /// Adds a using statement to the namespace (alternative naming convention).
-    /// </summary>
-    /// <param name="usingStatement">The using statement to add.</param>
-    /// <returns>The namespace builder for method chaining.</returns>
-    public NamespaceBuilder WithUsing(string usingStatement) => AddUsing(usingStatement);
 
     /// <summary>
     /// Adds a class builder to the namespace.
     /// </summary>
     /// <param name="classBuilder">The class builder to add.</param>
     /// <returns>The namespace builder for method chaining.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when classBuilder is null.</exception>
     public NamespaceBuilder AddClass(ClassBuilder classBuilder)
     {
+        if (classBuilder is null)
+            throw new ArgumentNullException(nameof(classBuilder));
+            
         _members.Add(classBuilder);
         return this;
     }
@@ -72,20 +84,18 @@ public class NamespaceBuilder : ICodeBuilder
         return AddClass(classBuilder);
     }
 
-    /// <summary>
-    /// Adds a class builder to the namespace (alternative naming convention).
-    /// </summary>
-    /// <param name="classBuilder">The class builder to add.</param>
-    /// <returns>The namespace builder for method chaining.</returns>
-    public NamespaceBuilder WithClass(ClassBuilder classBuilder) => AddClass(classBuilder);
 
     /// <summary>
     /// Adds an interface builder to the namespace.
     /// </summary>
     /// <param name="interfaceBuilder">The interface builder to add.</param>
     /// <returns>The namespace builder for method chaining.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when interfaceBuilder is null.</exception>
     public NamespaceBuilder AddInterface(InterfaceBuilder interfaceBuilder)
     {
+        if (interfaceBuilder is null)
+            throw new ArgumentNullException(nameof(interfaceBuilder));
+            
         _members.Add(interfaceBuilder);
         return this;
     }
@@ -110,8 +120,12 @@ public class NamespaceBuilder : ICodeBuilder
     /// </summary>
     /// <param name="enumBuilder">The enum builder to add.</param>
     /// <returns>The namespace builder for method chaining.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when enumBuilder is null.</exception>
     public NamespaceBuilder AddEnum(EnumBuilder enumBuilder)
     {
+        if (enumBuilder is null)
+            throw new ArgumentNullException(nameof(enumBuilder));
+            
         _members.Add(enumBuilder);
         return this;
     }
@@ -130,20 +144,18 @@ public class NamespaceBuilder : ICodeBuilder
         return AddEnum(enumBuilder);
     }
 
-    /// <summary>
-    /// Adds an enum builder to the namespace (alternative naming convention).
-    /// </summary>
-    /// <param name="enumBuilder">The enum builder to add.</param>
-    /// <returns>The namespace builder for method chaining.</returns>
-    public NamespaceBuilder WithEnum(EnumBuilder enumBuilder) => AddEnum(enumBuilder);
 
     /// <summary>
     /// Adds a record builder to the namespace.
     /// </summary>
     /// <param name="recordBuilder">The record builder to add.</param>
     /// <returns>The namespace builder for method chaining.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when recordBuilder is null.</exception>
     public NamespaceBuilder AddRecord(RecordBuilder recordBuilder)
     {
+        if (recordBuilder is null)
+            throw new ArgumentNullException(nameof(recordBuilder));
+            
         _members.Add(recordBuilder);
         return this;
     }

@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -10,7 +11,7 @@ namespace FractalDataWorks.SmartGenerators.CodeBuilders.Documentation;
 /// </summary>
 public static class XmlDocumentationFormatter
 {
-    private static readonly Regex _pascalCaseRegex = new(@"(?<!^)(?=[A-Z])", RegexOptions.Compiled);
+    private static readonly Regex _pascalCaseRegex = new(@"(?<!^)(?=[A-Z])", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
 
     /// <summary>
     /// Formats a documentation string by wrapping it in XML summary tags.

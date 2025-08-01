@@ -204,9 +204,20 @@ public class MethodBuilder : MemberBuilderBase<MethodBuilder>
     /// Makes the method async.
     /// </summary>
     /// <returns>The builder instance for chaining.</returns>
-    public MethodBuilder Make()
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.VisualStudio.Threading", "VSTHRD200:Avoid \"Async\" suffix in names of methods that do not return an awaitable type", Justification = "This is a builder method that sets the async modifier, not an async method itself")]
+    public MethodBuilder MakeAsync()
     {
         Modifiers |= Modifiers.Async;
+        return this;
+    }
+
+    /// <summary>
+    /// Makes the method extern.
+    /// </summary>
+    /// <returns>The builder instance for chaining.</returns>
+    public MethodBuilder MakeExtern()
+    {
+        Modifiers |= Modifiers.Extern;
         return this;
     }
 
@@ -305,7 +316,8 @@ public class MethodBuilder : MemberBuilderBase<MethodBuilder>
         // If expression body is set, emit expression-bodied method
         if (_expressionBody != null)
         {
-            codeBuilder.AppendLine($"{GetAccessModifierString(AccessModifier)}{GetModifierString(Modifiers)} {TypeName} {Name}() => {_expressionBody};");
+            var parameterList = string.Join(", ", _parameters.Select(p => $"{p.Type} {p.Name}"));
+            codeBuilder.AppendLine($"{GetAccessModifierString(AccessModifier)}{GetModifierString(Modifiers)} {TypeName} {Name}({parameterList}) => {_expressionBody};");
             return;
         }
 
@@ -407,7 +419,8 @@ public class MethodBuilder : MemberBuilderBase<MethodBuilder>
         // If expression body is set, emit expression-bodied method
         if (_expressionBody != null)
         {
-            sb.AppendLine($"{GetAccessModifierString(AccessModifier)}{GetModifierString(Modifiers)} {TypeName} {Name}() => {_expressionBody};");
+            var parameterList = string.Join(", ", _parameters.Select(p => $"{p.Type} {p.Name}"));
+            sb.AppendLine($"{GetAccessModifierString(AccessModifier)}{GetModifierString(Modifiers)} {TypeName} {Name}({parameterList}) => {_expressionBody};");
             return sb.ToString();
         }
 

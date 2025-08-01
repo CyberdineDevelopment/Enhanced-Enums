@@ -385,7 +385,7 @@ public class ExpectationsApiIntegrationTests
                     .MakeReadOnly())
                 .AddMethod("ProcessAsync", "Task<bool>", m => m
                     .MakePublic()
-                    .Make()
+                    .MakeAsync()
                     .AddParameter("string", "data")
                     .WithBody(b => b
                         .AppendLine("await Task.Delay(100);")
@@ -429,18 +429,18 @@ public class ExpectationsApiIntegrationTests
                 .MakePublic()
                 .AddMethod("ProcessAsync", "Task", m => m
                     .MakePublic()
-                    .Make()
+                    .MakeAsync()
                     .WithBody(b => b.AppendLine("await Task.Delay(100);")))
                 .AddMethod("ProcessWithResultAsync", "Task<int>", m => m
                     .MakePublic()
-                    .Make()
+                    .MakeAsync()
                     .AddParameter("string", "input")
                     .WithBody(b => b
                         .AppendLine("await Task.Delay(100);")
                         .AppendLine("return input?.Length ?? 0;")))
                 .AddMethod("ProcessWithCancellationAsync", "Task<bool>", m => m
                     .MakePublic()
-                    .Make()
+                    .MakeAsync()
                     .AddParameter("byte[]", "data")
                     .AddParameter("CancellationToken", "cancellationToken", "default")
                     .WithBody(b => b
@@ -448,7 +448,7 @@ public class ExpectationsApiIntegrationTests
                         .AppendLine("return data?.Length > 0;")))
                 .AddMethod("ProcessValueTaskAsync", "ValueTask<string>", m => m
                     .MakeProtected()
-                    .Make()
+                    .MakeAsync()
                     .AddParameter("int", "id")
                     .WithBody(b => b
                         .AppendLine("await Task.Delay(50);")
@@ -496,7 +496,7 @@ public class ExpectationsApiIntegrationTests
             .AddEnum(e => e
                 .WithName("FlagsEnum")
                 .MakePublic()
-                .WithAttribute("Flags")
+                .AddAttribute("Flags")
                 .AddValue("None", 0)
                 .AddValue("Read", 1)
                 .AddValue("Write", 2)

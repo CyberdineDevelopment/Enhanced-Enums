@@ -11,15 +11,11 @@
   </PropertyGroup>
 	<ItemGroup>
 		<!-- Enhanced Enums source generator -->
-		<ProjectReference Include="..\..\src\FractalDataWorks.EnhancedEnums\FractalDataWorks.EnhancedEnums.csproj" 
+		<ProjectReference Include="..\..\src\FractalDataWorks.EnhancedEnums.SourceGenerator\FractalDataWorks.EnhancedEnums.SourceGenerator.csproj" 
 						  OutputItemType="Analyzer" 
 						  ReferenceOutputAssembly="false" />
 		<!-- Base types and attributes -->
 		<ProjectReference Include="..\..\src\FractalDataWorks\FractalDataWorks.csproj" />
-	</ItemGroup>
-	<ItemGroup>
-		<!-- Exclude generated files from compilation to prevent double compilation -->
-		<Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
 	</ItemGroup>
 </Project>
 

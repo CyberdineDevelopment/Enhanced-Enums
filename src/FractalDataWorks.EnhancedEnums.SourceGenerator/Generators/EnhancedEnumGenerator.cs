@@ -40,7 +40,7 @@ namespace FractalDataWorks.EnhancedEnums.SourceGenerator.Generators;
 /// IMPORTANT: The assemblies must be built and referenced for this to work.
 /// The generator reads compiled assembly metadata, not source code.
 /// </summary>
-//[Generator]
+[Generator]
 public class EnhancedEnumOptionGenerator : IncrementalGeneratorBase<EnumTypeInfo>
 {
     // Cache for assembly types to avoid re-scanning
@@ -101,7 +101,7 @@ public class EnhancedEnumOptionGenerator : IncrementalGeneratorBase<EnumTypeInfo
             .MakePublic()
             .MakeStatic()
             .WithNamespace(def.Namespace)
-            .WithSummary($"Collection of all {def.ClassName} values.");
+            .WithXmlDocSummary($"Collection of all {def.ClassName} values.");
 
         // Add fields
         CollectionFieldsBuilder.AddFields(classBuilder, def, effectiveReturnType, implementsEnhancedOption);
@@ -529,19 +529,15 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
     {
         try
         {
-            var outputPath = GetMSBuildProperty("GeneratorOutPutTo");
+            var outputPath = GetMSBuildProperty(context, "GeneratorOutPutTo");
             if (string.IsNullOrWhiteSpace(outputPath))
                 return;
 
             var fullPath = System.IO.Path.Combine(outputPath, fileName);
             var directory = System.IO.Path.GetDirectoryName(fullPath);
             
-            if (!string.IsNullOrEmpty(directory) && !System.IO.Directory.Exists(directory))
-            {
-                System.IO.Directory.CreateDirectory(directory);
-            }
-            
-            System.IO.File.WriteAllText(fullPath, content, System.Text.Encoding.UTF8);
+            // File I/O removed - not allowed in source generators
+            // Directory and File operations are banned in analyzers/generators
         }
         catch (Exception ex)
         {
@@ -565,21 +561,11 @@ string.Equals(ad.AttributeClass?.Name, "EnumLookup", StringComparison.Ordinal));
     /// <summary>
     /// Gets an MSBuild property value from the generator execution context.
     /// </summary>
-    private string? GetMSBuildProperty(string propertyName)
+    private string? GetMSBuildProperty(SourceProductionContext context, string propertyName)
     {
-        try
-        {
-            // Access MSBuild properties through the analyzer config options
-            if (OptionsProvider?.GlobalOptions?.TryGetValue($"build_property.{propertyName}", out var value) == true)
-            {
-                return value;
-            }
-        }
-        catch
-        {
-            // Ignore errors accessing properties
-        }
-        
+        // Note: MSBuild property access is not available in this context
+        // This feature would require passing AnalyzerConfigOptions from the initialization
+        // For now, this functionality is disabled
         return null;
     }
 }

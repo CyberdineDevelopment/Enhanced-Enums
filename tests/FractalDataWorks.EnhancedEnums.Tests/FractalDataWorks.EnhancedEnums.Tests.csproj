@@ -74,15 +74,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Reference the generator project -->
+    <!-- Reference the core projects -->
     <ProjectReference Include="..\..\src\FractalDataWorks.EnhancedEnums\FractalDataWorks.EnhancedEnums.csproj" />
     <ProjectReference Include="..\..\src\FractalDataWorks\FractalDataWorks.csproj" />
     <ProjectReference Include="..\..\src\FractalDataWorks.SmartGenerators.TestUtilities\FractalDataWorks.SmartGenerators.TestUtilities.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Services\" />
-    <Folder Include="TestHelpers\" />
   </ItemGroup>
 
 </Project>

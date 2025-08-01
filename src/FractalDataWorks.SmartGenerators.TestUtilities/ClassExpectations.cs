@@ -318,8 +318,11 @@ public class ClassExpectations
     public ClassExpectations HasBaseType(string baseTypeName)
     {
         var baseType = _classDeclaration.BaseList?.Types
-            .FirstOrDefault(t => t.Type is IdentifierNameSyntax identifierName &&
-string.Equals(identifierName.Identifier.ValueText, baseTypeName, StringComparison.Ordinal));
+            .FirstOrDefault(t => 
+            {
+                var typeText = t.Type.ToString();
+                return string.Equals(typeText, baseTypeName, StringComparison.Ordinal);
+            });
 
         _ = baseType.ShouldNotBeNull($"Expected class '{_classDeclaration.Identifier}' to have base type '{baseTypeName}'");
         return this;

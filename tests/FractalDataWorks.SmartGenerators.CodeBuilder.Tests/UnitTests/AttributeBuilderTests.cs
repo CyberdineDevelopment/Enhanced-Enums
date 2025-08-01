@@ -9,7 +9,7 @@ namespace FractalDataWorks.SmartGenerators.CodeBuilder.Tests.UnitTests;
 public class AttributeBuilderTests
 {
     [Fact]
-    public void Constructor_WithValidName_CreatesBuilder()
+    public void ConstructorWithValidNameCreatesBuilder()
     {
         // Arrange & Act
         var builder = new AttributeBuilder("TestAttribute");
@@ -20,28 +20,28 @@ public class AttributeBuilderTests
     }
 
     [Fact]
-    public void Constructor_WithNullName_ThrowsArgumentException()
+    public void ConstructorWithNullNameThrowsArgumentException()
     {
         // Act & Assert - using Shouldly
         Should.Throw<ArgumentException>(() => new AttributeBuilder(null!));
     }
 
     [Fact]
-    public void Constructor_WithEmptyName_ThrowsArgumentException()
+    public void ConstructorWithEmptyNameThrowsArgumentException()
     {
         // Act & Assert - using Shouldly
         Should.Throw<ArgumentException>(() => new AttributeBuilder(""));
     }
 
     [Fact]
-    public void Constructor_WithWhitespaceName_ThrowsArgumentException()
+    public void ConstructorWithWhitespaceNameThrowsArgumentException()
     {
         // Act & Assert - using Shouldly
         Should.Throw<ArgumentException>(() => new AttributeBuilder("   "));
     }
 
     [Fact]
-    public void WithArgument_AddsPositionalArgument()
+    public void WithArgumentAddsPositionalArgument()
     {
         // Arrange
         var builder = new AttributeBuilder("Test");
@@ -54,7 +54,7 @@ public class AttributeBuilderTests
     }
 
     [Fact]
-    public void WithArgument_MultipleArguments_AddsInOrder()
+    public void WithArgumentMultipleArgumentsAddsInOrder()
     {
         // Arrange
         var builder = new AttributeBuilder("Test");
@@ -71,7 +71,7 @@ public class AttributeBuilderTests
     }
 
     [Fact]
-    public void WithArgument_NullValue_ThrowsArgumentNullException()
+    public void WithArgumentNullValueThrowsArgumentNullException()
     {
         // Arrange
         var builder = new AttributeBuilder("Test");
@@ -81,7 +81,7 @@ public class AttributeBuilderTests
     }
 
     [Fact]
-    public void WithNamedArgument_AddsNamedArgument()
+    public void WithNamedArgumentAddsNamedArgument()
     {
         // Arrange
         var builder = new AttributeBuilder("Test");
@@ -94,7 +94,7 @@ public class AttributeBuilderTests
     }
 
     [Fact]
-    public void WithNamedArgument_MultipleNamedArguments()
+    public void WithNamedArgumentMultipleNamedArguments()
     {
         // Arrange
         var builder = new AttributeBuilder("Test");
@@ -111,7 +111,7 @@ public class AttributeBuilderTests
     }
 
     [Fact]
-    public void WithNamedArgument_NullName_ThrowsArgumentException()
+    public void WithNamedArgumentNullNameThrowsArgumentException()
     {
         // Arrange
         var builder = new AttributeBuilder("Test");
@@ -121,7 +121,7 @@ public class AttributeBuilderTests
     }
 
     [Fact]
-    public void WithNamedArgument_EmptyName_ThrowsArgumentException()
+    public void WithNamedArgumentEmptyNameThrowsArgumentException()
     {
         // Arrange
         var builder = new AttributeBuilder("Test");
@@ -131,7 +131,7 @@ public class AttributeBuilderTests
     }
 
     [Fact]
-    public void WithNamedArgument_NullValue_ThrowsArgumentNullException()
+    public void WithNamedArgumentNullValueThrowsArgumentNullException()
     {
         // Arrange
         var builder = new AttributeBuilder("Test");
@@ -141,7 +141,7 @@ public class AttributeBuilderTests
     }
 
     [Fact]
-    public void MixedArguments_PositionalThenNamed()
+    public void MixedArgumentsPositionalThenNamed()
     {
         // Arrange
         var builder = new AttributeBuilder("Test");
@@ -159,7 +159,7 @@ public class AttributeBuilderTests
     }
 
     [Fact]
-    public void Constructor_WithAttributeSuffix_KeepsOriginalName()
+    public void ConstructorWithAttributeSuffixKeepsOriginalName()
     {
         // Arrange & Act
         var builder = new AttributeBuilder("TestAttribute");

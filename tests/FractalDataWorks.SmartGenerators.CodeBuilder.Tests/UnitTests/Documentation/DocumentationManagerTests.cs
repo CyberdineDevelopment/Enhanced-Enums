@@ -30,7 +30,7 @@ public class DocumentationManagerTests
     }
 
     [Fact]
-    public void Constructor_WithValidProvider_CreatesInstance()
+    public void ConstructorWithValidProviderCreatesInstance()
     {
         // Arrange
         var provider = new TestDocumentationProvider();
@@ -44,14 +44,14 @@ public class DocumentationManagerTests
     }
 
     [Fact]
-    public void Constructor_WithNullProvider_ThrowsArgumentNullException()
+    public void ConstructorWithNullProviderThrowsArgumentNullException()
     {
         // Arrange & Act & Assert
         Assert.Throws<ArgumentNullException>(() => new DocumentationManager(null!));
     }
 
     [Fact]
-    public void SetCustomDocumentation_WithValidSummary_SetsOnProvider()
+    public void SetCustomDocumentationWithValidSummarySetsOnProvider()
     {
         // Arrange
         var provider = new TestDocumentationProvider();
@@ -66,7 +66,7 @@ public class DocumentationManagerTests
     }
 
     [Fact]
-    public void SetCustomDocumentation_WithNullSummary_ThrowsArgumentException()
+    public void SetCustomDocumentationWithNullSummaryThrowsArgumentException()
     {
         // Arrange
         var provider = new TestDocumentationProvider();
@@ -77,7 +77,7 @@ public class DocumentationManagerTests
     }
 
     [Fact]
-    public void SetCustomDocumentation_WithEmptySummary_ThrowsArgumentException()
+    public void SetCustomDocumentationWithEmptySummaryThrowsArgumentException()
     {
         // Arrange
         var provider = new TestDocumentationProvider();
@@ -88,7 +88,7 @@ public class DocumentationManagerTests
     }
 
     [Fact]
-    public void SetCustomDocumentation_WithWhitespaceSummary_ThrowsArgumentException()
+    public void SetCustomDocumentationWithWhitespaceSummaryThrowsArgumentException()
     {
         // Arrange
         var provider = new TestDocumentationProvider();
@@ -99,7 +99,7 @@ public class DocumentationManagerTests
     }
 
     [Fact]
-    public void GetDocumentation_CallsProviderGetDocumentation()
+    public void GetDocumentationCallsProviderGetDocumentation()
     {
         // Arrange
         var provider = new TestDocumentationProvider();
@@ -116,7 +116,7 @@ public class DocumentationManagerTests
     }
 
     [Fact]
-    public void GenerateDocumentation_ReturnsFormattedSummary()
+    public void GenerateDocumentationReturnsFormattedSummary()
     {
         // Arrange
         var provider = new TestDocumentationProvider();
@@ -133,7 +133,7 @@ public class DocumentationManagerTests
     }
 
     [Fact]
-    public void GenerateDocumentation_WithEmptyDocumentation_ReturnsFormattedEmptySummary()
+    public void GenerateDocumentationWithEmptyDocumentationReturnsFormattedEmptySummary()
     {
         // Arrange
         var provider = new TestDocumentationProvider();
@@ -149,7 +149,7 @@ public class DocumentationManagerTests
     }
 
     [Fact]
-    public void DocumentationProvider_ReturnsProvidedInstance()
+    public void DocumentationProviderReturnsProvidedInstance()
     {
         // Arrange
         var provider = new TestDocumentationProvider();

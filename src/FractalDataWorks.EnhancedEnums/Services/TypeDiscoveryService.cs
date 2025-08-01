@@ -101,8 +101,8 @@ public static class TypeDiscoveryService
                     continue;
 
                 // Check if this matches our definition
-                if (symbol.Name == definition.ClassName && 
-                    GetFullNamespace(symbol) == definition.Namespace)
+                if (string.Equals(symbol.Name, definition.ClassName, StringComparison.Ordinal) && 
+                    string.Equals(GetFullNamespace(symbol), definition.Namespace, StringComparison.Ordinal))
                 {
                     return symbol;
                 }
@@ -139,7 +139,7 @@ public static class TypeDiscoveryService
             .Any(a => 
             {
                 var name = a.Name.ToString();
-                return name.Contains("EnumOption") && !name.Contains("EnhancedEnumOption");
+                return name.Contains("EnumOption", StringComparison.Ordinal) && !name.Contains("EnhancedEnumOption", StringComparison.Ordinal);
             });
     }
 }

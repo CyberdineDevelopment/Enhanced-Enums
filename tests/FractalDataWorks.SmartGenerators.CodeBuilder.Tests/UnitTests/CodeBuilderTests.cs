@@ -8,7 +8,7 @@ namespace FractalDataWorks.SmartGenerators.CodeBuilder.Tests.UnitTests;
 public class CodeBuilderTests
 {
     [Fact]
-    public void Constructor_DefaultIndentSize_UsesFourSpaces()
+    public void ConstructorDefaultIndentSizeUsesFourSpaces()
     {
         // Arrange & Act
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -20,7 +20,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void Constructor_CustomIndentSize_UsesSpecifiedSpaces()
+    public void ConstructorCustomIndentSizeUsesSpecifiedSpaces()
     {
         // Arrange & Act
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder(2);
@@ -32,7 +32,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void AppendLine_WithText_AppendsWithNewline()
+    public void AppendLineWithTextAppendsWithNewline()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -46,7 +46,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void AppendLine_EmptyString_AppendsBlankLine()
+    public void AppendLineEmptyStringAppendsBlankLine()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -62,7 +62,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void Append_AddsTextWithoutNewline()
+    public void AppendAddsTextWithoutNewline()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -77,7 +77,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void Indent_IncreasesIndentLevel()
+    public void IndentIncreasesIndentLevel()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -97,7 +97,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void Outdent_DecreasesIndentLevel()
+    public void OutdentDecreasesIndentLevel()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -118,7 +118,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void Outdent_AtZeroLevel_StaysAtZero()
+    public void OutdentAtZeroLevelStaysAtZero()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -133,7 +133,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void Dedent_AliasForOutdent_Works()
+    public void DedentAliasForOutdentWorks()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -151,7 +151,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void OpenBlock_AddsOpeningBraceAndIndents()
+    public void OpenBlockAddsOpeningBraceAndIndents()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -169,7 +169,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void CloseBlock_AddsClosingBraceAndOutdents()
+    public void CloseBlockAddsClosingBraceAndOutdents()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -187,7 +187,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void AppendGeneratedCodeHeader_AddsStandardHeader()
+    public void AppendGeneratedCodeHeaderAddsStandardHeader()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -202,7 +202,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void AppendNamespace_AddsNamespaceDeclaration()
+    public void AppendNamespaceAddsNamespaceDeclaration()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -216,7 +216,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void WithIndent_CreatesTemporaryIndentScope()
+    public void WithIndentCreatesTemporaryIndentScope()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -237,7 +237,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void Build_ReturnsBuiltCode()
+    public void BuildReturnsBuiltCode()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -251,7 +251,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void ToString_ReturnsBuiltCode()
+    public void ToStringReturnsBuiltCode()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -265,7 +265,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void Append_AtStartOfLine_AddsIndentation()
+    public void AppendAtStartOfLineAddsIndentation()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -281,15 +281,15 @@ public class CodeBuilderTests
         result.ShouldBe($"    FirstSecond{Environment.NewLine}");
     }
 
-    [Fact(Skip = "TODO: CodeBuilder doesn't validate negative indent size")]
-    public void Constructor_NegativeIndentSize_ThrowsArgumentException()
+    [Fact]
+    public void ConstructorNegativeIndentSizeThrowsArgumentException()
     {
         // Act & Assert
         Should.Throw<ArgumentException>(() => new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder(-1));
     }
 
     [Fact]
-    public void Constructor_ZeroIndentSize_UsesNoIndentation()
+    public void ConstructorZeroIndentSizeUsesNoIndentation()
     {
         // Arrange & Act
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder(0);
@@ -301,7 +301,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void AppendLine_WithNull_AppendsEmptyLine()
+    public void AppendLineWithNullAppendsEmptyLine()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -315,7 +315,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void Append_WithNull_TreatsAsEmptyString()
+    public void AppendWithNullTreatsAsEmptyString()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -331,7 +331,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void Append_WithEmptyString_DoesNotAddIndentation()
+    public void AppendWithEmptyStringDoesNotAddIndentation()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -347,7 +347,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void MultipleIndentOutdent_TracksLevelCorrectly()
+    public void MultipleIndentOutdentTracksLevelCorrectly()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -368,7 +368,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void ComplexBlockStructure_GeneratesCorrectCode()
+    public void ComplexBlockStructureGeneratesCorrectCode()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -396,7 +396,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void WithIndent_NestedScopes_WorkCorrectly()
+    public void WithIndentNestedScopesWorkCorrectly()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -424,7 +424,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void AppendGeneratedCodeHeader_WithIndent_MaintainsIndentation()
+    public void AppendGeneratedCodeHeaderWithIndentMaintainsIndentation()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -439,8 +439,8 @@ public class CodeBuilderTests
         lines.Where(l => l.StartsWith("    //")).Count().ShouldBeGreaterThan(0);
     }
 
-    [Fact(Skip = "TODO: CodeBuilder.AppendNamespace doesn't validate null parameter")]
-    public void AppendNamespace_WithNull_ThrowsArgumentNullException()
+    [Fact]
+    public void AppendNamespaceWithNullThrowsArgumentNullException()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -449,8 +449,8 @@ public class CodeBuilderTests
         Should.Throw<ArgumentNullException>(() => builder.AppendNamespace(null!));
     }
 
-    [Fact(Skip = "TODO: CodeBuilder.AppendNamespace doesn't validate empty parameter")]
-    public void AppendNamespace_WithEmptyString_ThrowsArgumentException()
+    [Fact]
+    public void AppendNamespaceWithEmptyStringThrowsArgumentException()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -460,7 +460,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void MixedAppendAndAppendLine_ProducesCorrectOutput()
+    public void MixedAppendAndAppendLineProducesCorrectOutput()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -481,7 +481,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void LargeIndentSize_WorksCorrectly()
+    public void LargeIndentSizeWorksCorrectly()
     {
         // Arrange & Act
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder(8);
@@ -493,7 +493,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void EmptyBuilder_BuildReturnsEmptyString()
+    public void EmptyBuilderBuildReturnsEmptyString()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -506,7 +506,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void EmptyBuilder_ToStringReturnsEmptyString()
+    public void EmptyBuilderToStringReturnsEmptyString()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -519,7 +519,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void ChainedOperations_ReturnsSameInstance()
+    public void ChainedOperationsReturnsSameInstance()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -538,7 +538,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void AppendLine_AfterAppend_StartsNewLineWithoutIndent()
+    public void AppendLineAfterAppendStartsNewLineWithoutIndent()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();
@@ -555,7 +555,7 @@ public class CodeBuilderTests
     }
 
     [Fact]
-    public void WithIndent_DisposedMultipleTimes_OnlyOutdentsOnce()
+    public void WithIndentDisposedMultipleTimesOnlyOutdentsOnce()
     {
         // Arrange
         var builder = new FractalDataWorks.SmartGenerators.CodeBuilders.CodeBuilder();

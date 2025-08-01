@@ -9,7 +9,7 @@ namespace FractalDataWorks.SmartGenerators.CodeBuilder.Tests.UnitTests;
 public class RecordBuilderTests
 {
     [Fact]
-    public void DefaultConstructor_CreatesRecordWithDefaultName()
+    public void DefaultConstructorCreatesRecordWithDefaultName()
     {
         // Arrange & Act
         var builder = new RecordBuilder();
@@ -24,7 +24,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void Constructor_WithValidName_CreatesRecord()
+    public void ConstructorWithValidNameCreatesRecord()
     {
         // Arrange & Act
         var builder = new RecordBuilder("Person");
@@ -38,28 +38,28 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void Constructor_WithNullName_ThrowsArgumentException()
+    public void ConstructorWithNullNameThrowsArgumentException()
     {
         // Act & Assert
         Assert.Throws<ArgumentException>(() => new RecordBuilder(null!));
     }
 
     [Fact]
-    public void Constructor_WithEmptyName_ThrowsArgumentException()
+    public void ConstructorWithEmptyNameThrowsArgumentException()
     {
         // Act & Assert
         Assert.Throws<ArgumentException>(() => new RecordBuilder(""));
     }
 
     [Fact]
-    public void Constructor_WithWhitespaceName_ThrowsArgumentException()
+    public void ConstructorWithWhitespaceNameThrowsArgumentException()
     {
         // Act & Assert
         Assert.Throws<ArgumentException>(() => new RecordBuilder("   "));
     }
 
     [Fact]
-    public void WithName_SetsRecordName()
+    public void WithNameSetsRecordName()
     {
         // Arrange
         var builder = new RecordBuilder();
@@ -75,7 +75,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void WithName_NullName_ThrowsArgumentException()
+    public void WithNameNullNameThrowsArgumentException()
     {
         // Arrange
         var builder = new RecordBuilder();
@@ -85,7 +85,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void WithBaseType_SetsBaseType()
+    public void WithBaseTypeSetsBaseType()
     {
         // Arrange
         var builder = new RecordBuilder("DerivedRecord");
@@ -101,7 +101,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void WithBaseType_NullBaseType_ThrowsArgumentException()
+    public void WithBaseTypeNullBaseTypeThrowsArgumentException()
     {
         // Arrange
         var builder = new RecordBuilder();
@@ -111,7 +111,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void WithParameter_AddsParameter()
+    public void WithParameterAddsParameter()
     {
         // Arrange
         var builder = new RecordBuilder("Person");
@@ -132,7 +132,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void WithParameter_NullType_ThrowsArgumentException()
+    public void WithParameterNullTypeThrowsArgumentException()
     {
         // Arrange
         var builder = new RecordBuilder();
@@ -142,7 +142,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void WithParameter_NullName_ThrowsArgumentException()
+    public void WithParameterNullNameThrowsArgumentException()
     {
         // Arrange
         var builder = new RecordBuilder();
@@ -152,7 +152,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void WithParameter_WithConfiguration_AddsConfiguredParameter()
+    public void WithParameterWithConfigurationAddsConfiguredParameter()
     {
         // Arrange
         var builder = new RecordBuilder("Person");
@@ -173,7 +173,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void WithParameter_NullConfiguration_ThrowsArgumentNullException()
+    public void WithParameterNullConfigurationThrowsArgumentNullException()
     {
         // Arrange
         var builder = new RecordBuilder();
@@ -183,7 +183,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void MakeStruct_CreatesRecordStruct()
+    public void MakeStructCreatesRecordStruct()
     {
         // Arrange
         var builder = new RecordBuilder("Point");
@@ -200,7 +200,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void ImplementsInterface_AddsInterface()
+    public void ImplementsInterfaceAddsInterface()
     {
         // Arrange
         var builder = new RecordBuilder("Product");
@@ -213,7 +213,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void ImplementsInterface_NullInterface_ThrowsArgumentException()
+    public void ImplementsInterfaceNullInterfaceThrowsArgumentException()
     {
         // Arrange
         var builder = new RecordBuilder();
@@ -223,7 +223,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void ImplementsInterface_DuplicateInterface_ThrowsArgumentException()
+    public void ImplementsInterfaceDuplicateInterfaceThrowsArgumentException()
     {
         // Arrange
         var builder = new RecordBuilder()
@@ -236,7 +236,7 @@ public class RecordBuilderTests
     // Add more comprehensive tests using Shouldly
 
     [Fact]
-    public void Name_Property_ReturnsRecordName()
+    public void NamePropertyReturnsRecordName()
     {
         // Arrange
         var builder = new RecordBuilder("TestRecord");
@@ -250,7 +250,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void WithNamespace_ValidNamespace_WrapsRecordInNamespace()
+    public void WithNamespaceValidNamespaceUsesFileScopedNamespace()
     {
         // Arrange
         var builder = new RecordBuilder("Person");
@@ -261,12 +261,14 @@ public class RecordBuilderTests
             .Build();
 
         // Assert - using Shouldly
-        result.ShouldContain("namespace MyApp.Models");
+        result.ShouldContain("namespace MyApp.Models;");
+        result.ShouldNotContain("namespace MyApp.Models{");
+        result.ShouldNotContain("}"); // File-scoped namespaces don't have closing braces
         result.ShouldContain("record Person");
     }
 
     [Fact]
-    public void WithNamespace_NullNamespace_ThrowsArgumentException()
+    public void WithNamespaceNullNamespaceThrowsArgumentException()
     {
         // Arrange
         var builder = new RecordBuilder("MyRecord");
@@ -276,7 +278,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void WithNamespace_EmptyNamespace_ThrowsArgumentException()
+    public void WithNamespaceEmptyNamespaceThrowsArgumentException()
     {
         // Arrange
         var builder = new RecordBuilder("MyRecord");
@@ -286,7 +288,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void WithNamespace_WhitespaceNamespace_ThrowsArgumentException()
+    public void WithNamespaceWhitespaceNamespaceThrowsArgumentException()
     {
         // Arrange
         var builder = new RecordBuilder("MyRecord");
@@ -296,7 +298,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void MakePublic_SetsPublicAccessModifier()
+    public void MakePublicSetsPublicAccessModifier()
     {
         // Arrange
         var builder = new RecordBuilder("PublicRecord");
@@ -311,7 +313,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void MakePrivate_SetsPrivateAccessModifier()
+    public void MakePrivateSetsPrivateAccessModifier()
     {
         // Arrange
         var builder = new RecordBuilder("PrivateRecord");
@@ -326,7 +328,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void MakeProtected_SetsProtectedAccessModifier()
+    public void MakeProtectedSetsProtectedAccessModifier()
     {
         // Arrange
         var builder = new RecordBuilder("ProtectedRecord");
@@ -341,7 +343,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void MakeInternal_SetsInternalAccessModifier()
+    public void MakeInternalSetsInternalAccessModifier()
     {
         // Arrange
         var builder = new RecordBuilder("InternalRecord");
@@ -356,7 +358,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void MakeSealed_SetsSealedModifier()
+    public void MakeSealedSetsSealedModifier()
     {
         // Arrange
         var builder = new RecordBuilder("SealedRecord");
@@ -371,7 +373,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void MakeAbstract_SetsAbstractModifier()
+    public void MakeAbstractSetsAbstractModifier()
     {
         // Arrange
         var builder = new RecordBuilder("AbstractRecord");
@@ -386,7 +388,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void MakePartial_SetsPartialModifier()
+    public void MakePartialSetsPartialModifier()
     {
         // Arrange
         var builder = new RecordBuilder("PartialRecord");
@@ -401,7 +403,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void AddMethod_CreatesMethodAndReturnsBuilder()
+    public void AddMethodCreatesMethodAndReturnsBuilder()
     {
         // Arrange
         var builder = new RecordBuilder("PersonRecord");
@@ -419,7 +421,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void AddMethod_WithConfigure_ConfiguresMethod()
+    public void AddMethodWithConfigureConfiguresMethod()
     {
         // Arrange
         var builder = new RecordBuilder("PersonRecord");
@@ -437,7 +439,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void AddMethod_WithNullConfigure_ThrowsArgumentNullException()
+    public void AddMethodWithNullConfigureThrowsArgumentNullException()
     {
         // Arrange
         var builder = new RecordBuilder("MyRecord");
@@ -447,7 +449,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void AddProperty_CreatesPropertyAndReturnsBuilder()
+    public void AddPropertyCreatesPropertyAndReturnsBuilder()
     {
         // Arrange
         var builder = new RecordBuilder("PersonRecord");
@@ -464,7 +466,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void AddProperty_WithConfigure_ConfiguresProperty()
+    public void AddPropertyWithConfigureConfiguresProperty()
     {
         // Arrange
         var builder = new RecordBuilder("PersonRecord");
@@ -482,7 +484,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void AddProperty_WithNullConfigure_ThrowsArgumentNullException()
+    public void AddPropertyWithNullConfigureThrowsArgumentNullException()
     {
         // Arrange
         var builder = new RecordBuilder("MyRecord");
@@ -492,14 +494,14 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void WithSummary_AddsXmlDocumentation()
+    public void WithXmlDocSummaryAddsXmlDocumentation()
     {
         // Arrange
         var builder = new RecordBuilder("PersonRecord");
 
         // Act
         var result = builder
-            .WithSummary("Represents a person in the system.")
+            .WithXmlDocSummary("Represents a person in the system.")
             .Build();
 
         // Assert - using Shouldly
@@ -509,7 +511,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void Build_RecordWithNoBody_GeneratesMinimalRecord()
+    public void BuildRecordWithNoBodyGeneratesMinimalRecord()
     {
         // Arrange
         var builder = new RecordBuilder("SimpleRecord");
@@ -522,7 +524,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void Build_RecordStructWithParameters_GeneratesCorrectCode()
+    public void BuildRecordStructWithParametersGeneratesCorrectCode()
     {
         // Arrange
         var builder = new RecordBuilder("Point3D");
@@ -541,7 +543,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void Build_RecordWithBaseTypeAndInterfaces_GeneratesCorrectCode()
+    public void BuildRecordWithBaseTypeAndInterfacesGeneratesCorrectCode()
     {
         // Arrange
         var builder = new RecordBuilder("Employee");
@@ -559,8 +561,8 @@ public class RecordBuilderTests
         result.ShouldContain("public record Employee(string EmployeeId) : Person, IEmployee, IPayable;");
     }
 
-    [Fact(Skip = "TODO: Debug record body generation")]
-    public void Build_ComplexRecord_GeneratesCorrectCode()
+    [Fact]
+    public void BuildComplexRecordGeneratesCorrectCode()
     {
         // Arrange
         var builder = new RecordBuilder("Customer");
@@ -570,7 +572,7 @@ public class RecordBuilderTests
             .WithNamespace("MyApp.Models")
             .MakePublic()
             .MakeSealed()
-            .WithSummary("Represents a customer in the system.")
+            .WithXmlDocSummary("Represents a customer in the system.")
             .AddAttribute("Serializable")
             .WithParameter("string", "Id")
             .WithParameter("string", "Name")
@@ -598,7 +600,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void Build_RecordWithMultipleParametersWithDefaults_GeneratesCorrectCode()
+    public void BuildRecordWithMultipleParametersWithDefaultsGeneratesCorrectCode()
     {
         // Arrange
         var builder = new RecordBuilder("Configuration");
@@ -616,7 +618,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void ImplementsInterface_MultipleInterfaces_AddsAllInterfaces()
+    public void ImplementsInterfaceMultipleInterfacesAddsAllInterfaces()
     {
         // Arrange
         var builder = new RecordBuilder("Product");
@@ -633,7 +635,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void ImplementsInterface_EmptyInterface_ThrowsArgumentException()
+    public void ImplementsInterfaceEmptyInterfaceThrowsArgumentException()
     {
         // Arrange
         var builder = new RecordBuilder("MyRecord");
@@ -643,7 +645,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void ImplementsInterface_WhitespaceInterface_ThrowsArgumentException()
+    public void ImplementsInterfaceWhitespaceInterfaceThrowsArgumentException()
     {
         // Arrange
         var builder = new RecordBuilder("MyRecord");
@@ -653,7 +655,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void WithParameter_EmptyType_ThrowsArgumentException()
+    public void WithParameterEmptyTypeThrowsArgumentException()
     {
         // Arrange
         var builder = new RecordBuilder("MyRecord");
@@ -663,7 +665,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void WithParameter_WhitespaceType_ThrowsArgumentException()
+    public void WithParameterWhitespaceTypeThrowsArgumentException()
     {
         // Arrange
         var builder = new RecordBuilder("MyRecord");
@@ -673,7 +675,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void WithParameter_EmptyName_ThrowsArgumentException()
+    public void WithParameterEmptyNameThrowsArgumentException()
     {
         // Arrange
         var builder = new RecordBuilder("MyRecord");
@@ -683,7 +685,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void WithParameter_WhitespaceName_ThrowsArgumentException()
+    public void WithParameterWhitespaceNameThrowsArgumentException()
     {
         // Arrange
         var builder = new RecordBuilder("MyRecord");
@@ -693,7 +695,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void WithBaseType_EmptyBaseType_ThrowsArgumentException()
+    public void WithBaseTypeEmptyBaseTypeThrowsArgumentException()
     {
         // Arrange
         var builder = new RecordBuilder("MyRecord");
@@ -703,7 +705,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void WithBaseType_WhitespaceBaseType_ThrowsArgumentException()
+    public void WithBaseTypeWhitespaceBaseTypeThrowsArgumentException()
     {
         // Arrange
         var builder = new RecordBuilder("MyRecord");
@@ -713,7 +715,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void WithName_EmptyName_ThrowsArgumentException()
+    public void WithNameEmptyNameThrowsArgumentException()
     {
         // Arrange
         var builder = new RecordBuilder();
@@ -723,7 +725,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void WithName_WhitespaceName_ThrowsArgumentException()
+    public void WithNameWhitespaceNameThrowsArgumentException()
     {
         // Arrange
         var builder = new RecordBuilder();
@@ -733,7 +735,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void AddAttribute_StringAttribute_AddsAttribute()
+    public void AddAttributeStringAttributeAddsAttribute()
     {
         // Arrange
         var builder = new RecordBuilder("MyRecord");
@@ -749,7 +751,7 @@ public class RecordBuilderTests
     }
 
     [Fact]
-    public void FluentInterface_ChainsCorrectly()
+    public void FluentInterfaceChainsCorrectly()
     {
         // Arrange & Act
         var result = new RecordBuilder()
@@ -760,7 +762,7 @@ public class RecordBuilderTests
             .WithBaseType("BaseRecord")
             .ImplementsInterface("IInterface1")
             .ImplementsInterface("IInterface2")
-            .WithSummary("Test fluent interface chaining.")
+            .WithXmlDocSummary("Test fluent interface chaining.")
             .AddAttribute("TestAttribute")
             .WithParameter("string", "Name")
             .WithParameter("int", "Age")

@@ -23,7 +23,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void Constructor_WithNameAndType_CreatesField()
+    public void ConstructorWithNameAndTypeCreatesField()
     {
         // Arrange & Act
         var builder = new FieldBuilder("_count", "int");
@@ -34,7 +34,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void Constructor_WithNameOnly_CreatesFieldWithEmptyType()
+    public void ConstructorWithNameOnlyCreatesFieldWithEmptyType()
     {
         // Arrange & Act
         var builder = new FieldBuilder("_field");
@@ -47,14 +47,14 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void Constructor_WithNullTypeName_ThrowsArgumentException()
+    public void ConstructorWithNullTypeNameThrowsArgumentException()
     {
         // Act & Assert
         Assert.Throws<ArgumentException>(() => new FieldBuilder("_field", null!));
     }
 
     [Fact]
-    public void WithType_SetsFieldType()
+    public void WithTypeSetsFieldType()
     {
         // Arrange
         var builder = new FieldBuilder("_field");
@@ -69,7 +69,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void WithType_NullType_ThrowsArgumentException()
+    public void WithTypeNullTypeThrowsArgumentException()
     {
         // Arrange
         var builder = new FieldBuilder("_field");
@@ -79,7 +79,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void WithType_EmptyType_ThrowsArgumentException()
+    public void WithTypeEmptyTypeThrowsArgumentException()
     {
         // Arrange
         var builder = new FieldBuilder("_field");
@@ -89,7 +89,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void WithType_WhitespaceType_ThrowsArgumentException()
+    public void WithTypeWhitespaceTypeThrowsArgumentException()
     {
         // Arrange
         var builder = new FieldBuilder("_field");
@@ -99,7 +99,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void MakePublic_SetsPublicAccessModifier()
+    public void MakePublicSetsPublicAccessModifier()
     {
         // Arrange
         var builder = new FieldBuilder("Field", "int");
@@ -114,7 +114,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void MakePrivate_SetsPrivateAccessModifier()
+    public void MakePrivateSetsPrivateAccessModifier()
     {
         // Arrange
         var builder = new FieldBuilder("_field", "int");
@@ -129,7 +129,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void MakeProtected_SetsProtectedAccessModifier()
+    public void MakeProtectedSetsProtectedAccessModifier()
     {
         // Arrange
         var builder = new FieldBuilder("_field", "int");
@@ -144,7 +144,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void MakeInternal_SetsInternalAccessModifier()
+    public void MakeInternalSetsInternalAccessModifier()
     {
         // Arrange
         var builder = new FieldBuilder("_field", "int");
@@ -159,7 +159,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void MakeStatic_SetsStaticModifier()
+    public void MakeStaticSetsStaticModifier()
     {
         // Arrange
         var builder = new FieldBuilder("Count", "int");
@@ -174,7 +174,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void MakeReadOnly_SetsReadOnlyModifier()
+    public void MakeReadOnlySetsReadOnlyModifier()
     {
         // Arrange
         var builder = new FieldBuilder("_field", "string");
@@ -189,7 +189,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void MakeConst_WithValue_CreatesConstantField()
+    public void MakeConstWithValueCreatesConstantField()
     {
         // Arrange
         var builder = new FieldBuilder("MaxValue", "int");
@@ -204,7 +204,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void MakeConst_NullValue_ThrowsArgumentException()
+    public void MakeConstNullValueThrowsArgumentException()
     {
         // Arrange
         var builder = new FieldBuilder("Constant", "int");
@@ -214,7 +214,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void MakeConst_EmptyValue_ThrowsArgumentException()
+    public void MakeConstEmptyValueThrowsArgumentException()
     {
         // Arrange
         var builder = new FieldBuilder("Constant", "int");
@@ -224,7 +224,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void MakeConst_PublicConstant_GeneratesCorrectly()
+    public void MakeConstPublicConstantGeneratesCorrectly()
     {
         // Arrange
         var builder = new FieldBuilder("Pi", "double");
@@ -240,7 +240,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void WithInitializer_String_AddsInitializer()
+    public void WithInitializerStringAddsInitializer()
     {
         // Arrange
         var builder = new FieldBuilder("_list", "List<string>");
@@ -255,7 +255,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void WithInitializer_AfterMakeConst_ThrowsInvalidOperationException()
+    public void WithInitializerAfterMakeConstThrowsInvalidOperationException()
     {
         // Arrange
         var builder = new FieldBuilder("Constant", "int");
@@ -267,7 +267,7 @@ public class FieldBuilderTests
 
 
     [Fact]
-    public void AddAttribute_AddsAttributeToField()
+    public void AddAttributeAddsAttributeToField()
     {
         // Arrange
         var builder = new FieldBuilder("_field", "string");
@@ -284,7 +284,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void AddAttribute_NullAttribute_ThrowsArgumentNullException()
+    public void AddAttributeNullAttributeThrowsArgumentNullException()
     {
         // Arrange
         var builder = new FieldBuilder("_field", "string");
@@ -294,7 +294,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void WithXmlDocSummary_AddsDocumentation()
+    public void WithXmlDocSummaryAddsDocumentation()
     {
         // Arrange
         var builder = new FieldBuilder("_count", "int");
@@ -311,7 +311,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void Build_ComplexField_GeneratesCorrectCode()
+    public void BuildComplexFieldGeneratesCorrectCode()
     {
         // Arrange
         var builder = new FieldBuilder("_logger", "ILogger");
@@ -330,7 +330,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void Build_StaticReadOnlyField_GeneratesCorrectCode()
+    public void BuildStaticReadOnlyFieldGeneratesCorrectCode()
     {
         // Arrange
         var builder = new FieldBuilder("Empty", "string");
@@ -348,7 +348,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void Build_ConstantWithModifiers_IgnoresOtherModifiers()
+    public void BuildConstantWithModifiersIgnoresOtherModifiers()
     {
         // Arrange
         var builder = new FieldBuilder("MaxSize", "int");
@@ -366,7 +366,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void Build_MultipleAttributes_GeneratesCorrectly()
+    public void BuildMultipleAttributesGeneratesCorrectly()
     {
         // Arrange
         var builder = new FieldBuilder("_field", "object");
@@ -386,7 +386,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void Build_FieldWithComplexType_GeneratesCorrectly()
+    public void BuildFieldWithComplexTypeGeneratesCorrectly()
     {
         // Arrange
         var builder = new FieldBuilder("_dictionary", "Dictionary<string, List<int>>");
@@ -402,7 +402,7 @@ public class FieldBuilderTests
     }
 
     [Fact]
-    public void FluentInterface_ChainsCorrectly()
+    public void FluentInterfaceChainsCorrectly()
     {
         // Arrange & Act
         var result = new FieldBuilder("_value")

@@ -69,13 +69,6 @@ public class EnumBuilder : CodeBuilderBase<EnumBuilder>
     }
 
     /// <summary>
-    /// Adds an attribute to the enum (alias for AddAttribute).
-    /// </summary>
-    /// <param name="attributeText">The attribute text without brackets.</param>
-    /// <returns>The builder instance for chaining.</returns>
-    public EnumBuilder WithAttribute(string attributeText) => AddAttribute(attributeText);
-
-    /// <summary>
     /// Adds a member to the enum.
     /// </summary>
     /// <param name="memberName">The name of the enum member.</param>

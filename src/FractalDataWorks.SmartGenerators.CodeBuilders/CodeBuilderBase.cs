@@ -447,6 +447,11 @@ public abstract class CodeBuilderBase<TBuilder> : ICodeBuilder, IDocumentationMa
             result += "required ";
         }
 
+        if ((modifier & Modifiers.Extern) == Modifiers.Extern)
+        {
+            result += "extern ";
+        }
+
         return result;
     }
 

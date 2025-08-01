@@ -136,7 +136,7 @@ public class MethodDocumentationProvider : IXmlDocumentationProvider
     /// Gets parameter documentation for all parameters.
     /// </summary>
     /// <returns>A dictionary mapping parameter names to their documentation.</returns>
-    public Dictionary<string, string> GetParameterDocs()
+    public IDictionary<string, string> GetParameterDocs()
     {
         var result = new Dictionary<string, string>(StringComparer.Ordinal);
 

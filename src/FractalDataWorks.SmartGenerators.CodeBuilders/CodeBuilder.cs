@@ -17,8 +17,12 @@ public class CodeBuilder : ICodeBuilder
     /// Initializes a new instance of the <see cref="CodeBuilder"/> class.
     /// </summary>
     /// <param name="indentSize">The number of spaces for each indentation level.</param>
+    /// <exception cref="ArgumentException">Thrown when indentSize is negative.</exception>
     public CodeBuilder(int indentSize = 4)
     {
+        if (indentSize < 0)
+            throw new ArgumentException("Indent size cannot be negative.", nameof(indentSize));
+            
         _indentString = new string(' ', indentSize);
     }
 
@@ -134,6 +138,11 @@ public class CodeBuilder : ICodeBuilder
     /// <returns>The code builder instance for chaining.</returns>
     public ICodeBuilder AppendNamespace(string namespaceName)
     {
+        if (namespaceName is null)
+            throw new ArgumentNullException(nameof(namespaceName));
+        if (string.IsNullOrWhiteSpace(namespaceName))
+            throw new ArgumentException("Namespace name cannot be empty or whitespace.", nameof(namespaceName));
+            
         AppendLine($"namespace {namespaceName};");
         AppendLine();
         return this;

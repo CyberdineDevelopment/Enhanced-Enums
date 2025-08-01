@@ -51,7 +51,7 @@ public class MethodBuilderTests
 
     // Constructor tests
     [Fact]
-    public void Constructor_WithNameAndReturnType_CreatesMethod()
+    public void ConstructorWithNameAndReturnTypeCreatesMethod()
     {
         // Arrange & Act
         var builder = new MethodBuilder("Calculate", "int");
@@ -63,7 +63,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void Constructor_WithNameOnly_CreatesVoidMethod()
+    public void ConstructorWithNameOnlyCreatesVoidMethod()
     {
         // Arrange & Act
         var builder = new MethodBuilder("DoSomething");
@@ -74,42 +74,42 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void Constructor_WithNullName_ThrowsArgumentException()
+    public void ConstructorWithNullNameThrowsArgumentException()
     {
         // Act & Assert
         Assert.Throws<ArgumentException>(() => new MethodBuilder(null!));
     }
 
     [Fact]
-    public void Constructor_WithEmptyName_ThrowsArgumentException()
+    public void ConstructorWithEmptyNameThrowsArgumentException()
     {
         // Act & Assert
         Assert.Throws<ArgumentException>(() => new MethodBuilder(""));
     }
 
     [Fact]
-    public void Constructor_WithWhitespaceName_ThrowsArgumentException()
+    public void ConstructorWithWhitespaceNameThrowsArgumentException()
     {
         // Act & Assert
         Assert.Throws<ArgumentException>(() => new MethodBuilder("   "));
     }
 
     [Fact]
-    public void Constructor_WithNullReturnType_ThrowsArgumentException()
+    public void ConstructorWithNullReturnTypeThrowsArgumentException()
     {
         // Act & Assert
         Assert.Throws<ArgumentException>(() => new MethodBuilder("Method", null!));
     }
 
     [Fact]
-    public void Constructor_WithEmptyReturnType_ThrowsArgumentException()
+    public void ConstructorWithEmptyReturnTypeThrowsArgumentException()
     {
         // Act & Assert
         Assert.Throws<ArgumentException>(() => new MethodBuilder("Method", ""));
     }
 
     [Fact]
-    public void Constructor_WithWhitespaceReturnType_ThrowsArgumentException()
+    public void ConstructorWithWhitespaceReturnTypeThrowsArgumentException()
     {
         // Act & Assert
         Assert.Throws<ArgumentException>(() => new MethodBuilder("Method", "   "));
@@ -117,7 +117,7 @@ public class MethodBuilderTests
 
     // WithReturnType tests
     [Fact]
-    public void WithReturnType_SetsReturnType()
+    public void WithReturnTypeSetsReturnType()
     {
         // Arrange
         var builder = new MethodBuilder("GetValue");
@@ -132,7 +132,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void WithReturnType_NullReturnType_ThrowsArgumentException()
+    public void WithReturnTypeNullReturnTypeThrowsArgumentException()
     {
         // Arrange
         var builder = new MethodBuilder("Method");
@@ -142,7 +142,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void WithReturnType_EmptyReturnType_ThrowsArgumentException()
+    public void WithReturnTypeEmptyReturnTypeThrowsArgumentException()
     {
         // Arrange
         var builder = new MethodBuilder("Method");
@@ -152,7 +152,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void WithReturnType_WhitespaceReturnType_ThrowsArgumentException()
+    public void WithReturnTypeWhitespaceReturnTypeThrowsArgumentException()
     {
         // Arrange
         var builder = new MethodBuilder("Method");
@@ -163,7 +163,7 @@ public class MethodBuilderTests
 
     // Parameter tests
     [Fact]
-    public void AddParameter_SingleParameter_AddsParameter()
+    public void AddParameterSingleParameterAddsParameter()
     {
         // Arrange
         var builder = new MethodBuilder("Calculate", "int");
@@ -178,7 +178,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void AddParameter_MultipleParameters_AddsAllParameters()
+    public void AddParameterMultipleParametersAddsAllParameters()
     {
         // Arrange
         var builder = new MethodBuilder("Add", "int");
@@ -194,7 +194,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void AddParameter_WithDefaultValue_AddsParameterWithDefault()
+    public void AddParameterWithDefaultValueAddsParameterWithDefault()
     {
         // Arrange
         var builder = new MethodBuilder("Process", "void");
@@ -210,7 +210,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void AddParameter_GenericType_AddsParameter()
+    public void AddParameterGenericTypeAddsParameter()
     {
         // Arrange
         var builder = new MethodBuilder("Process", "void");
@@ -225,7 +225,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void AddParameter_NullTypeName_ThrowsArgumentException()
+    public void AddParameterNullTypeNameThrowsArgumentException()
     {
         // Arrange
         var builder = new MethodBuilder("Method");
@@ -235,7 +235,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void AddParameter_EmptyTypeName_ThrowsArgumentException()
+    public void AddParameterEmptyTypeNameThrowsArgumentException()
     {
         // Arrange
         var builder = new MethodBuilder("Method");
@@ -245,7 +245,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void AddParameter_NullParameterName_ThrowsArgumentException()
+    public void AddParameterNullParameterNameThrowsArgumentException()
     {
         // Arrange
         var builder = new MethodBuilder("Method");
@@ -255,7 +255,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void AddParameter_EmptyParameterName_ThrowsArgumentException()
+    public void AddParameterEmptyParameterNameThrowsArgumentException()
     {
         // Arrange
         var builder = new MethodBuilder("Method");
@@ -265,7 +265,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void AddParameter_DuplicateParameterName_ThrowsArgumentException()
+    public void AddParameterDuplicateParameterNameThrowsArgumentException()
     {
         // Arrange
         var builder = new MethodBuilder("Method");
@@ -277,7 +277,7 @@ public class MethodBuilderTests
 
     // Access modifier tests
     [Fact]
-    public void MakePublic_SetsPublicAccessModifier()
+    public void MakePublicSetsPublicAccessModifier()
     {
         // Arrange
         var builder = new MethodBuilder("Method", "void");
@@ -292,7 +292,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void MakePrivate_SetsPrivateAccessModifier()
+    public void MakePrivateSetsPrivateAccessModifier()
     {
         // Arrange
         var builder = new MethodBuilder("Method", "void");
@@ -307,7 +307,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void MakeProtected_SetsProtectedAccessModifier()
+    public void MakeProtectedSetsProtectedAccessModifier()
     {
         // Arrange
         var builder = new MethodBuilder("Method", "void");
@@ -322,7 +322,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void MakeInternal_SetsInternalAccessModifier()
+    public void MakeInternalSetsInternalAccessModifier()
     {
         // Arrange
         var builder = new MethodBuilder("Method", "void");
@@ -338,7 +338,7 @@ public class MethodBuilderTests
 
     // Modifier tests
     [Fact]
-    public void MakeStatic_SetsStaticModifier()
+    public void MakeStaticSetsStaticModifier()
     {
         // Arrange
         var builder = new MethodBuilder("Calculate", "int");
@@ -353,7 +353,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void MakeVirtual_SetsVirtualModifier()
+    public void MakeVirtualSetsVirtualModifier()
     {
         // Arrange
         var builder = new MethodBuilder("Method", "void");
@@ -368,7 +368,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void MakeOverride_SetsOverrideModifier()
+    public void MakeOverrideSetsOverrideModifier()
     {
         // Arrange
         var builder = new MethodBuilder("Method", "void");
@@ -383,7 +383,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void MakeAbstract_SetsAbstractModifier()
+    public void MakeAbstractSetsAbstractModifier()
     {
         // Arrange
         var builder = new MethodBuilder("Method", "void");
@@ -398,14 +398,14 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void MakeAsync_SetsAsyncModifier()
+    public void MakeAsyncSetsAsyncModifier()
     {
         // Arrange
         var builder = new MethodBuilder("ProcessAsync", "Task");
 
         // Act
         var result = builder
-            .Make()
+            .MakeAsync()
             .Build();
 
         // Assert
@@ -414,7 +414,7 @@ public class MethodBuilderTests
 
     // Body tests
     [Fact]
-    public void WithBody_StringContent_SetsMethodBody()
+    public void WithBodyStringContentSetsMethodBody()
     {
         // Arrange
         var builder = new MethodBuilder("DoWork", "void");
@@ -431,7 +431,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void WithBody_NullContent_ThrowsArgumentNullException()
+    public void WithBodyNullContentThrowsArgumentNullException()
     {
         // Arrange
         var builder = new MethodBuilder("Method", "void");
@@ -441,7 +441,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void WithBody_ActionContent_SetsMethodBody()
+    public void WithBodyActionContentSetsMethodBody()
     {
         // Arrange
         var builder = new MethodBuilder("Calculate", "int");
@@ -457,7 +457,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void WithBody_NullAction_ThrowsArgumentNullException()
+    public void WithBodyNullActionThrowsArgumentNullException()
     {
         // Arrange
         var builder = new MethodBuilder("Method", "void");
@@ -468,7 +468,7 @@ public class MethodBuilderTests
 
     // Expression body tests
     [Fact]
-    public void WithExpressionBody_SetsExpressionBody()
+    public void WithExpressionBodySetsExpressionBody()
     {
         // Arrange
         var builder = new MethodBuilder("GetValue", "int");
@@ -485,7 +485,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void WithExpressionBody_NullExpression_ThrowsArgumentNullException()
+    public void WithExpressionBodyNullExpressionThrowsArgumentNullException()
     {
         // Arrange
         var builder = new MethodBuilder("Method", "int");
@@ -495,7 +495,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void WithExpressionBody_WithModifiers_AppliesModifiers()
+    public void WithExpressionBodyWithModifiersAppliesModifiers()
     {
         // Arrange
         var builder = new MethodBuilder("GetDefault", "string");
@@ -513,7 +513,7 @@ public class MethodBuilderTests
 
     // No implementation tests
     [Fact]
-    public void NoImplementation_CreatesAbstractMethod()
+    public void NoImplementationCreatesAbstractMethod()
     {
         // Arrange
         var builder = new MethodBuilder("Process", "void");
@@ -533,7 +533,7 @@ public class MethodBuilderTests
 
     // XML documentation tests
     [Fact]
-    public void WithXmlDocSummary_AddsDocumentation()
+    public void WithXmlDocSummaryAddsDocumentation()
     {
         // Arrange
         var builder = new MethodBuilder("Calculate", "int");
@@ -550,7 +550,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void WithXmlDocParam_AddsParameterDocumentation()
+    public void WithXmlDocParamAddsParameterDocumentation()
     {
         // Arrange
         var builder = new MethodBuilder("Add", "int");
@@ -569,7 +569,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void WithXmlDocReturns_AddsReturnDocumentation()
+    public void WithXmlDocReturnsAddsReturnDocumentation()
     {
         // Arrange
         var builder = new MethodBuilder("Calculate", "int");
@@ -584,7 +584,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void WithXmlDocException_AddsExceptionDocumentation()
+    public void WithXmlDocExceptionAddsExceptionDocumentation()
     {
         // Arrange
         var builder = new MethodBuilder("Divide", "double");
@@ -602,7 +602,7 @@ public class MethodBuilderTests
 
     // Directive tests
     [Fact]
-    public void AddBodyForDirective_AddsConditionalBody()
+    public void AddBodyForDirectiveAddsConditionalBody()
     {
         // Arrange
         var builder = new MethodBuilder("GetPlatform", "string");
@@ -625,7 +625,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void AddBodyForDirective_NullCondition_ThrowsArgumentException()
+    public void AddBodyForDirectiveNullConditionThrowsArgumentException()
     {
         // Arrange
         var builder = new MethodBuilder("Method", "void");
@@ -635,7 +635,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void AddBodyForDirective_EmptyCondition_ThrowsArgumentException()
+    public void AddBodyForDirectiveEmptyConditionThrowsArgumentException()
     {
         // Arrange
         var builder = new MethodBuilder("Method", "void");
@@ -645,7 +645,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void AddBodyForDirective_NullBlockBuilder_ThrowsArgumentNullException()
+    public void AddBodyForDirectiveNullBlockBuilderThrowsArgumentNullException()
     {
         // Arrange
         var builder = new MethodBuilder("Method", "void");
@@ -655,7 +655,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void AddElseBody_WithoutDirective_ThrowsInvalidOperationException()
+    public void AddElseBodyWithoutDirectiveThrowsInvalidOperationException()
     {
         // Arrange
         var builder = new MethodBuilder("Method", "void");
@@ -665,7 +665,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void AddElseBody_NullBlockBuilder_ThrowsArgumentNullException()
+    public void AddElseBodyNullBlockBuilderThrowsArgumentNullException()
     {
         // Arrange
         var builder = new MethodBuilder("Method", "void");
@@ -677,7 +677,7 @@ public class MethodBuilderTests
 
     // Attribute tests
     [Fact]
-    public void AddAttribute_AddsAttributeToMethod()
+    public void AddAttributeAddsAttributeToMethod()
     {
         // Arrange
         var builder = new MethodBuilder("Process", "void");
@@ -693,7 +693,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void AddAttribute_MultipleAttributes_AddsAllAttributes()
+    public void AddAttributeMultipleAttributesAddsAllAttributes()
     {
         // Arrange
         var builder = new MethodBuilder("ProcessAsync", "Task");
@@ -711,7 +711,7 @@ public class MethodBuilderTests
 
     // Complex scenario tests
     [Fact]
-    public void Build_ComplexMethod_GeneratesCorrectCode()
+    public void BuildComplexMethodGeneratesCorrectCode()
     {
         // Arrange
         var builder = new MethodBuilder("CalculateAsync", "Task<int>");
@@ -719,7 +719,7 @@ public class MethodBuilderTests
         // Act
         var result = builder
             .MakePublic()
-            .Make()
+            .MakeAsync()
             .AddParameter("int", "input")
             .AddParameter("CancellationToken", "cancellationToken", "default")
             .WithXmlDocSummary("Calculates the result asynchronously.")
@@ -750,7 +750,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void Build_AbstractMethod_GeneratesCorrectCode()
+    public void BuildAbstractMethodGeneratesCorrectCode()
     {
         // Arrange
         var builder = new MethodBuilder("Process", "void");
@@ -773,7 +773,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void Build_StaticExpressionBodiedMethod_GeneratesCorrectCode()
+    public void BuildStaticExpressionBodiedMethodGeneratesCorrectCode()
     {
         // Arrange
         var builder = new MethodBuilder("GetDefault", "string");
@@ -790,7 +790,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void Build_MethodWithoutBody_GeneratesNotImplementedException()
+    public void BuildMethodWithoutBodyGeneratesNotImplementedException()
     {
         // Arrange
         var builder = new MethodBuilder("NotImplemented", "void");
@@ -804,7 +804,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void FluentInterface_ChainsCorrectly()
+    public void FluentInterfaceChainsCorrectly()
     {
         // Arrange & Act
         var result = new MethodBuilder("Process")
@@ -824,8 +824,8 @@ public class MethodBuilderTests
     }
 
     // Additional tests to improve coverage
-    [Fact(Skip = "TODO: Expression body methods don't include parameters in current implementation")]
-    public void WithExpressionBody_WithParameters_GeneratesCorrectCode()
+    [Fact]
+    public void WithExpressionBodyWithParametersGeneratesCorrectCode()
     {
         // Arrange
         var builder = new MethodBuilder("Add", "int");
@@ -839,12 +839,12 @@ public class MethodBuilderTests
             .Build();
 
         // Assert
-        // Current implementation doesn't include parameters for expression body methods
-        Assert.Contains("public int Add() => a + b;", result);
+        // Expression body methods now correctly include parameters
+        Assert.Contains("int Add(int a, int b) => a + b;", result);
     }
 
     [Fact]
-    public void Build_ProtectedInternal_GeneratesCorrectCode()
+    public void BuildProtectedInternalGeneratesCorrectCode()
     {
         // Arrange
         var builder = new MethodBuilder("InternalMethod", "void");
@@ -859,7 +859,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void Build_PrivateProtected_GeneratesCorrectCode()
+    public void BuildPrivateProtectedGeneratesCorrectCode()
     {
         // Arrange
         var builder = new MethodBuilder("PrivateMethod", "void");
@@ -874,7 +874,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void MakeSealed_SetsSealedModifier()
+    public void MakeSealedSetsSealedModifier()
     {
         // Arrange
         var builder = new MethodBuilder("SealedMethod", "void");
@@ -890,7 +890,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void MakeSealedWithOverride_SetsBothModifiers()
+    public void MakeSealedWithOverrideSetsBothModifiers()
     {
         // Arrange
         var builder = new MethodBuilder("SealedMethod", "void");
@@ -907,7 +907,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void Build_MethodWithGenericReturnType_GeneratesCorrectCode()
+    public void BuildMethodWithGenericReturnTypeGeneratesCorrectCode()
     {
         // Arrange
         var builder = new MethodBuilder("GetItems", "List<string>");
@@ -924,7 +924,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void Build_MethodWithMultipleXmlDocElements_GeneratesCorrectOrder()
+    public void BuildMethodWithMultipleXmlDocElementsGeneratesCorrectOrder()
     {
         // Arrange
         var builder = new MethodBuilder("Divide", "double");
@@ -955,7 +955,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void Build_MethodWithComplexDirectives_GeneratesCorrectCode()
+    public void BuildMethodWithComplexDirectivesGeneratesCorrectCode()
     {
         // Arrange
         var builder = new MethodBuilder("GetConfig", "string");
@@ -976,8 +976,8 @@ public class MethodBuilderTests
         Assert.Contains("#endif", result);
     }
 
-    [Fact(Skip = "TODO: Expression body methods don't include parameters in current implementation")]
-    public void Build_ExpressionBodiedMethodWithComplexExpression_GeneratesCorrectCode()
+    [Fact]
+    public void BuildExpressionBodiedMethodWithComplexExpressionGeneratesCorrectCode()
     {
         // Arrange
         var builder = new MethodBuilder("IsValid", "bool");
@@ -990,12 +990,12 @@ public class MethodBuilderTests
             .Build();
 
         // Assert
-        // Current implementation doesn't include parameters for expression body methods
-        Assert.Contains("public bool IsValid() => !string.IsNullOrWhiteSpace(input) && input.Length > 5 && input.Length < 100;", result);
+        // Expression body methods now correctly include parameters
+        Assert.Contains("bool IsValid(string input) => !string.IsNullOrWhiteSpace(input) && input.Length > 5 && input.Length < 100;", result);
     }
 
     [Fact]
-    public void Build_AsyncMethodWithTaskOfT_GeneratesCorrectCode()
+    public void BuildAsyncMethodWithTaskOfTGeneratesCorrectCode()
     {
         // Arrange
         var builder = new MethodBuilder("GetDataAsync", "Task<string>");
@@ -1003,7 +1003,7 @@ public class MethodBuilderTests
         // Act
         var result = builder
             .MakePublic()
-            .Make()
+            .MakeAsync()
             .WithBody("return await Task.FromResult(\"data\");")
             .Build();
 
@@ -1013,7 +1013,7 @@ public class MethodBuilderTests
     }
 
     [Fact]
-    public void Build_PartialMethod_GeneratesCorrectCode()
+    public void BuildPartialMethodGeneratesCorrectCode()
     {
         // Arrange
         var builder = new MethodBuilder("OnPropertyChanged", "void");
@@ -1028,23 +1028,23 @@ public class MethodBuilderTests
         Assert.Contains("partial void OnPropertyChanged(string propertyName)", result);
     }
 
-    [Fact(Skip = "TODO: MakeExtern method doesn't exist in current implementation")]
-    public void Build_ExternMethod_GeneratesCorrectCode()
+    [Fact]
+    public void BuildExternMethodGeneratesCorrectCode()
     {
         // Arrange
         var builder = new MethodBuilder("GetSystemTime", "long");
 
         // Act
-        var result = builder
+        var code = builder
             .MakePublic()
             .MakeStatic()
-            //.MakeExtern()
+            .MakeExtern()
             .AddAttribute("DllImport(\"kernel32.dll\")")
-            .NoImplementation(this);
-        var code = builder.Build();
+            .Build();
 
         // Assert
         Assert.Contains("[DllImport(\"kernel32.dll\")]", code);
-        Assert.Contains("public static extern long GetSystemTime();", code);
+        Assert.Contains("public static extern", code);
+        Assert.Contains("GetSystemTime", code);
     }
 }

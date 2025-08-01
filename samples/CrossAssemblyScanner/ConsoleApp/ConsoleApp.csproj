@@ -25,10 +25,7 @@
     <GeneratorOutPutTo>GeneratedFiles\EnhancedEnums</GeneratorOutPutTo>
   </PropertyGroup>
   <ItemGroup>    
-    <!-- Exclude generated files from compilation to prevent double compilation -->
-    <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
-    <!-- Exclude any GeneratedFiles directories from compilation -->
-    <Compile Remove="GeneratedFiles/**/*.cs" />
+    <!-- Keep generated files visible in IDE but don't duplicate compilation -->
     <None Remove="GeneratedFiles/**/*" />
   </ItemGroup>
 

@@ -59,7 +59,7 @@ public sealed class EnumTypeInfo : IInputInfo, IEquatable<EnumTypeInfo>
     /// When false, generates non-generic Collections class.
     /// Defaults to false.
     /// </summary>
-    public bool Generic { get; set; } = false;
+    public bool Generic { get; set; }
 
     /// <summary>
     /// Gets or sets the generation strategy name to use.

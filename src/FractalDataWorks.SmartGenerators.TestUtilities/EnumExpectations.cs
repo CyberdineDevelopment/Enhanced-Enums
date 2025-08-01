@@ -63,6 +63,17 @@ public class EnumExpectations
     }
 
     /// <summary>
+    /// Asserts that the enum has a specific modifier.
+    /// </summary>
+    /// <param name="modifier">The expected modifier.</param>
+    /// <returns>This <see cref="EnumExpectations"/> instance for method chaining.</returns>
+    public EnumExpectations HasModifier(SyntaxKind modifier)
+    {
+        _enumDeclaration.ShouldHaveModifier(modifier);
+        return this;
+    }
+
+    /// <summary>
     /// Asserts that the enum has a specific value member.
     /// </summary>
     /// <param name="valueName">The name of the enum value.</param>

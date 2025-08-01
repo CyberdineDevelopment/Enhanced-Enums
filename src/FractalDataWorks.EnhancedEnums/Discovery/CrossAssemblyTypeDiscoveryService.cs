@@ -76,7 +76,7 @@ public class CrossAssemblyTypeDiscoveryService : ICrossAssemblyTypeDiscoveryServ
 
         // Check if current assembly is in the allowed list or if wildcard is specified
         return allowedAssemblies.Any(allowed => 
-            allowed == "*" || string.Equals(allowed, currentAssemblyName, StringComparison.OrdinalIgnoreCase));
+            string.Equals(allowed, "*", StringComparison.Ordinal) || string.Equals(allowed, currentAssemblyName, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>

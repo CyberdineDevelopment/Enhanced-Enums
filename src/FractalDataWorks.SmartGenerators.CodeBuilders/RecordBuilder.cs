@@ -235,24 +235,17 @@ public class RecordBuilder : CodeBuilderBase<RecordBuilder>
         return this;
     }
 
-    /// <summary>
-    /// Sets the XML documentation summary for this record.
-    /// </summary>
-    /// <param name="summary">The summary text.</param>
-    /// <returns>The builder instance for chaining.</returns>
-    public RecordBuilder WithSummary(string summary) => WithXmlDocSummary(summary);
-
     /// <inheritdoc />
     public override string Build()
     {
         var sb = new StringBuilder();
 
-        // Build namespace if specified
+        // Build namespace if specified (file-scoped)
         var hasNamespace = !string.IsNullOrEmpty(_namespace);
         if (hasNamespace)
         {
-            sb.AppendLine($"namespace {_namespace}");
-            sb.AppendLine("{");
+            sb.AppendLine($"namespace {_namespace};");
+            sb.AppendLine();
         }
 
         // Build XML documentation
@@ -356,11 +349,7 @@ public class RecordBuilder : CodeBuilderBase<RecordBuilder>
             sb.AppendLine(";");
         }
 
-        // Close namespace if specified
-        if (!string.IsNullOrEmpty(_namespace))
-        {
-            sb.AppendLine("}");
-        }
+        // File-scoped namespaces don't need closing braces
 
         return sb.ToString();
     }

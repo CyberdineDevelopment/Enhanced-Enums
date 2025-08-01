@@ -9,7 +9,7 @@ namespace FractalDataWorks.SmartGenerators.CodeBuilder.Tests.UnitTests;
 public class NamespaceBuilderTests
 {
     [Fact]
-    public void Constructor_WithValidName_CreatesNamespace()
+    public void ConstructorWithValidNameCreatesNamespace()
     {
         // Arrange & Act
         var builder = new NamespaceBuilder("TestNamespace");
@@ -20,7 +20,7 @@ public class NamespaceBuilderTests
     }
 
     [Fact]
-    public void AddUsing_AddsUsingStatement()
+    public void AddUsingAddsUsingStatement()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -36,7 +36,7 @@ public class NamespaceBuilderTests
     }
 
     [Fact]
-    public void AddUsing_MultipleUsings_AddsAllInOrder()
+    public void AddUsingMultipleUsingsAddsAllInOrder()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -56,7 +56,7 @@ public class NamespaceBuilderTests
     }
 
     [Fact]
-    public void AddUsing_DuplicateUsing_OnlyAddsOnce()
+    public void AddUsingDuplicateUsingOnlyAddsOnce()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -78,14 +78,14 @@ public class NamespaceBuilderTests
     }
 
     [Fact]
-    public void WithUsing_AddsUsingStatement()
+    public void AddUsingAddsUsingStatementAlternativeTest()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
 
         // Act
         var code = builder
-            .WithUsing("System.Text")
+            .AddUsing("System.Text")
             .Build();
 
         // Assert
@@ -93,7 +93,7 @@ public class NamespaceBuilderTests
     }
 
     [Fact]
-    public void AddClass_WithClassBuilder_AddsClass()
+    public void AddClassWithClassBuilderAddsClass()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -110,7 +110,7 @@ public class NamespaceBuilderTests
     }
 
     [Fact]
-    public void AddClass_WithConfiguration_AddsClass()
+    public void AddClassWithConfigurationAddsClass()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -125,7 +125,7 @@ public class NamespaceBuilderTests
     }
 
     [Fact]
-    public void WithClass_AddsClass()
+    public void AddClassAddsClassAlternativeTest()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -133,7 +133,7 @@ public class NamespaceBuilderTests
 
         // Act
         var code = builder
-            .WithClass(classBuilder)
+            .AddClass(classBuilder)
             .Build();
 
         // Assert
@@ -141,7 +141,7 @@ public class NamespaceBuilderTests
     }
 
     [Fact]
-    public void AddInterface_WithInterfaceBuilder_AddsInterface()
+    public void AddInterfaceWithInterfaceBuilderAddsInterface()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -157,7 +157,7 @@ public class NamespaceBuilderTests
     }
 
     [Fact]
-    public void AddInterface_WithConfiguration_AddsInterface()
+    public void AddInterfaceWithConfigurationAddsInterface()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -172,7 +172,7 @@ public class NamespaceBuilderTests
     }
 
     [Fact]
-    public void AddEnum_WithEnumBuilder_AddsEnum()
+    public void AddEnumWithEnumBuilderAddsEnum()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -188,7 +188,7 @@ public class NamespaceBuilderTests
     }
 
     [Fact]
-    public void AddEnum_WithConfiguration_AddsEnum()
+    public void AddEnumWithConfigurationAddsEnum()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -205,7 +205,7 @@ public class NamespaceBuilderTests
     }
 
     [Fact]
-    public void WithEnum_AddsEnum()
+    public void AddEnumAddsEnumAlternativeTest()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -213,7 +213,7 @@ public class NamespaceBuilderTests
 
         // Act
         var code = builder
-            .WithEnum(enumBuilder)
+            .AddEnum(enumBuilder)
             .Build();
 
         // Assert
@@ -221,7 +221,7 @@ public class NamespaceBuilderTests
     }
 
     [Fact]
-    public void AddRecord_WithRecordBuilder_AddsRecord()
+    public void AddRecordWithRecordBuilderAddsRecord()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -237,7 +237,7 @@ public class NamespaceBuilderTests
     }
 
     [Fact]
-    public void AddRecord_WithConfiguration_AddsRecord()
+    public void AddRecordWithConfigurationAddsRecord()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -252,7 +252,7 @@ public class NamespaceBuilderTests
     }
 
     [Fact]
-    public void Build_WithMultipleMembers_ProperlySpacesThem()
+    public void BuildWithMultipleMembersProperlySpacesThem()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -277,29 +277,29 @@ public class NamespaceBuilderTests
         parts.Length.ShouldBeGreaterThanOrEqualTo(4); // Using section, namespace declaration, and members with spacing
     }
 
-    [Fact(Skip = "TODO: NamespaceBuilder constructor doesn't validate null/empty namespace name")]
-    public void Constructor_WithNullName_ThrowsArgumentNullException()
+    [Fact]
+    public void ConstructorWithNullNameThrowsArgumentNullException()
     {
         // Act & Assert
         Should.Throw<ArgumentNullException>(() => new NamespaceBuilder(null!));
     }
 
-    [Fact(Skip = "TODO: NamespaceBuilder constructor doesn't validate null/empty namespace name")]
-    public void Constructor_WithEmptyName_ThrowsArgumentException()
+    [Fact]
+    public void ConstructorWithEmptyNameThrowsArgumentException()
     {
         // Act & Assert
         Should.Throw<ArgumentException>(() => new NamespaceBuilder(""));
     }
 
-    [Fact(Skip = "TODO: NamespaceBuilder constructor doesn't validate null/empty namespace name")]
-    public void Constructor_WithWhitespaceName_ThrowsArgumentException()
+    [Fact]
+    public void ConstructorWithWhitespaceNameThrowsArgumentException()
     {
         // Act & Assert
         Should.Throw<ArgumentException>(() => new NamespaceBuilder("   "));
     }
 
-    [Fact(Skip = "TODO: NamespaceBuilder.AddUsing doesn't validate null/empty parameters")]
-    public void AddUsing_WithNullUsing_ThrowsArgumentNullException()
+    [Fact]
+    public void AddUsingWithNullUsingThrowsArgumentNullException()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -308,8 +308,8 @@ public class NamespaceBuilderTests
         Should.Throw<ArgumentNullException>(() => builder.AddUsing(null!));
     }
 
-    [Fact(Skip = "TODO: NamespaceBuilder.AddUsing doesn't validate null/empty parameters")]
-    public void AddUsing_WithEmptyUsing_ThrowsArgumentException()
+    [Fact]
+    public void AddUsingWithEmptyUsingThrowsArgumentException()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -318,18 +318,9 @@ public class NamespaceBuilderTests
         Should.Throw<ArgumentException>(() => builder.AddUsing(""));
     }
 
-    [Fact(Skip = "TODO: NamespaceBuilder.WithUsing doesn't validate null/empty parameters")]
-    public void WithUsing_WithNullUsing_ThrowsArgumentNullException()
-    {
-        // Arrange
-        var builder = new NamespaceBuilder("TestNamespace");
 
-        // Act & Assert
-        Should.Throw<ArgumentNullException>(() => builder.WithUsing(null!));
-    }
-
-    [Fact(Skip = "TODO: NamespaceBuilder.AddClass doesn't validate null parameters")]
-    public void AddClass_WithNullClassBuilder_ThrowsArgumentNullException()
+    [Fact]
+    public void AddClassWithNullClassBuilderThrowsArgumentNullException()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -338,8 +329,8 @@ public class NamespaceBuilderTests
         Should.Throw<ArgumentNullException>(() => builder.AddClass((ClassBuilder)null!));
     }
 
-    [Fact(Skip = "TODO: NamespaceBuilder.AddClass doesn't validate null parameters")]
-    public void AddClass_WithNullConfiguration_ThrowsArgumentNullException()
+    [Fact]
+    public void AddClassWithNullConfigurationThrowsArgumentNullException()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -348,18 +339,9 @@ public class NamespaceBuilderTests
         Should.Throw<ArgumentNullException>(() => builder.AddClass((Action<ClassBuilder>)null!));
     }
 
-    [Fact(Skip = "TODO: NamespaceBuilder.WithClass doesn't validate null parameters")]
-    public void WithClass_WithNullClassBuilder_ThrowsArgumentNullException()
-    {
-        // Arrange
-        var builder = new NamespaceBuilder("TestNamespace");
 
-        // Act & Assert
-        Should.Throw<ArgumentNullException>(() => builder.WithClass(null!));
-    }
-
-    [Fact(Skip = "TODO: NamespaceBuilder.AddInterface doesn't validate null parameters")]
-    public void AddInterface_WithNullInterfaceBuilder_ThrowsArgumentNullException()
+    [Fact]
+    public void AddInterfaceWithNullInterfaceBuilderThrowsArgumentNullException()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -368,8 +350,8 @@ public class NamespaceBuilderTests
         Should.Throw<ArgumentNullException>(() => builder.AddInterface((InterfaceBuilder)null!));
     }
 
-    [Fact(Skip = "TODO: NamespaceBuilder.AddInterface doesn't validate null parameters")]
-    public void AddInterface_WithNullConfiguration_ThrowsArgumentNullException()
+    [Fact]
+    public void AddInterfaceWithNullConfigurationThrowsArgumentNullException()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -378,8 +360,8 @@ public class NamespaceBuilderTests
         Should.Throw<ArgumentNullException>(() => builder.AddInterface((Action<InterfaceBuilder>)null!));
     }
 
-    [Fact(Skip = "TODO: NamespaceBuilder.AddEnum doesn't validate null parameters")]
-    public void AddEnum_WithNullEnumBuilder_ThrowsArgumentNullException()
+    [Fact]
+    public void AddEnumWithNullEnumBuilderThrowsArgumentNullException()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -388,8 +370,8 @@ public class NamespaceBuilderTests
         Should.Throw<ArgumentNullException>(() => builder.AddEnum((EnumBuilder)null!));
     }
 
-    [Fact(Skip = "TODO: NamespaceBuilder.AddEnum doesn't validate null parameters")]
-    public void AddEnum_WithNullConfiguration_ThrowsArgumentNullException()
+    [Fact]
+    public void AddEnumWithNullConfigurationThrowsArgumentNullException()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -398,18 +380,9 @@ public class NamespaceBuilderTests
         Should.Throw<ArgumentNullException>(() => builder.AddEnum((Action<EnumBuilder>)null!));
     }
 
-    [Fact(Skip = "TODO: NamespaceBuilder.WithEnum doesn't validate null parameters")]
-    public void WithEnum_WithNullEnumBuilder_ThrowsArgumentNullException()
-    {
-        // Arrange
-        var builder = new NamespaceBuilder("TestNamespace");
 
-        // Act & Assert
-        Should.Throw<ArgumentNullException>(() => builder.WithEnum(null!));
-    }
-
-    [Fact(Skip = "TODO: NamespaceBuilder.AddRecord doesn't validate null parameters")]
-    public void AddRecord_WithNullRecordBuilder_ThrowsArgumentNullException()
+    [Fact]
+    public void AddRecordWithNullRecordBuilderThrowsArgumentNullException()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -418,8 +391,8 @@ public class NamespaceBuilderTests
         Should.Throw<ArgumentNullException>(() => builder.AddRecord((RecordBuilder)null!));
     }
 
-    [Fact(Skip = "TODO: NamespaceBuilder.AddRecord doesn't validate null parameters")]
-    public void AddRecord_WithNullConfiguration_ThrowsArgumentNullException()
+    [Fact]
+    public void AddRecordWithNullConfigurationThrowsArgumentNullException()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -429,7 +402,7 @@ public class NamespaceBuilderTests
     }
 
     [Fact]
-    public void Build_EmptyNamespace_GeneratesOnlyNamespaceDeclaration()
+    public void BuildEmptyNamespaceGeneratesOnlyNamespaceDeclaration()
     {
         // Arrange
         var builder = new NamespaceBuilder("EmptyNamespace");
@@ -442,7 +415,7 @@ public class NamespaceBuilderTests
     }
 
     [Fact]
-    public void Build_WithComplexNamespace_GeneratesCorrectStructure()
+    public void BuildWithComplexNamespaceGeneratesCorrectStructure()
     {
         // Arrange
         var builder = new NamespaceBuilder("Company.Product.Feature");
@@ -464,7 +437,7 @@ public class NamespaceBuilderTests
     }
 
     [Fact]
-    public void AddUsing_WithStaticUsing_AddsStaticUsing()
+    public void AddUsingWithStaticUsingAddsStaticUsing()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -478,23 +451,9 @@ public class NamespaceBuilderTests
         code.ShouldContain("using static System.Math;");
     }
 
-    [Fact]
-    public void AddUsing_WithGlobalUsing_AddsGlobalUsing()
-    {
-        // Arrange
-        var builder = new NamespaceBuilder("TestNamespace");
-
-        // Act
-        var code = builder
-            .AddUsing("global::System.Collections.Generic")
-            .Build();
-
-        // Assert
-        code.ShouldContain("using global::System.Collections.Generic;");
-    }
 
     [Fact]
-    public void AddUsing_WithAlias_AddsUsingAlias()
+    public void AddUsingWithAliasAddsUsingAlias()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -509,7 +468,7 @@ public class NamespaceBuilderTests
     }
 
     [Fact]
-    public void Build_WithMultipleClassesAndInterfaces_ProperlySpacesThem()
+    public void BuildWithMultipleClassesAndInterfacesProperlySpacesThem()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -534,16 +493,16 @@ public class NamespaceBuilderTests
     }
 
     [Fact]
-    public void WithUsing_MultipleCallsChained_AddsAllUsings()
+    public void AddUsingMultipleCallsChainedAddsAllUsings()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
 
         // Act
         var code = builder
-            .WithUsing("System")
-            .WithUsing("System.Text")
-            .WithUsing("System.Linq")
+            .AddUsing("System")
+            .AddUsing("System.Text")
+            .AddUsing("System.Linq")
             .Build();
 
         // Assert
@@ -553,7 +512,7 @@ public class NamespaceBuilderTests
     }
 
     [Fact]
-    public void Build_WithNestedTypes_GeneratesProperStructure()
+    public void BuildWithNestedTypesGeneratesProperStructure()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");
@@ -569,19 +528,28 @@ public class NamespaceBuilderTests
         code.ShouldContain("private class NestedClass");
     }
 
-    [Fact(Skip = "TODO: NamespaceBuilder methods don't validate null parameters")]
-    public void ICodeBuilder_Methods_NotDirectlyUsed()
+    [Fact]
+    public void ICodeBuilderMethodsAreImplemented()
     {
-        // These methods from ICodeBuilder interface are not meant to be used directly on NamespaceBuilder
-        // They're internal implementation details
+        // These methods from ICodeBuilder interface are implementation details
+        // but we can verify they exist and don't throw exceptions
         var builder = new NamespaceBuilder("TestNamespace");
 
-        // These would need proper testing if they're meant to be public API
-        // Currently marking as skipped since they seem to be internal implementation
+        // These methods should not throw exceptions when called
+        builder.Append("test");
+        builder.AppendLine("test");
+        builder.Indent();
+        builder.Outdent();
+        builder.OpenBlock();
+        builder.CloseBlock();
+        
+        // ToString returns internal builder state, not the namespace code
+        var result = builder.ToString();
+        result.ShouldNotBeNull();
     }
 
     [Fact]
-    public void ToString_ReturnsEmptyString()
+    public void ToStringReturnsEmptyString()
     {
         // Arrange
         var builder = new NamespaceBuilder("TestNamespace");

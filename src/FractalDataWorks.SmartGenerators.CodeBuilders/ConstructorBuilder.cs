@@ -247,10 +247,18 @@ public class ConstructorBuilder : MemberBuilderBase<ConstructorBuilder>
         GenerateAttributes(sb);
 
         // Build constructor declaration
-        sb.Append(GetAccessModifierString(AccessModifier))
-        .Append(GetModifierString(Modifiers))
-        .Append(_className)
-        .Append('(');
+        // Static constructors in C# have special syntax: they don't have access modifiers and the 'static' keyword comes before the class name
+        if ((Modifiers & Modifiers.Static) == Modifiers.Static)
+        {
+            sb.Append("static ").Append(_className).Append('(');
+        }
+        else
+        {
+            sb.Append(GetAccessModifierString(AccessModifier))
+            .Append(GetModifierString(Modifiers))
+            .Append(_className)
+            .Append('(');
+        }
 
         // Build parameters
         for (var i = 0; i < _parameters.Count; i++)

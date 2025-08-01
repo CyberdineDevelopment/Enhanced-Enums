@@ -8,7 +8,7 @@ namespace FractalDataWorks.SmartGenerators.CodeBuilder.Tests.UnitTests;
 public class DirectiveBuilderTests
 {
     [Fact]
-    public void Create_ReturnsNewInstance()
+    public void CreateReturnsNewInstance()
     {
         // Act
         var builder = DirectiveBuilder.Create();
@@ -19,7 +19,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void If_WithValidConditionAndBody_AddsIfClause()
+    public void IfWithValidConditionAndBodyAddsIfClause()
     {
         // Arrange
         var builder = DirectiveBuilder.Create();
@@ -36,7 +36,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void If_WithNullCondition_ThrowsArgumentException()
+    public void IfWithNullConditionThrowsArgumentException()
     {
         // Arrange
         var builder = DirectiveBuilder.Create();
@@ -46,7 +46,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void If_WithEmptyCondition_ThrowsArgumentException()
+    public void IfWithEmptyConditionThrowsArgumentException()
     {
         // Arrange
         var builder = DirectiveBuilder.Create();
@@ -56,7 +56,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void If_WithWhitespaceCondition_ThrowsArgumentException()
+    public void IfWithWhitespaceConditionThrowsArgumentException()
     {
         // Arrange
         var builder = DirectiveBuilder.Create();
@@ -66,7 +66,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void If_WithNullBody_ThrowsArgumentNullException()
+    public void IfWithNullBodyThrowsArgumentNullException()
     {
         // Arrange
         var builder = DirectiveBuilder.Create();
@@ -76,7 +76,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void ElseIf_WithValidConditionAndBody_AddsElseIfClause()
+    public void ElseIfWithValidConditionAndBodyAddsElseIfClause()
     {
         // Arrange
         var builder = DirectiveBuilder.Create();
@@ -93,7 +93,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void ElseIf_WithNullCondition_ThrowsArgumentException()
+    public void ElseIfWithNullConditionThrowsArgumentException()
     {
         // Arrange
         var builder = DirectiveBuilder.Create();
@@ -103,7 +103,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void ElseIf_WithEmptyCondition_ThrowsArgumentException()
+    public void ElseIfWithEmptyConditionThrowsArgumentException()
     {
         // Arrange
         var builder = DirectiveBuilder.Create();
@@ -113,7 +113,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void ElseIf_WithNullBody_ThrowsArgumentNullException()
+    public void ElseIfWithNullBodyThrowsArgumentNullException()
     {
         // Arrange
         var builder = DirectiveBuilder.Create();
@@ -123,7 +123,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void Else_WithValidBody_AddsElseClause()
+    public void ElseWithValidBodyAddsElseClause()
     {
         // Arrange
         var builder = DirectiveBuilder.Create();
@@ -141,7 +141,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void Else_WithNullBody_ThrowsArgumentNullException()
+    public void ElseWithNullBodyThrowsArgumentNullException()
     {
         // Arrange
         var builder = DirectiveBuilder.Create();
@@ -151,7 +151,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void Build_ComplexDirective_GeneratesCorrectStructure()
+    public void BuildComplexDirectiveGeneratesCorrectStructure()
     {
         // Arrange
         var builder = DirectiveBuilder.Create();
@@ -185,7 +185,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void Build_EmptyDirective_StillGeneratesEndif()
+    public void BuildEmptyDirectiveStillGeneratesEndif()
     {
         // Arrange
         var builder = DirectiveBuilder.Create();
@@ -198,7 +198,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void Build_MultipleElseIf_GeneratesCorrectStructure()
+    public void BuildMultipleElseIfGeneratesCorrectStructure()
     {
         // Arrange
         var builder = DirectiveBuilder.Create();
@@ -221,7 +221,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void Build_WithoutIfClause_StillGeneratesEndif()
+    public void BuildWithoutIfClauseStillGeneratesEndif()
     {
         // Arrange & Act
         var builder = DirectiveBuilder.Create();
@@ -234,7 +234,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void Build_ElseWithoutIf_StillGeneratesStructure()
+    public void BuildElseWithoutIfStillGeneratesStructure()
     {
         // Arrange & Act
         var builder = DirectiveBuilder.Create();
@@ -248,7 +248,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void Build_NestedDirectives_GeneratesCorrectStructure()
+    public void BuildNestedDirectivesGeneratesCorrectStructure()
     {
         // Arrange
         var builder = DirectiveBuilder.Create();
@@ -273,7 +273,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void Build_ComplexConditions_GeneratesCorrectCode()
+    public void BuildComplexConditionsGeneratesCorrectCode()
     {
         // Arrange
         var builder = DirectiveBuilder.Create();
@@ -287,7 +287,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void Build_EmptyBodyCallbacks_GeneratesMinimalStructure()
+    public void BuildEmptyBodyCallbacksGeneratesMinimalStructure()
     {
         // Arrange
         var builder = DirectiveBuilder.Create();
@@ -308,7 +308,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void ElseIf_WhitespaceCondition_ThrowsArgumentException()
+    public void ElseIfWhitespaceConditionThrowsArgumentException()
     {
         // Arrange
         var builder = DirectiveBuilder.Create();
@@ -318,7 +318,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void Build_WithIndentedContent_MaintainsProperIndentation()
+    public void BuildWithIndentedContentMaintainsProperIndentation()
     {
         // Arrange
         var builder = DirectiveBuilder.Create();
@@ -344,7 +344,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void ChainingMethods_ReturnsSameInstance()
+    public void ChainingMethodsReturnsSameInstance()
     {
         // Arrange
         var builder = DirectiveBuilder.Create();
@@ -361,7 +361,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void Build_DefineConstants_GeneratesCorrectDirectives()
+    public void BuildDefineConstantsGeneratesCorrectDirectives()
     {
         // Arrange
         var builder = DirectiveBuilder.Create();
@@ -379,7 +379,7 @@ public class DirectiveBuilderTests
     }
 
     [Fact]
-    public void Build_PragmaWarnings_GeneratesCorrectDirectives()
+    public void BuildPragmaWarningsGeneratesCorrectDirectives()
     {
         // Arrange
         var builder = DirectiveBuilder.Create();

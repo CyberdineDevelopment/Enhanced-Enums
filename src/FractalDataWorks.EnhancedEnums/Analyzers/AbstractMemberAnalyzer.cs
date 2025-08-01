@@ -27,11 +27,11 @@ public class AbstractMemberAnalyzer : DiagnosticAnalyzer
 
     private static readonly LocalizableString AbstractPropertyTitle = "Abstract property in enhanced enum";
     private static readonly LocalizableString AbstractPropertyMessageFormat = "Property '{0}' should be virtual and initialized via constructor instead of abstract";
-    private static readonly LocalizableString AbstractPropertyDescription = "Enhanced enum values should initialize all properties through constructors. Use virtual properties instead of abstract to allow constructor initialization.";
+    private static readonly LocalizableString AbstractPropertyDescription = "Enhanced enum values should initialize all properties through constructors using virtual properties instead of abstract to allow constructor initialization.";
     
     private static readonly LocalizableString AbstractFieldTitle = "Abstract field in enhanced enum";
     private static readonly LocalizableString AbstractFieldMessageFormat = "Field '{0}' cannot be abstract. Use a virtual property instead";
-    private static readonly LocalizableString AbstractFieldDescription = "Fields cannot be abstract in C#. Use virtual properties initialized via constructor.";
+    private static readonly LocalizableString AbstractFieldDescription = "Fields cannot be abstract in C# so use virtual properties initialized via constructor.";
     
     private const string Category = "Design";
 

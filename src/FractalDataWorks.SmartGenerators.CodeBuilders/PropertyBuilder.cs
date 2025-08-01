@@ -273,9 +273,9 @@ public class PropertyBuilder : MemberBuilderBase<PropertyBuilder>
             {
                 if (_getterBlockBuilder != null)
                 {
-                    sb.Append("get ");
+                    sb.Append("get { ");
                     sb.Append(_getterBlockBuilder.Build());
-                    sb.Append(' ');
+                    sb.Append(" } ");
                 }
                 else
                 {
@@ -292,9 +292,9 @@ public class PropertyBuilder : MemberBuilderBase<PropertyBuilder>
 
                 if (_setterBlockBuilder != null)
                 {
-                    sb.Append(_hasInitSetter ? "init " : "set ");
+                    sb.Append(_hasInitSetter ? "init { " : "set { ");
                     sb.Append(_setterBlockBuilder.Build());
-                    sb.Append(' ');
+                    sb.Append(" } ");
                 }
                 else
                 {

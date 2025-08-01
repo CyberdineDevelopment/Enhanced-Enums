@@ -141,16 +141,16 @@ internal static class TypeComparer
     {
         return predefined.Keyword.Kind() switch
         {
-            SyntaxKind.StringKeyword => identifier == "String",
-            SyntaxKind.IntKeyword => identifier == "Int32",
-            SyntaxKind.BoolKeyword => identifier == "Boolean",
-            SyntaxKind.ObjectKeyword => identifier == "Object",
-            SyntaxKind.DecimalKeyword => identifier == "Decimal",
-            SyntaxKind.DoubleKeyword => identifier == "Double",
-            SyntaxKind.FloatKeyword => identifier == "Single",
-            SyntaxKind.LongKeyword => identifier == "Int64",
-            SyntaxKind.ShortKeyword => identifier == "Int16",
-            SyntaxKind.ByteKeyword => identifier == "Byte",
+            SyntaxKind.StringKeyword => string.Equals(identifier, "String", StringComparison.Ordinal),
+            SyntaxKind.IntKeyword => string.Equals(identifier, "Int32", StringComparison.Ordinal),
+            SyntaxKind.BoolKeyword => string.Equals(identifier, "Boolean", StringComparison.Ordinal),
+            SyntaxKind.ObjectKeyword => string.Equals(identifier, "Object", StringComparison.Ordinal),
+            SyntaxKind.DecimalKeyword => string.Equals(identifier, "Decimal", StringComparison.Ordinal),
+            SyntaxKind.DoubleKeyword => string.Equals(identifier, "Double", StringComparison.Ordinal),
+            SyntaxKind.FloatKeyword => string.Equals(identifier, "Single", StringComparison.Ordinal),
+            SyntaxKind.LongKeyword => string.Equals(identifier, "Int64", StringComparison.Ordinal),
+            SyntaxKind.ShortKeyword => string.Equals(identifier, "Int16", StringComparison.Ordinal),
+            SyntaxKind.ByteKeyword => string.Equals(identifier, "Byte", StringComparison.Ordinal),
             _ => false
         };
     }

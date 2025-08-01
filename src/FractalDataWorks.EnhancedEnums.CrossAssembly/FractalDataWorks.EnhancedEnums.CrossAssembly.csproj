@@ -21,11 +21,19 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Bcl.HashCode" PrivateAssets="all" />
+    <ProjectReference Include="../FractalDataWorks/FractalDataWorks.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../FractalDataWorks.SmartGenerators/FractalDataWorks.SmartGenerators.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../FractalDataWorks.SmartGenerators.CodeBuilders/FractalDataWorks.SmartGenerators.CodeBuilders.csproj" PrivateAssets="all" />
     <ProjectReference Include="../FractalDataWorks.EnhancedEnums/FractalDataWorks.EnhancedEnums.csproj" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <None Include="$(OutputPath)\FractalDataWorks.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <None Include="$(OutputPath)\FractalDataWorks.SmartGenerators.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <None Include="$(OutputPath)\FractalDataWorks.SmartGenerators.CodeBuilders.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <None Include="$(OutputPath)\FractalDataWorks.EnhancedEnums.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     <!-- Include build props in the package -->
     <None Include="build\FractalDataWorks.EnhancedEnums.CrossAssembly.props" Pack="true" PackagePath="build\" />
   </ItemGroup>

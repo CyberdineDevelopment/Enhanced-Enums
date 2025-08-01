@@ -13,18 +13,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\FractalDataWorks.EnhancedEnums\FractalDataWorks.EnhancedEnums.csproj" 
+    <ProjectReference Include="..\..\..\src\FractalDataWorks.EnhancedEnums.CrossAssembly\FractalDataWorks.EnhancedEnums.CrossAssembly.csproj" 
                       OutputItemType="Analyzer" 
                       ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\..\src\FractalDataWorks\FractalDataWorks.csproj" />
     <ProjectReference Include="..\Services.Notification\Services.Notification.csproj" />
     <ProjectReference Include="..\Services.Notification.Sms\Services.Notification.Sms.csproj" />
     <ProjectReference Include="..\Services.Notification.Email\Services.Notification.Email.csproj" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <!-- Exclude generated files from compilation to prevent double compilation -->
-    <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
   </ItemGroup>
   
   <!-- Clean generated files before build -->
